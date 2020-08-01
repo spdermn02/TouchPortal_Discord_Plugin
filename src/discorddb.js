@@ -19,6 +19,7 @@ const path = require("path");
 //  .digest("base64")
 //  .substr(0, 32);
 
+console.log(path.join(__dirname + "tpdiscord.db"));
 const configStore = new Datastore({
   filename: path.join(__dirname + "tpdiscord.db"),
   autoload: true,
