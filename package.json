@@ -1,0 +1,27 @@
+{
+  "name": "tpdiscord",
+  "version": "1.0.0",
+  "description": "Touch Portal Plugin for Discord using RPC",
+  "bin": "src/index.js",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "pkg": "pkg .",
+    "pkg-win": "pkg --targets node12-win-x64 .",
+    "pkg-mac": "pkg --targets node12-macos-x64 ."
+  },
+  "author": "Jameson Allen aka Spdermn02",
+  "license": "ISC",
+  "pkg": {
+    "assets": [ "src/**/*.html", "src/public/scripts/**/*.js", "src/public/images/**/*.png", "src/public/styles/**/*.css"]
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "discord-rpc": "^3.1.2",
+    "express": "^4.17.1",
+    "nedb": "^1.8.0",
+    "nedb-promise": "^2.0.1",
+    "out-url": "^1.1.1",
+    "touchportal-sdk": "file:../touchportal-node-sdk"
+  }
+}
