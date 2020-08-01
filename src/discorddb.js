@@ -19,9 +19,9 @@ const path = require("path");
 //  .digest("base64")
 //  .substr(0, 32);
 
-console.log(path.join(__dirname + "tpdiscord.db"));
+console.log(path.join(__dirname + "/tpdiscord.db"));
 const configStore = new Datastore({
-  filename: path.join(__dirname + "tpdiscord.db"),
+  filename: path.join(__dirname + "/tpdiscord.db"),
   autoload: true,
   //afterSerialization(plaintext) {
   //  const iv = crypto.randomBytes(16);
