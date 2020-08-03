@@ -3,7 +3,7 @@
     "version": 1,
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
-    "plugin_start_cmd": "\"%TP_PLUGIN_FOLDER%TPDiscord\tpdiscord.exe\"",
+    "plugin_start_cmd": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
     "configuration": {
         "colorDark": "#225834",
         "colorLight": "#45b168"
