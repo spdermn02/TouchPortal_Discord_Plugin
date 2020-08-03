@@ -61,6 +61,12 @@ TPClient.on("ListChange", (data) => {
 TPClient.on("Info", (data) => {
   console.log(pluginId, ": DEBUG : Info :" + JSON.stringify(data));
 });
+TPClient.on("Close", (data) => {
+  console.log(
+    pluginId,
+    ": WARN : Closing due to TouchPortal sending closePlugin message"
+  );
+});
 
 const voiceActivity = function (data) {
   if (data.mute) {
