@@ -1,6 +1,6 @@
 const RPC = require("discord-rpc");
 const discordDb = require("./discorddb");
-const TP = require("touchportal-sdk");
+const TP = require("touchportal-api");
 const express = require("express");
 const bodyParser = require("body-parser");
 const { open } = require("out-url");
@@ -14,7 +14,7 @@ const redirectUri = "http://localhost";
 
 const pluginId = "TPDiscord";
 
-const client = new RPC.Client({ transport: "ipc" });
+let DiscordClient = new RPC.Client({ transport: "ipc" });
 const TPClient = new TP.Client();
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,8 +23,8 @@ const port = 9403;
 let muteState = 0;
 let deafState = 0;
 
-TPClient.on("Message", (data) => {
-  if (data.data && data.data.length > 0 ) {
+TPClient.on("Action", (data) => {
+  if (data.data && data.data.length > 0) {
     if (data.data[0].id === "discordDeafenAction") {
       if (data.data[0].value === "Toggle") {
         deafState = 1 - deafState;
@@ -33,7 +33,7 @@ TPClient.on("Message", (data) => {
       } else if (data.data[0].value === "On") {
         deafState = 1;
       }
-      client.setVoiceSettings({ deaf: 1 === deafState });
+      DiscordClient.setVoiceSettings({ deaf: 1 === deafState });
     }
     if (data.data[0].id === "discordMuteAction") {
       if (data.data[0].value === "Toggle") {
@@ -43,16 +43,23 @@ TPClient.on("Message", (data) => {
       } else if (data.data[0].value === "On") {
         muteState = 1;
       }
-      client.setVoiceSettings({ mute: 1 === muteState });
+      DiscordClient.setVoiceSettings({ mute: 1 === muteState });
     }
-  }
-  else {
-    console.log("WARN: Unhandled Incoming Message",JSON.stringify(data));
+  } else {
+    console.log(
+      pluginId,
+      ": WARN : No data in Action Message",
+      JSON.stringify(data)
+    );
   }
 });
 
+TPClient.on("ListChange", (data) => {
+  console.log(pluginId, ": DEBUG : ListChange :" + JSON.stringify(data));
+});
+
 TPClient.on("Info", (data) => {
-  console.log("Info:" + data);
+  console.log(pluginId, ": DEBUG : Info :" + JSON.stringify(data));
 });
 
 const voiceActivity = function (data) {
@@ -68,14 +75,19 @@ const voiceActivity = function (data) {
     deafState = 0;
   }
 
-  TPClient.stateUpdate("discord_mute", muteState ? "On" : "Off");
-  TPClient.stateUpdate("discord_deafen", deafState ? "On" : "Off");
+  let states = [
+    { id: "discord_mute", value: muteState ? "On" : "Off" },
+    { id: "discord_deafen", value: deafState ? "On" : "Off" },
+  ];
+  TPClient.stateUpdateMany(states);
 };
 
 const subscribe = function (data) {
   if (!data || !data.mode || !data.mode.type) {
-    console.log("got here with no data");
-    console.log(data);
+    console.log(
+      pluginId,
+      ": ERROR : subscribe : event has no data or known mode.type"
+    );
     return;
   }
   switch (data.mode.type) {
@@ -83,21 +95,27 @@ const subscribe = function (data) {
       voiceActivity(data);
       break;
     default:
-      console.log("Unhandled mode.type " + data.mode.type);
+      console.log(pluginId, ": DEBUG : Unhandled mode.type " + data.mode.type);
   }
 };
 
-client.on("ready", () => {
+DiscordClient.on("ready", () => {
   if (!accessToken) {
     discordDb.db.insert({
       _id: "discordToken",
-      accessToken: client.accessToken,
+      accessToken: DiscordClient.accessToken,
     });
   }
 
   TPClient.connect({ pluginId });
 
-  client.subscribe("VOICE_SETTINGS_UPDATE", subscribe);
+  DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", subscribe);
+});
+
+DiscordClient.on("disconnected", () => {
+  console.log(pluginId, ": WARN : discord connection closed");
+
+  //doLogin();
 });
 
 app.get("/", (req, res) => {
@@ -105,7 +123,6 @@ app.get("/", (req, res) => {
 });
 
 app.post("/store", async (req, res) => {
-  console.log('We are trying to store',req.body);
   const data = req.body;
 
   if (data.clientId && data.clientSecret) {
@@ -145,7 +162,10 @@ app.post("/store", async (req, res) => {
 
 app.use(express.static(path.join(__dirname + "/public")));
 app.listen(port, () =>
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(
+    pluginId,
+    `: DEBUG : Example app listening at http://localhost:${port}`
+  )
 );
 
 var waitForClientId = (timeoutms) =>
@@ -157,6 +177,29 @@ var waitForClientId = (timeoutms) =>
       else setTimeout(check, 100);
     };
     setTimeout(check, 100);
+  });
+
+var waitForLogin = (timeoutms) =>
+  new Promise((r, j) => {
+    var check = () => {
+      if (DiscordClient.user != null) {
+        r();
+      } else {
+        DiscordClient.login({
+          clientId,
+          clientSecret,
+          accessToken,
+          scopes,
+          redirectUri,
+        }).catch((error) => console.log(error));
+        if (DiscordClient.user != null) {
+          r();
+        } else if ((timeoutms -= 5000) < 0)
+          j("timed out, restart Touch Portal!");
+        else setTimeout(check, 5000);
+      }
+    };
+    check();
   });
 
 async function doLogin() {
@@ -185,7 +228,14 @@ async function doLogin() {
   }
 
   // Log in to RPC with client id
-  client.login({ clientId, clientSecret, accessToken, scopes, redirectUri });
+  await waitForLogin(5 * 60 * 1000); //wait for 5 minutes
+  //await client.login({
+  //  clientId,
+  //  clientSecret,
+  //  accessToken,
+  //  scopes,
+  //  redirectUri,
+  //});
 }
 
 doLogin();
