@@ -145,7 +145,7 @@ const connectToDiscord = function () {
 
 // - START - WebServer
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname + "/discordkeys.html"));
+  res.sendFile(path.join(__dirname,"/html/discordkeys.html"));
 });
 
 app.post("/store", async (req, res) => {
@@ -155,7 +155,7 @@ app.post("/store", async (req, res) => {
     clientId = data.clientId;
     clientSecret = data.clientSecret;
   } else {
-    res.sendFile(path.join(__dirname + "/error.html"));
+    res.sendFile(path.join(__dirname,"/html/error.html"));
     return;
   }
 
@@ -183,10 +183,10 @@ app.post("/store", async (req, res) => {
     );
   }
 
-  res.sendFile(path.join(__dirname + "/success.html"));
+  res.sendFile(path.join(__dirname,"/html/success.html"));
 });
 
-app.use(express.static(path.join(__dirname + "/public")));
+app.use(express.static(path.join(__dirname,"/public")));
 app.listen(port, () =>
   console.log(
     pluginId,
