@@ -130,7 +130,6 @@ const connectToDiscord = function () {
 
   DiscordClient.on("disconnected", () => {
     console.log(pluginId, ": WARN : discord connection closed, will attempt reconnect");
-    DiscordClient = null;
     doLogin();
   });
 
@@ -229,6 +228,11 @@ var waitForLogin = () =>
 
 async function doLogin() {
   if( connecting ) { return; }
+  if( DiscordClient ) {
+    DiscordClient.removeAllListeners();
+    DiscordClient.destroy();
+    DiscordClient = null;
+  }
   let appDoc = await discordDb.db.findOne({ _id: "appid" });
   if (!appDoc) {
     open(`https://discord.com/developers/applications`);
