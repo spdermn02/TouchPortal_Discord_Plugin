@@ -20,7 +20,7 @@ const path = require("path");
 //  .substr(0, 32);
 
 const configStore = new Datastore({
-  filename: "./tpdiscord.db",
+  filename: "../config/tpdiscord.db",
   autoload: true,
   //afterSerialization(plaintext) {
   //  const iv = crypto.randomBytes(16);

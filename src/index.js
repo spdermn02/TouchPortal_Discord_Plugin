@@ -9,17 +9,20 @@ const path = require("path");
 let clientId = undefined;
 let clientSecret = undefined;
 let accessToken = undefined;
+let connecting = false;
 const scopes = ["identify", "rpc"];
 const redirectUri = "http://localhost";
 
 const pluginId = "TPDiscord";
 
-let DiscordClient = new RPC.Client({ transport: "ipc" });
 const TPClient = new TP.Client();
+let DiscordClient = null;
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 const port = 9403;
 
+// - START - TP
 let muteState = 0;
 let deafState = 0;
 
@@ -67,65 +70,82 @@ TPClient.on("Close", (data) => {
     ": WARN : Closing due to TouchPortal sending closePlugin message"
   );
 });
+// - END - TP
 
-const voiceActivity = function (data) {
-  if (data.mute) {
-    muteState = 1;
-  } else {
-    muteState = 0;
-  }
-  if (data.deaf) {
-    deafState = 1;
-    muteState = 1;
-  } else {
-    deafState = 0;
-  }
+// - START - Discord
+const connectToDiscord = function () {
+  DiscordClient = new RPC.Client({ transport: "ipc" });
 
-  let states = [
-    { id: "discord_mute", value: muteState ? "On" : "Off" },
-    { id: "discord_deafen", value: deafState ? "On" : "Off" },
-  ];
-  TPClient.stateUpdateMany(states);
+  const voiceActivity = function (data) {
+    if (data.mute) {
+      muteState = 1;
+    } else {
+      muteState = 0;
+    }
+    if (data.deaf) {
+      deafState = 1;
+      muteState = 1;
+    } else {
+      deafState = 0;
+    }
+
+    let states = [
+      { id: "discord_mute", value: muteState ? "On" : "Off" },
+      { id: "discord_deafen", value: deafState ? "On" : "Off" },
+    ];
+    TPClient.stateUpdateMany(states);
+  };
+
+  const subscribe = function (data) {
+    if (!data || !data.mode || !data.mode.type) {
+      console.log(
+        pluginId,
+        ": ERROR : subscribe : event has no data or known mode.type"
+      );
+      return;
+    }
+    switch (data.mode.type) {
+      case "VOICE_ACTIVITY":
+        voiceActivity(data);
+        break;
+      default:
+        console.log(
+          pluginId,
+          ": DEBUG : Unhandled mode.type " + data.mode.type
+        );
+    }
+  };
+
+  DiscordClient.on("ready", () => {
+    if (!accessToken) {
+      discordDb.db.insert({
+        _id: "discordToken",
+        accessToken: DiscordClient.accessToken,
+      });
+    }
+
+
+    DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", subscribe);
+  });
+
+  DiscordClient.on("disconnected", () => {
+    console.log(pluginId, ": WARN : discord connection closed, will attempt reconnect");
+    doLogin();
+  });
+
+  DiscordClient.login({
+    clientId,
+    clientSecret,
+    accessToken,
+    scopes,
+    redirectUri,
+  }).catch((error) => {});
 };
+// - END - Discord
 
-const subscribe = function (data) {
-  if (!data || !data.mode || !data.mode.type) {
-    console.log(
-      pluginId,
-      ": ERROR : subscribe : event has no data or known mode.type"
-    );
-    return;
-  }
-  switch (data.mode.type) {
-    case "VOICE_ACTIVITY":
-      voiceActivity(data);
-      break;
-    default:
-      console.log(pluginId, ": DEBUG : Unhandled mode.type " + data.mode.type);
-  }
-};
-
-DiscordClient.on("ready", () => {
-  if (!accessToken) {
-    discordDb.db.insert({
-      _id: "discordToken",
-      accessToken: DiscordClient.accessToken,
-    });
-  }
-
-  TPClient.connect({ pluginId });
-
-  DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", subscribe);
-});
-
-DiscordClient.on("disconnected", () => {
-  console.log(pluginId, ": WARN : discord connection closed");
-
-  //doLogin();
-});
-
+// - START - WebServer
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname + "/discordkeys.html"));
+  res.sendFile(path.join(__dirname,"/html/discordkeys.html"));
 });
 
 app.post("/store", async (req, res) => {
@@ -135,7 +155,7 @@ app.post("/store", async (req, res) => {
     clientId = data.clientId;
     clientSecret = data.clientSecret;
   } else {
-    res.sendFile(path.join(__dirname + "/error.html"));
+    res.sendFile(path.join(__dirname,"/html/error.html"));
     return;
   }
 
@@ -163,16 +183,17 @@ app.post("/store", async (req, res) => {
     );
   }
 
-  res.sendFile(path.join(__dirname + "/success.html"));
+  res.sendFile(path.join(__dirname,"/html/success.html"));
 });
 
-app.use(express.static(path.join(__dirname + "/public")));
+app.use(express.static(path.join(__dirname,"/public")));
 app.listen(port, () =>
   console.log(
     pluginId,
     `: DEBUG : Example app listening at http://localhost:${port}`
   )
 );
+// - END - WebServer
 
 var waitForClientId = (timeoutms) =>
   new Promise((r, j) => {
@@ -185,30 +206,33 @@ var waitForClientId = (timeoutms) =>
     setTimeout(check, 100);
   });
 
-var waitForLogin = (timeoutms) =>
+var waitForLogin = () =>
   new Promise((r, j) => {
+    connecting = true;
     var check = () => {
-      if (DiscordClient.user != null) {
+      if (DiscordClient && DiscordClient.user != null) {
+        connecting = false;
         r();
       } else {
-        DiscordClient.login({
-          clientId,
-          clientSecret,
-          accessToken,
-          scopes,
-          redirectUri,
-        }).catch((error) => console.log(error));
-        if (DiscordClient.user != null) {
+        connectToDiscord();
+        if (DiscordClient && DiscordClient.user != null) {
+          connectin = false;
           r();
-        } else if ((timeoutms -= 5000) < 0)
-          j("timed out, restart Touch Portal!");
-        else setTimeout(check, 5000);
+        } else { 
+          setTimeout(check, 1000);
+        }
       }
     };
-    check();
+    setTimeout(check,500);
   });
 
 async function doLogin() {
+  if( connecting ) { return; }
+  if( DiscordClient ) {
+    DiscordClient.removeAllListeners();
+    DiscordClient.destroy();
+    DiscordClient = null;
+  }
   let appDoc = await discordDb.db.findOne({ _id: "appid" });
   if (!appDoc) {
     open(`https://discord.com/developers/applications`);
@@ -233,15 +257,11 @@ async function doLogin() {
     accessToken = aTDoc.accessToken;
   }
 
-  // Log in to RPC with client id
-  await waitForLogin(5 * 60 * 1000); //wait for 5 minutes
-  //await client.login({
-  //  clientId,
-  //  clientSecret,
-  //  accessToken,
-  //  scopes,
-  //  redirectUri,
-  //});
+  // Start Login process
+  await waitForLogin(); 
 }
 
+// We are going to connect to TP first, then Discord
+// That way if TP shuts down the plugin will be shutdown too
+TPClient.connect({ pluginId });
 doLogin();
