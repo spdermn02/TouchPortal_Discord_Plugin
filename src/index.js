@@ -216,7 +216,7 @@ var waitForLogin = () =>
       } else {
         connectToDiscord();
         if (DiscordClient && DiscordClient.user != null) {
-          connectin = false;
+          connecting = false;
           r();
         } else { 
           setTimeout(check, 1000);
