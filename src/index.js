@@ -5,12 +5,15 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { open } = require("out-url");
 const path = require("path");
+const { KeyObject } = require("crypto");
 
 let clientId = undefined;
 let clientSecret = undefined;
 let accessToken = undefined;
+let refreshToken = undefined;
 let connecting = false;
-const scopes = ["identify", "rpc"];
+const scopes = ["identify", "rpc", "guilds", "messages.read"];
+//const scopes = ["identify", "rpc"];
 const redirectUri = "http://localhost";
 
 const pluginId = "TPDiscord";
@@ -25,8 +28,11 @@ const port = 9403;
 // - START - TP
 let muteState = 0;
 let deafState = 0;
+let guilds = {};
+let channels = {};
 
 TPClient.on("Action", (data) => {
+  console.log(data);
   if (data.data && data.data.length > 0) {
     if (data.data[0].id === "discordDeafenAction") {
       if (data.data[0].value === "Toggle") {
@@ -57,8 +63,31 @@ TPClient.on("Action", (data) => {
   }
 });
 
-TPClient.on("ListChange", (data) => {
-  console.log(pluginId, ": DEBUG : ListChange :" + JSON.stringify(data));
+TPClient.on("ListChange", async (data) => {
+  //console.log(pluginId, ": DEBUG : ListChange :" + JSON.stringify(data));
+  if( data.listId === 'discordServerList' ) {
+      console.log(data);
+    if( guilds.idx[data.value] ) {
+      let guildId = guilds.idx[data.value];
+      console.log(guildId);
+      let chData = await getGuildChannels(guildId);
+      console.log(chData);
+      //channelPromise.then((chData) => {
+      console.log(chData);
+      channels[guildId] = {
+        array: [],
+        idx: {}
+      }
+
+      chData.forEach((val,idx) => {
+        channels[guildId].array.push(val.name);
+        channels[guildId].idx[val.name] = val.id;
+      })
+
+      TPClient.choiceUpdateSpecific('discordServerChannel',channels[guildId].array,data.instanceId);
+    //},(error) => {console.log(error);} );
+    }
+  }
 });
 
 TPClient.on("Info", (data) => {
@@ -73,6 +102,8 @@ TPClient.on("Close", (data) => {
 // - END - TP
 
 // - START - Discord
+let getGuildChannels = () => { };
+
 const connectToDiscord = function () {
   DiscordClient = new RPC.Client({ transport: "ipc" });
 
@@ -96,7 +127,37 @@ const connectToDiscord = function () {
     TPClient.stateUpdateMany(states);
   };
 
-  const subscribe = function (data) {
+  getGuildChannels = async (guildId ) => {
+    console.log("getGuildChannels for guildId",guildId);
+    let channels = await DiscordClient.getChannels(guildId);
+    if( !channels ) { console.log("No channel data available"); return; }
+    return channels; 
+  }
+
+  const getGuilds = async () => {
+    let data = await DiscordClient.getGuilds();
+
+    if( !data || !data.guilds ) { console.log("No guild data available"); return; }
+
+    guilds = {
+      array : [],
+      idx: {}
+    };
+
+    data.guilds.forEach((val,idx) => {
+      guilds.array.push(val.name);
+      guilds.idx[val.name] = val.id;
+      guilds.idx[val.id] = val.name;
+    });
+
+    console.log(guilds)
+
+    TPClient.choiceUpdate('discordServerList',guilds.array)
+  };
+
+
+  const subscribe = async (data) => {
+    console.log(data);
     if (!data || !data.mode || !data.mode.type) {
       console.log(
         pluginId,
@@ -108,6 +169,9 @@ const connectToDiscord = function () {
       case "VOICE_ACTIVITY":
         voiceActivity(data);
         break;
+      case "GUILD_CREATE":
+        getGuilds();
+        break;
       default:
         console.log(
           pluginId,
@@ -116,22 +180,41 @@ const connectToDiscord = function () {
     }
   };
 
-  DiscordClient.on("ready", () => {
-    if (!accessToken) {
-      discordDb.db.insert({
+  DiscordClient.on("ready", async () => {
+    if (!accessToken || ( DiscordClient.accessToken != undefined && accessToken != DiscordClient.accessToken )) {
+      await discordDb.db.remove({ _id: "discordToken"});
+      await discordDb.db.insert({
         _id: "discordToken",
         accessToken: DiscordClient.accessToken,
       });
+      accessToken = DiscordClient.accessToken;
+    }
+    if( !refreshToken || (DiscordClient.refreshToken != undefined && refreshToken != DiscordClient.refreshToken ) ) {
+      await discordDb.db.remove({ _id: "discordRefreshToken"});
+      await discordDb.db.insert({
+        _id: "discordRefreshToken",
+        refreshToken: DiscordClient.refreshToken,
+      });
+      refreshToken = DiscordClient.refreshToken;
     }
 
-
     DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", subscribe);
+    DiscordClient.subscribe("GUILD_CREATE", subscribe);
+
+    let channels2 = await DiscordClient.getChannels('422966022413484032');
+    console.log(channels2);
+
+    getGuilds();
+
+    
   });
 
   DiscordClient.on("disconnected", () => {
     console.log(pluginId, ": WARN : discord connection closed, will attempt reconnect");
-    doLogin();
+    doLogin(false);
   });
+
+  console.log('Login Called '. clientSecret + ' . ' + refreshToken);
 
   DiscordClient.login({
     clientId,
@@ -139,7 +222,16 @@ const connectToDiscord = function () {
     accessToken,
     scopes,
     redirectUri,
-  }).catch((error) => {});
+    refreshToken
+  }).catch((error) => {
+    console.log(error);
+    if( error.code == 4009 ) {
+      connecting = false;
+      accessToken = null;
+      console.log("Calling Login");
+      doLogin(true);
+    }
+  });
 };
 // - END - Discord
 
@@ -216,7 +308,7 @@ var waitForLogin = () =>
       } else {
         connectToDiscord();
         if (DiscordClient && DiscordClient.user != null) {
-          connectin = false;
+          connecting = false;
           r();
         } else { 
           setTimeout(check, 1000);
@@ -226,7 +318,7 @@ var waitForLogin = () =>
     setTimeout(check,500);
   });
 
-async function doLogin() {
+async function doLogin(refresh) {
   if( connecting ) { return; }
   if( DiscordClient ) {
     DiscordClient.removeAllListeners();
@@ -252,9 +344,19 @@ async function doLogin() {
     await waitForClientId(30 * 60 * 1000); // wait for 30 minutes
   }
 
-  let aTDoc = await discordDb.db.findOne({ _id: "discordToken" });
-  if (aTDoc && aTDoc.accessToken !== undefined) {
-    accessToken = aTDoc.accessToken;
+  if( !refresh ) {
+    let aTDoc = await discordDb.db.findOne({ _id: "discordToken" });
+    if (aTDoc && aTDoc.accessToken !== undefined) {
+      accessToken = aTDoc.accessToken;
+    }
+  }
+  else {
+    await discordDb.db.remove({ _id: "discordToken"});
+  }
+
+  let rTDoc = await discordDb.db.findOne({ _id: "discordRefreshToken" });
+  if (rTDoc && rTDoc.refreshToken !== undefined) {
+    refreshToken = rTDoc.refreshToken;
   }
 
   // Start Login process
@@ -264,4 +366,4 @@ async function doLogin() {
 // We are going to connect to TP first, then Discord
 // That way if TP shuts down the plugin will be shutdown too
 TPClient.connect({ pluginId });
-doLogin();
+doLogin(false);

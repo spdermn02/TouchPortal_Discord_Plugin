@@ -58,6 +58,31 @@
                             ]
                         }
                     ]
+                },
+                {
+                   "id": "discord_select_text_channel",
+                   "prefix": "Discord:",
+                   "name":"Discord Select Text Channel",
+                   "type":"communicate",
+                   "description":"Switch your user to a specific text channel",
+                   "tryInline":"true",
+                   "format":"In Server {$discordServerList$} go to channel {$discordServerChannel$}",
+                   "data":[
+                       {
+                           "id":"discordServerList",
+                           "type":"choice",
+                           "label":"Discord Server List",
+                           "default":"",
+                           "valueChoices":[]
+                       },
+                       {
+                           "id":"discordServerChannel",
+                           "type":"choice",
+                           "label":"Discord Server Channel List",
+                           "default":"",
+                           "valueChoices":[]
+                       }
+                   ]
                 }
             ],
             "states": [
