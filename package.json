@@ -21,12 +21,8 @@
     ]
   },
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "discord-rpc": "file:D:\\development\\spdermn02.discord-rpc\\RPC",
-    "express": "^4.17.1",
-    "nedb": "^1.8.0",
-    "nedb-promise": "^2.0.1",
+    "discord-rpc": "^3.1.4",
     "out-url": "^1.1.1",
-    "touchportal-api": "^1.0.6"
+    "touchportal-api": "file:D:\\development\\touchportal-node-api\\"
   }
 }
