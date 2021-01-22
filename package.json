@@ -8,7 +8,9 @@
     "start": "node src/index.js",
     "pkg": "pkg .",
     "pkg-win": "pkg --targets node12-win-x64 .",
-    "pkg-mac": "pkg --targets node12-macos-x64 ."
+    "pkg-mac": "pkg --targets node12-macos-x64 .",
+    "build-win": "pkg --targets node12-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && del Installers\\TPDiscord-Win.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win.tpp TPDiscord",
+    "buil-mac": "pkg --targets node12-macos-x64 . && move tpdiscord base/Mac/TPDiscord/ && del Installers\\TPDiscord-Mac.tpp && cd base\\Mac && 7z a -tzip ../../Installers/TPDiscord-Mac.tpp TPDiscord"
   },
   "author": "Jameson Allen aka Spdermn02",
   "license": "ISC",
