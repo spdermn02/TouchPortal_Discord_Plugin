@@ -1,14 +1,29 @@
 {
-    "sdk": 2,
-    "version": 3,
-    "TPDiscord_Version":"3.0.0",
+    "sdk": 3,
+    "version": 4000,
+    "TPDiscord_Version":"4.0.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
     "configuration": {
-        "colorDark": "#225834",
-        "colorLight": "#45b168"
+        "colorDark": "#23272A",
+        "colorLight": "#7289DA"
     },
+    "settings": [
+        {
+            "name": "Discord Client Id",
+            "type": "text",
+            "default": "",
+            "maxLength": 20
+        },
+        {
+            "name": "Discord Client Secret",
+            "type": "text",
+            "isPassword": true,
+            "default": "",
+            "maxLength": 36
+        }
+    ],
     "categories": [
         {
             "id": "TPDiscord",
@@ -20,7 +35,6 @@
                     "prefix": "Discord:",
                     "name": "Discord Deafen",
                     "type": "communicate",
-                    "description": "Control Discord Deafen Setting",
                     "tryInline": "true",
                     "format": "Set Discord Deafen {$discordDeafenAction$}",
                     "data": [
@@ -42,7 +56,6 @@
                     "prefix": "Discord:",
                     "name": "Discord Mute",
                     "type": "communicate",
-                    "description": "Control Discord Mute Setting",
                     "tryInline": "true",
                     "format": "Set Discord Mute {$discordMuteAction$}",
                     "data": [
@@ -60,13 +73,20 @@
                     ]
                 },
                 {
-                   "id": "discord_select_text_channel",
+                   "id": "discord_hangup_voice",
                    "prefix": "Discord:",
-                   "name":"Discord Select Text Channel",
+                   "name":"Discord Hang Up",
                    "type":"communicate",
-                   "description":"Switch your user to a specific text channel",
                    "tryInline":"true",
-                   "format":"In Server {$discordServerList$} go to channel {$discordServerChannel$}",
+                   "format":"Hang Up Discord Voice Channel"
+                },
+                {
+                   "id": "discord_select_channel",
+                   "prefix": "Discord:",
+                   "name":"Discord Select Channel",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"On Discord Server {$discordServerList$} go to {$discordChannelType$} channel {$discordServerChannel$}",
                    "data":[
                        {
                            "id":"discordServerList",
@@ -74,6 +94,16 @@
                            "label":"Discord Server List",
                            "default":"",
                            "valueChoices":[]
+                       },
+                       {
+                           "id":"discordChannelType",
+                           "type":"choice",
+                           "label":"Discord Channel Type",
+                           "default":"",
+                           "valueChoices":[
+                              "Text", 
+                              "Voice"
+                           ]
                        },
                        {
                            "id":"discordServerChannel",
@@ -105,6 +135,22 @@
                         "0ff",
                         "On"
                     ]
+                },
+                {
+                    "id": "discord_voice_channel_active",
+                    "type": "choice",
+                    "desc": "Discord Voice Channel Active",
+                    "default": "0ff",
+                    "valueChoices": [
+                        "0ff",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_voice_channel_name",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Name",
+                    "default": "",
                 }
             ],
             "events": []
