@@ -219,7 +219,7 @@ var waitForLogin = () =>
           connecting = false;
           r();
         } else { 
-          setTimeout(check, 1000);
+          setTimeout(check, 5000);
         }
       }
     };
