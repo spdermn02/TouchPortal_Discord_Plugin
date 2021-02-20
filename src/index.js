@@ -3,6 +3,7 @@ const TP = require("touchportal-api");
 const { open } = require("out-url");
 const path = require("path");
 const TouchPortalClient = require("touchportal-api/src/client");
+const discordKeyMap = require("./discordkeys");
 
 let pluginSettings = {};
 let accessToken = undefined;
@@ -19,29 +20,35 @@ let DiscordClient = null;
 // - START - TP
 let muteState = 0;
 let deafState = 0;
+let last_voice_channel_subs = [];
+let discord_voice_channel_connected = 'No';
+let discord_voice_channel_name = '<None>';
+let discord_voice_average_ping = '0.00';
+let discord_voice_hostname = '<None>';
+let discord_voice_volume = '0.00';
+let discord_voice_mode_type = 'UNKNOWN';
 let guilds = {};
 let channels = {};
+let discordPTTKeys = [];
+
+let pttKeyStateId = 'discordPTTKeyboardKey';
 
 let instanceIds = {};
 
 TPClient.on("Action", async (message) => {
-  logIt("DEBUG",message);
+  logIt("DEBUG",JSON.stringify(message));
   if( message.actionId === "discord_select_channel" ) {
     let server = message.data[0].value;
     let type = message.data[1].value;
     let channelName = message.data[2].value;
     let guildId = guilds.idx[server];
 
-    logIg("DEBUG","select discord channel", server, channelName, guildId);
+    logIt("DEBUG","select discord channel", server, channelName, guildId);
 
     let channelId = channels[guildId][type.toLowerCase()].idx[channelName];
     
     if( type === 'Voice' ) {
-      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5});
-      await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channelId}, voiceState);
-      await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channelId}, voiceState);
-      await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channelId}, voiceState);
-      TPClient.stateUpdate("discord_voice_channel_active","On");
+      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: true});
     }
     else {
       await DiscordClient.selectTextChannel(channelId, {timeout: 5});
@@ -49,7 +56,33 @@ TPClient.on("Action", async (message) => {
   }
   else if( message.actionId === "discord_hangup_voice" ) {
     DiscordClient.selectVoiceChannel(null,{timeout:5});
-      TPClient.stateUpdate("discord_voice_channel_active","Off");
+  }
+  else if( message.actionId === "discord_reset_push_to_talk_key" ) {
+    discordPTTKeys = [];
+  }
+  else if( message.actionId === "discord_push_to_talk_key" ) {
+    let keyCode = discordKeyMap.keyboard.keyMap[message.data[0].value];
+    console.log(message.data[0].value, keyCode);
+    discordPTTKeys.push({type:0, code: keyCode , name: message.data[0].value});
+  }
+  else if( message.actionId === "discord_set_push_to_talk_key" ) {
+    DiscordClient.setVoiceSettings({'mode':{'shortcut':discordPTTKeys}});
+  }
+  else if( message.actionId == "discord_voice_mode_change" ) {
+    if( message.data[0].id === "discordVoiceMode") {
+      let modeType = "VOICE_ACTIVITY";
+      if (message.data[0].value === "Push To Talk" ) {
+        modeType = "PUSH_TO_TALK";
+      }
+      else if( message.data[0].value === "Voice Activity" ) {
+        modeType = "VOICE_ACTIVITY";
+      }
+      else {
+        modeType = discord_voice_mode_type == "VOICE_ACTIVITY" ? "PUSH_TO_TALK": "VOICE_ACTIVITY";
+      }
+      console.log(modeType);
+      DiscordClient.setVoiceSettings({'mode':{'type':modeType}});
+    }
   }
   else if (message.data && message.data.length > 0) {
     if (message.data[0].id === "discordDeafenAction") {
@@ -105,23 +138,30 @@ TPClient.on("ListChange", async (data) => {
       channels[guildId] = {
         voice: {
           array: [],
-          idx: {}
+          idx: {},
+          names: {}
         },
         text: {
           array: [],
-          idx: {}
+          idx: {},
+          names: {}
         }
       }
 
-      chData.forEach((channel,idx) => {
+      chData.forEach(async (channel,idx) => {
         // Type 0 is Text channel, 2 is Voice channel
         if( channel.type == 0 ) {
           channels[guildId].text.array.push(channel.name);
           channels[guildId].text.idx[channel.name] = channel.id;
+          channels[guildId].text.names[channel.id] = channel.name;
         }
         else if( channel.type == 2 ) {
           channels[guildId].voice.array.push(channel.name);
           channels[guildId].voice.idx[channel.name] = channel.id;
+          channels[guildId].voice.names[channel.id] = channel.name;
+          await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channel.id}, voiceState);
+          await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channel.id}, voiceState);
+          await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channel.id}, voiceState);
         }
       });
       logIt("DEBUG", guildId, channelType);
@@ -132,16 +172,19 @@ TPClient.on("ListChange", async (data) => {
 });
 
 TPClient.on("Info", (data) => {
-  logIt("DEBUG","Info :" + JSON.stringify(data));
+  logIt("DEBUG","Info : We received info from Touch-Portal");
+
+  console.log(pttKeyStateId,JSON.stringify(Object.keys(discordKeyMap.keyboard.keyMap)));
+  TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
 });
 
 TPClient.on("Settings", (data) => {
-  logIt("DEBUG","Settings :" + JSON.stringify(data));
+  logIt("DEBUG","Settings: New Settings from Touch-Portal");
   data.forEach( (setting) => {
     let key = Object.keys(setting)[0];
     pluginSettings[key] = setting[key];
+    logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
-
   doLogin();
 });
 
@@ -176,9 +219,19 @@ const connectToDiscord = function () {
       deafState = 0;
     }
 
+    if( data.input.volume > -1) {
+      discord_voice_volume = data.input.volume.toFixed(2);
+    }
+    if( data.mode.type != '') {
+      console.log("mode is "+data.mode.type);
+      discord_voice_mode_type = data.mode.type;
+    }
+
     let states = [
       { id: "discord_mute", value: muteState ? "On" : "Off" },
       { id: "discord_deafen", value: deafState ? "On" : "Off" },
+      { id: "discord_voice_volume", value: discord_voice_volume },
+      { id: "discord_voice_mode_type", value: discord_voice_mode_type }
     ];
     TPClient.stateUpdateMany(states);
   };
@@ -193,7 +246,7 @@ const connectToDiscord = function () {
   const getGuilds = async () => {
     let data = await DiscordClient.getGuilds();
 
-    if( !data || !data.guilds ) { logIt("ERROR", "guild data available"); return; }
+    if( !data || !data.guilds ) { logIt("ERROR", "guild data not available"); return; }
 
     guilds = {
       array : [],
@@ -205,9 +258,11 @@ const connectToDiscord = function () {
       guilds.idx[guild.name] = guild.id;
       guilds.idx[guild.id] = guild.name;
 
+      //Look into maybe using a promise and an await here.. 
+      // to limit having to do this timeout thingy
       setTimeout(() => { 
         buildGuildChannelIndex(guild.id);
-      },100*idx);
+      },500*idx);
 
     });
 
@@ -218,38 +273,31 @@ const connectToDiscord = function () {
     let chData = await getGuildChannels(guildId);
 
     channels[guildId] = {
-      array: [],
-      idx: {}
-    };
-
-    chData.forEach((channel,idx) => {
-      channels[guildId].array.push(channel.name);
-      channels[guildId].idx[channel.name] = channel.id;
-    })
-    channels[guildId] = {
       voice: {
         array: [],
-        idx: {}
+        idx: {},
+        names: {}
       },
       text: {
         array: [],
-        idx: {}
+        idx: {},
+        names: {}
       }
-    }
+    };
 
-    chData.forEach((channel,idx) => {
+    chData.forEach(async (channel,idx) => {
       // Type 0 is Text channel, 2 is Voice channel
       if( channel.type == 0 ) {
         channels[guildId].text.array.push(channel.name);
         channels[guildId].text.idx[channel.name] = channel.id;
+        channels[guildId].text.names[channel.id] = channel.name;
       }
       else if( channel.type == 2 ) {
         channels[guildId].voice.array.push(channel.name);
         channels[guildId].voice.idx[channel.name] = channel.id;
-
+        channels[guildId].voice.names[channel.id] = channel.name;
       }
     });
-
   };
 
   voiceState = async (data) => {
@@ -257,10 +305,34 @@ const connectToDiscord = function () {
   };
   voiceChannel = async (data) => {
       logIt("DEBUG",'Voice Channel:',JSON.stringify(data));
+      if ( data.channel_id == null ) {
+        //Set Voice Channel Name - <None>
+        discord_voice_channel_name = '<None>';
+        last_voice_channel_subs.forEach( sub => {
+          sub.unsubscribe();
+        })
+      }
+      else if( data.guild_id == null ) {
+        discord_voice_channel_name = 'Personal';
+        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}, voiceState);
+        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}, voiceState);
+        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}, voiceState);
+        last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
+      }
+      else {
+        // Lookup Voice Channel Name
+        discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
+        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}, voiceState);
+        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}, voiceState);
+        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}, voiceState);
+        last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
+      }
+
+      TPClient.stateUpdate("discord_voice_channel_name",discord_voice_channel_name);
   };
   guildCreate = async (data) => {
       logIt("DEBUG",'Guild Create:',JSON.stringify(data));
-      getGuild();
+      getGuilds();
   };
   channelCreate = async (data) => {
       logIt("DEBUG",'Channel Create:',JSON.stringify(data));
@@ -268,12 +340,39 @@ const connectToDiscord = function () {
   };
   voiceConnectionStatus = async (data) => {
       logIt("DEBUG",'Voice Connection:',JSON.stringify(data));
+      if( data.state != null && data.state == 'VOICE_CONNECTED' ) {
+        // Set Voice Channel Connect State
+        discord_voice_channel_connected = 'Yes';
+        discord_voice_average_ping = data.average_ping.toFixed(2);
+        discord_voice_hostname = data.hostname;
+      }
+      else if( data.state != null && data.state == 'DISCONNECTED' ) {
+        //Set Voice Channel Connect State Off
+        discord_voice_channel_connected = 'No';
+        discord_voice_average_ping = '0';
+        discord_voice_hostname = '<None>';
+      }
+      var states = [
+        { id: 'discord_voice_channel_connected', value: discord_voice_channel_connected},
+        { id: 'discord_voice_average_ping', value: discord_voice_average_ping},
+        { id: 'discord_voice_hostname', value: discord_voice_hostname},
+      ];
+      TPClient.stateUpdateMany(states);
   };
 
   DiscordClient.on("ready", async () => {
     if (!accessToken || ( DiscordClient.accessToken != undefined && accessToken != DiscordClient.accessToken )) {
       accessToken = DiscordClient.accessToken;
     }
+
+    //DiscordClient.setVoiceSettings({'mode':{'type':'PUSH_TO_TALK','shortcut':[{'type':0,'code':16,'name':'shift'},{'type':0,'code':123,'name':'F12'}]}});
+    // Left Shift 160
+    // Right Shift = 161
+    // Left control = 162
+    // Right control = 163
+    // Left Alt = 164
+    // Right Alt = 165
+    //"shortcut":[{"type":0,"code":160,"name":"shift"},{"type":0,"code":123,"name":"f12"}]
 
     await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", voiceActivity);
     await DiscordClient.subscribe("GUILD_CREATE", guildCreate);
@@ -313,12 +412,12 @@ var waitForClientId = (timeoutms) =>
     var check = () => {
       if (!isEmpty(pluginSettings["Discord Client Id"]) && !isEmpty(pluginSettings["Discord Client Secret"])) {
         r();
-      } else if ((timeoutms -= 100) < 0) { 
+      } else if ((timeoutms -= 1000) < 0) { 
         j("timed out, restart Touch Portal!"); 
       }
-      else setTimeout(check, 100);
+      else setTimeout(check, 1000);
     };
-    setTimeout(check, 100);
+    setTimeout(check, 1000);
   });
 
 var waitForLogin = () =>
@@ -353,7 +452,6 @@ async function doLogin() {
     open(`https://discord.com/developers/applications`);
 
     await waitForClientId(30 * 60 * 1000); // wait for 30 minutes
-
   }
 
   // Start Login process

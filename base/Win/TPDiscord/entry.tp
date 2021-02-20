@@ -113,6 +113,61 @@
                            "valueChoices":[]
                        }
                    ]
+                },
+                {
+                   "id": "discord_voice_mode_change",
+                   "prefix": "Discord:",
+                   "name":"Discord Voice Mode",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"Set Discord Voice Type to {$discordVoiceMode$}",
+                   "data":[
+                       {
+                           "id":"discordVoiceMode",
+                           "type":"choice",
+                           "label":"Discord Voice Mode",
+                           "default":"Toggle",
+                           "valueChoices":[
+                               "Voice Activity",
+                               "Push To Talk",
+                               "Toggle"
+                           ]
+                       }
+                   ]
+                },
+                {
+                   "id": "discord_reset_push_to_talk_key",
+                   "prefix": "Discord:",
+                   "name":"Discord Store Reset Push To Talk Keys",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"Reset Push To Talk Keys"
+                },
+                {
+                   "id": "discord_push_to_talk_key",
+                   "prefix": "Discord:",
+                   "name":"Discord Push To Talk Key",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
+                   "data":[
+                       {
+                           "id":"discordPTTKeyboardKey",
+                           "type":"choice",
+                           "label":"Discord Push To Talk Keyboard Key",
+                           "default":"",
+                           "valueChoices":[
+                           ]
+                       }
+                   ]
+                },
+                {
+                   "id": "discord_set_push_to_talk_key",
+                   "prefix": "Discord:",
+                   "name":"Discord Store Push To Talk Keys",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"Store Push To Talk Keys"
                 }
             ],
             "states": [
@@ -137,13 +192,13 @@
                     ]
                 },
                 {
-                    "id": "discord_voice_channel_active",
+                    "id": "discord_voice_channel_connected",
                     "type": "choice",
-                    "desc": "Discord Voice Channel Active",
-                    "default": "0ff",
+                    "desc": "Discord Voice Channel Connected",
+                    "default": "No",
                     "valueChoices": [
-                        "0ff",
-                        "On"
+                        "No",
+                        "Yes"
                     ]
                 },
                 {
@@ -151,6 +206,34 @@
                     "type": "text",
                     "desc": "Discord Voice Channel Name",
                     "default": "",
+                },
+                {
+                    "id": "discord_voice_average_ping",
+                    "type": "text",
+                    "desc": "Discord Voice Average Ping",
+                    "default": "0.00",
+                },
+                {
+                    "id": "discord_voice_hostname",
+                    "type": "text",
+                    "desc": "Discord Voice Hostname",
+                    "default": "",
+                },
+                {
+                    "id": "discord_voice_mode_type",
+                    "type": "text",
+                    "desc": "Discord Voice Mode Type",
+                    "default": "",
+                    "valueChoices":[
+                        "PUSH_TO_TALK",
+                        "VOICE_ACTIVITY"
+                    ]
+                },
+                {
+                    "id": "discord_voice_volume",
+                    "type": "text",
+                    "desc": "Discord Voice Volume",
+                    "default": "0.00",
                 }
             ],
             "events": []
