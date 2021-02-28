@@ -1,4 +1,6 @@
 let alphaChars = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 1 2 3 4 5 6 7 8 9 0';
+let germanAlphaChars = 'Ä Ö Ü ß';
+let spanishAlphaChars = 'Á É Í Ó Ú Ñ';
 
 let keyboard = { type: 0,
     keyMap: {
@@ -80,8 +82,22 @@ let keyboard = { type: 0,
 
 alphaChars.split(' ').forEach(char => {
     keyboard.keyMap[char] = char.charCodeAt(0);
-})
+});
+
+germanAlphaChars.split(' ').forEach(char => {
+    keyboard.keyMap[char] = char.charCodeAt(0);
+});
+
+spanishAlphaChars.split(' ').forEach(char => {
+    keyboard.keyMap[char] = char.charCodeAt(0);
+});
 
 console.log(JSON.stringify(keyboard));
 
 module.exports = { keyboard: keyboard};
+
+
+// G-Key Support 6 max
+// K95
+// K55
+
