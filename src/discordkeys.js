@@ -29,7 +29,7 @@ let keyboard = { type: 0,
         'F17': 128,
         'F18': 129,
         'F19': 130,
-        // Discord only supports up to F19
+        // Discord only supports up to F19 - leaving these here for documentation purposes
         /*'F20': 131,
         'F21': 132,
         'F22': 133,
@@ -92,12 +92,4 @@ spanishAlphaChars.split(' ').forEach(char => {
     keyboard.keyMap[char] = char.charCodeAt(0);
 });
 
-console.log(JSON.stringify(keyboard));
-
 module.exports = { keyboard: keyboard};
-
-
-// G-Key Support 6 max
-// K95
-// K55
-

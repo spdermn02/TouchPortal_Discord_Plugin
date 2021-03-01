@@ -12,6 +12,8 @@ const scopes = ["identify", "rpc",  "guilds", "messages.read" ];
 //const scopes = ["identify", "rpc"];
 const redirectUri = "http://localhost";
 
+const updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
+
 const pluginId = "TPDiscord";
 
 const TPClient = new TP.Client();
@@ -62,7 +64,6 @@ TPClient.on("Action", async (message) => {
   }
   else if( message.actionId === "discord_push_to_talk_key" ) {
     let keyCode = discordKeyMap.keyboard.keyMap[message.data[0].value];
-    console.log(message.data[0].value, keyCode);
     discordPTTKeys.push({type:0, code: keyCode , name: message.data[0].value});
   }
   else if( message.actionId === "discord_set_push_to_talk_key" ) {
@@ -80,7 +81,6 @@ TPClient.on("Action", async (message) => {
       else {
         modeType = discord_voice_mode_type == "VOICE_ACTIVITY" ? "PUSH_TO_TALK": "VOICE_ACTIVITY";
       }
-      console.log(modeType);
       DiscordClient.setVoiceSettings({'mode':{'type':modeType}});
     }
   }
@@ -174,7 +174,6 @@ TPClient.on("ListChange", async (data) => {
 TPClient.on("Info", (data) => {
   logIt("DEBUG","Info : We received info from Touch-Portal");
 
-  console.log(pttKeyStateId,JSON.stringify(Object.keys(discordKeyMap.keyboard.keyMap)));
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
 });
 
@@ -186,6 +185,9 @@ TPClient.on("Settings", (data) => {
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
   doLogin();
+});
+TPClient.on("Update", (curVersion, newVersion) => {
+  logIt("DEBUG",curVersion, newVersion);
 });
 
 TPClient.on("Close", (data) => {
@@ -223,7 +225,7 @@ const connectToDiscord = function () {
       discord_voice_volume = data.input.volume.toFixed(2);
     }
     if( data.mode.type != '') {
-      console.log("mode is "+data.mode.type);
+      logIt("DEBUG","voice mode is",data.mode.type);
       discord_voice_mode_type = data.mode.type;
     }
 
@@ -471,4 +473,4 @@ function logIt() {
 
 // We are going to connect to TP first, then Discord
 // That way if TP shuts down the plugin will be shutdown too
-TPClient.connect({ pluginId });
+TPClient.connect({ pluginId, updateUrl });
