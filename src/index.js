@@ -7,7 +7,7 @@ const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
 const platform = require('process').platform;
 
 const app_monitor = {
-  "darwin": "Discord.app",
+  "darwin": "/Applications/Discord.app/Contents/MacOS/Discord",
   "win32": "Discord.exe"
 };
 
