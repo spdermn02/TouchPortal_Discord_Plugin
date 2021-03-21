@@ -15,16 +15,14 @@
   "author": "Jameson Allen aka Spdermn02",
   "license": "ISC",
   "pkg": {
-    "assets": [
-      "src/**/*",
-      "src/public/scripts/**/*",
-      "src/public/images/**/*",
-      "src/public/styles/**/*"
+    "scripts": [
+      "src/**/*.js"
     ]
   },
   "dependencies": {
     "discord-rpc": "^3.1.4",
+    "find-process": "^1.4.4",
     "out-url": "^1.1.1",
-    "touchportal-api": "^2.0.0-alpha"
+    "touchportal-api": "^2.0.1"
   }
 }

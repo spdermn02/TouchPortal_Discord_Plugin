@@ -36,7 +36,7 @@
                     "name": "Discord Deafen",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Set Discord Deafen {$discordDeafenAction$}",
+                    "format": "Discord: Set Deafen {$discordDeafenAction$}",
                     "data": [
                         {
                             "id": "discordDeafenAction",
@@ -57,7 +57,7 @@
                     "name": "Discord Mute",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Set Discord Mute {$discordMuteAction$}",
+                    "format": "Discord: Set Mute {$discordMuteAction$}",
                     "data": [
                         {
                             "id": "discordMuteAction",
@@ -78,7 +78,7 @@
                    "name":"Discord Hang Up",
                    "type":"communicate",
                    "tryInline":"true",
-                   "format":"Hang Up Discord Voice Channel"
+                   "format":"Discord: Hang Up Voice Channel"
                 },
                 {
                    "id": "discord_select_channel",
@@ -86,7 +86,7 @@
                    "name":"Discord Select Channel",
                    "type":"communicate",
                    "tryInline":"true",
-                   "format":"On Discord Server {$discordServerList$} go to {$discordChannelType$} channel {$discordServerChannel$}",
+                   "format":"Discord: On Server {$discordServerList$} go to {$discordChannelType$} channel {$discordServerChannel$}",
                    "data":[
                        {
                            "id":"discordServerList",
@@ -120,7 +120,7 @@
                    "name":"Discord Voice Mode",
                    "type":"communicate",
                    "tryInline":"true",
-                   "format":"Set Discord Voice Type to {$discordVoiceMode$}",
+                   "format":"Discord: Set Voice Type to {$discordVoiceMode$}",
                    "data":[
                        {
                            "id":"discordVoiceMode",
@@ -141,7 +141,7 @@
                    "name":"Discord Store Reset Push To Talk Keys",
                    "type":"communicate",
                    "tryInline":"true",
-                   "format":"Reset Push To Talk Keys"
+                   "format":"Discord: Reset Push To Talk Keys"
                 },
                 {
                    "id": "discord_push_to_talk_key",
@@ -149,7 +149,7 @@
                    "name":"Discord Push To Talk Key",
                    "type":"communicate",
                    "tryInline":"true",
-                   "format":"Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
+                   "format":"Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
                    "data":[
                        {
                            "id":"discordPTTKeyboardKey",
@@ -167,7 +167,7 @@
                    "name":"Discord Store Push To Talk Keys",
                    "type":"communicate",
                    "tryInline":"true",
-                   "format":"Store Push To Talk Keys"
+                   "format":"Discord: Store Push To Talk Keys"
                 }
             ],
             "states": [
@@ -205,23 +205,23 @@
                     "id": "discord_voice_channel_name",
                     "type": "text",
                     "desc": "Discord Voice Channel Name",
-                    "default": "",
+                    "default": ""
                 },
                 {
                     "id": "discord_voice_average_ping",
                     "type": "text",
                     "desc": "Discord Voice Average Ping",
-                    "default": "0.00",
+                    "default": "0.00"
                 },
                 {
                     "id": "discord_voice_hostname",
                     "type": "text",
                     "desc": "Discord Voice Hostname",
-                    "default": "",
+                    "default": ""
                 },
                 {
                     "id": "discord_voice_mode_type",
-                    "type": "text",
+                    "type": "choice",
                     "desc": "Discord Voice Mode Type",
                     "default": "",
                     "valueChoices":[
@@ -233,7 +233,7 @@
                     "id": "discord_voice_volume",
                     "type": "text",
                     "desc": "Discord Voice Volume",
-                    "default": "0.00",
+                    "default": "0.00"
                 }
             ],
             "events": []

@@ -2,9 +2,16 @@ const RPC = require("discord-rpc");
 const TP = require("touchportal-api");
 const { open } = require("out-url");
 const path = require("path");
-const TouchPortalClient = require("touchportal-api/src/client");
 const discordKeyMap = require("./discordkeys");
+const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
+const platform = require('process').platform;
 
+const app_monitor = {
+  "darwin": "Discord.app",
+  "win32": "Discord.exe"
+};
+
+let discordRunning = false;
 let pluginSettings = {};
 let accessToken = undefined;
 let connecting = false;
@@ -12,11 +19,13 @@ const scopes = ["identify", "rpc",  "guilds", "messages.read" ];
 //const scopes = ["identify", "rpc"];
 const redirectUri = "http://localhost";
 
+//Change this to API?
 const updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
 
 const pluginId = "TPDiscord";
 
 const TPClient = new TP.Client();
+const procWatcher = new ProcessWatcher();
 let DiscordClient = null;
 
 // - START - TP
@@ -50,6 +59,10 @@ TPClient.on("Action", async (message) => {
     let channelId = channels[guildId][type.toLowerCase()].idx[channelName];
     
     if( type === 'Voice' ) {
+      //let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channelId}, voiceState);
+      //let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channelId}, voiceState);
+      //let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channelId}, voiceState);
+      //last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: true});
     }
     else {
@@ -159,9 +172,9 @@ TPClient.on("ListChange", async (data) => {
           channels[guildId].voice.array.push(channel.name);
           channels[guildId].voice.idx[channel.name] = channel.id;
           channels[guildId].voice.names[channel.id] = channel.name;
-          await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channel.id}, voiceState);
-          await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channel.id}, voiceState);
-          await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channel.id}, voiceState);
+          DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channel.id}, voiceState);
+          DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channel.id}, voiceState);
+          DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channel.id}, voiceState);
         }
       });
       logIt("DEBUG", guildId, channelType);
@@ -175,16 +188,19 @@ TPClient.on("Info", (data) => {
   logIt("DEBUG","Info : We received info from Touch-Portal");
 
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
+
+  logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
+  procWatcher.watch(app_monitor[platform]);
 });
 
 TPClient.on("Settings", (data) => {
-  logIt("DEBUG","Settings: New Settings from Touch-Portal");
+  logIt("DEBUG","Settings: New Settings from Touch-Portal ");
   data.forEach( (setting) => {
     let key = Object.keys(setting)[0];
     pluginSettings[key] = setting[key];
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
-  doLogin();
+  //doLogin();
 });
 TPClient.on("Update", (curVersion, newVersion) => {
   logIt("DEBUG",curVersion, newVersion);
@@ -307,12 +323,13 @@ const connectToDiscord = function () {
   };
   voiceChannel = async (data) => {
       logIt("DEBUG",'Voice Channel:',JSON.stringify(data));
-      if ( data.channel_id == null ) {
-        //Set Voice Channel Name - <None>
-        discord_voice_channel_name = '<None>';
+      if ( last_voice_channel_subs.length > 0 ) {
         last_voice_channel_subs.forEach( sub => {
           sub.unsubscribe();
         })
+      }
+      if( data.channel_id == null ) {
+        discord_voice_channel_name = '<None>';
       }
       else if( data.guild_id == null ) {
         discord_voice_channel_name = 'Personal';
@@ -358,6 +375,7 @@ const connectToDiscord = function () {
         { id: 'discord_voice_channel_connected', value: discord_voice_channel_connected},
         { id: 'discord_voice_average_ping', value: discord_voice_average_ping},
         { id: 'discord_voice_hostname', value: discord_voice_hostname},
+        { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
       ];
       TPClient.stateUpdateMany(states);
   };
@@ -387,8 +405,8 @@ const connectToDiscord = function () {
   });
 
   DiscordClient.on("disconnected", () => {
-    logIt("WARN","discord connection closed, will attempt reconnect");
-    doLogin();
+    logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
+    discordRunning = false;
   });
 
   DiscordClient.login({
@@ -459,6 +477,32 @@ async function doLogin() {
   // Start Login process
   await waitForLogin(); 
 }
+
+// Process Watcher
+procWatcher.on('processRunning', (processName) => {
+  discordRunning = true;
+  // Lets shutdown the connection so we can re-establish it
+  setTimeout(function() {
+      logIt('INFO', "Discord is running, attempting to Connect");
+      doLogin();
+  }, 1000);
+});
+procWatcher.on('processTerminated', (processName) => {
+  logIt('WARN',`${processName} not detected as running`);
+  if( !discordRunning ) {
+      // We already did this once, don't need to keep repeating it
+      return;
+  }
+  logIt('WARN',`Disconnect active connections to Discord`);
+  discordRunning = false;
+  if ( DiscordClient ) {
+    DiscordClient.removeAllListeners();
+    DiscordClient.destroy();
+    DiscordClient = null;
+  }
+});
+// End Process Watcher
+
 
 function isEmpty(val) {
   return val === undefined || val === null || val === '';
