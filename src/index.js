@@ -190,7 +190,9 @@ TPClient.on("Info", (data) => {
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
 
   logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
-  procWatcher.watch(app_monitor[platform]);
+  if( platform != 'darwin' ) {
+      procWatcher.watch(app_monitor[platform]);
+  }
 });
 
 TPClient.on("Settings", (data) => {
@@ -200,7 +202,9 @@ TPClient.on("Settings", (data) => {
     pluginSettings[key] = setting[key];
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
-  //doLogin();
+  if( platform == 'darwin' ) {
+    doLogin();
+  }
 });
 TPClient.on("Update", (curVersion, newVersion) => {
   logIt("DEBUG",curVersion, newVersion);
@@ -406,6 +410,9 @@ const connectToDiscord = function () {
 
   DiscordClient.on("disconnected", () => {
     logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
+    if( platform == 'darwin' ) {
+      return doLogin();
+    }
     discordRunning = false;
   });
 

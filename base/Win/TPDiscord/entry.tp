@@ -228,12 +228,6 @@
                         "PUSH_TO_TALK",
                         "VOICE_ACTIVITY"
                     ]
-                },
-                {
-                    "id": "discord_voice_volume",
-                    "type": "text",
-                    "desc": "Discord Voice Volume",
-                    "default": "0.00"
                 }
             ],
             "events": []
