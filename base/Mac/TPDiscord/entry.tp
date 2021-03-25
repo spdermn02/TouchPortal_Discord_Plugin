@@ -1,14 +1,29 @@
 {
-    "sdk": 2,
-    "version": 3,
-    "TPDiscord_Version":"3.0.2",
+    "sdk": 3,
+    "version": 4000,
+    "TPDiscord_Version": "4.0.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
     "configuration": {
-        "colorDark": "#225834",
-        "colorLight": "#45b168"
+        "colorDark": "#23272A",
+        "colorLight": "#7289DA"
     },
+    "settings": [
+        {
+            "name": "Discord Client Id",
+            "type": "text",
+            "default": "",
+            "maxLength": 20
+        },
+        {
+            "name": "Discord Client Secret",
+            "type": "text",
+            "isPassword": true,
+            "default": "",
+            "maxLength": 36
+        }
+    ],
     "categories": [
         {
             "id": "TPDiscord",
@@ -20,9 +35,8 @@
                     "prefix": "Discord:",
                     "name": "Discord Deafen",
                     "type": "communicate",
-                    "description": "Control Discord Deafen Setting",
                     "tryInline": "true",
-                    "format": "Set Discord Deafen {$discordDeafenAction$}",
+                    "format": "Discord: Set Deafen {$discordDeafenAction$}",
                     "data": [
                         {
                             "id": "discordDeafenAction",
@@ -42,9 +56,8 @@
                     "prefix": "Discord:",
                     "name": "Discord Mute",
                     "type": "communicate",
-                    "description": "Control Discord Mute Setting",
                     "tryInline": "true",
-                    "format": "Set Discord Mute {$discordMuteAction$}",
+                    "format": "Discord: Set Mute {$discordMuteAction$}",
                     "data": [
                         {
                             "id": "discordMuteAction",
@@ -58,6 +71,102 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "id": "discord_hangup_voice",
+                    "prefix": "Discord:",
+                    "name": "Discord Hang Up",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Hang Up Voice Channel"
+                },
+                {
+                    "id": "discord_select_channel",
+                    "prefix": "Discord:",
+                    "name": "Discord Select Channel",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: On Server {$discordServerList$} go to {$discordChannelType$} channel {$discordServerChannel$}",
+                    "data": [
+                        {
+                            "id": "discordServerList",
+                            "type": "choice",
+                            "label": "Discord Server List",
+                            "default": "",
+                            "valueChoices": []
+                        },
+                        {
+                            "id": "discordChannelType",
+                            "type": "choice",
+                            "label": "Discord Channel Type",
+                            "default": "",
+                            "valueChoices": [
+                                "Text",
+                                "Voice"
+                            ]
+                        },
+                        {
+                            "id": "discordServerChannel",
+                            "type": "choice",
+                            "label": "Discord Server Channel List",
+                            "default": "",
+                            "valueChoices": []
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_voice_mode_change",
+                    "prefix": "Discord:",
+                    "name": "Discord Voice Mode",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Voice Type to {$discordVoiceMode$}",
+                    "data": [
+                        {
+                            "id": "discordVoiceMode",
+                            "type": "choice",
+                            "label": "Discord Voice Mode",
+                            "default": "Toggle",
+                            "valueChoices": [
+                                "Voice Activity",
+                                "Push To Talk",
+                                "Toggle"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_reset_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Store Reset Push To Talk Keys",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Reset Push To Talk Keys"
+                },
+                {
+                    "id": "discord_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Push To Talk Key",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
+                    "data": [
+                        {
+                            "id": "discordPTTKeyboardKey",
+                            "type": "choice",
+                            "label": "Discord Push To Talk Keyboard Key",
+                            "default": "",
+                            "valueChoices": []
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_set_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Store Push To Talk Keys",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Store Push To Talk Keys"
                 }
             ],
             "states": [
@@ -80,6 +189,50 @@
                         "0ff",
                         "On"
                     ]
+                },
+                {
+                    "id": "discord_voice_channel_connected",
+                    "type": "choice",
+                    "desc": "Discord Voice Channel Connected",
+                    "default": "No",
+                    "valueChoices": [
+                        "No",
+                        "Yes"
+                    ]
+                },
+                {
+                    "id": "discord_voice_channel_name",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Name",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_average_ping",
+                    "type": "text",
+                    "desc": "Discord Voice Average Ping",
+                    "default": "0.00"
+                },
+                {
+                    "id": "discord_voice_hostname",
+                    "type": "text",
+                    "desc": "Discord Voice Hostname",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_mode_type",
+                    "type": "choice",
+                    "desc": "Discord Voice Mode Type",
+                    "default": "",
+                    "valueChoices": [
+                        "PUSH_TO_TALK",
+                        "VOICE_ACTIVITY"
+                    ]
+                },
+                {
+                    "id": "discord_voice_volume",
+                    "type": "text",
+                    "desc": "Discord Voice Volume",
+                    "default": "0.00"
                 }
             ],
             "events": []

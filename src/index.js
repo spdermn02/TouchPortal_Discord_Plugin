@@ -1,82 +1,234 @@
 const RPC = require("discord-rpc");
-const discordDb = require("./discorddb");
 const TP = require("touchportal-api");
-const express = require("express");
-const bodyParser = require("body-parser");
 const { open } = require("out-url");
 const path = require("path");
+const discordKeyMap = require("./discordkeys");
+const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
+const platform = require('process').platform;
 
-let clientId = undefined;
-let clientSecret = undefined;
+const app_monitor = {
+  "darwin": "/Applications/Discord.app/Contents/MacOS/Discord",
+  "win32": "Discord.exe"
+};
+
+let discordRunning = false;
+let pluginSettings = {};
 let accessToken = undefined;
 let connecting = false;
-const scopes = ["identify", "rpc"];
+const scopes = ["identify", "rpc",  "guilds", "messages.read" ];
+//const scopes = ["identify", "rpc"];
 const redirectUri = "http://localhost";
+
+//Change this to API?
+const updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
 
 const pluginId = "TPDiscord";
 
 const TPClient = new TP.Client();
+const procWatcher = new ProcessWatcher();
 let DiscordClient = null;
-
-const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-const port = 9403;
 
 // - START - TP
 let muteState = 0;
 let deafState = 0;
+let last_voice_channel_subs = [];
+let discord_voice_channel_connected = 'No';
+let discord_voice_channel_name = '<None>';
+let discord_voice_average_ping = '0.00';
+let discord_voice_hostname = '<None>';
+let discord_voice_volume = '0.00';
+let discord_voice_mode_type = 'UNKNOWN';
+let guilds = {};
+let channels = {};
+let discordPTTKeys = [];
 
-TPClient.on("Action", (data) => {
-  if (data.data && data.data.length > 0) {
-    if (data.data[0].id === "discordDeafenAction") {
-      if (data.data[0].value === "Toggle") {
+let pttKeyStateId = 'discordPTTKeyboardKey';
+
+let instanceIds = {};
+
+TPClient.on("Action", async (message) => {
+  logIt("DEBUG",JSON.stringify(message));
+  if( message.actionId === "discord_select_channel" ) {
+    let server = message.data[0].value;
+    let type = message.data[1].value;
+    let channelName = message.data[2].value;
+    let guildId = guilds.idx[server];
+
+    logIt("DEBUG","select discord channel", server, channelName, guildId);
+
+    let channelId = channels[guildId][type.toLowerCase()].idx[channelName];
+    
+    if( type === 'Voice' ) {
+      //let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channelId}, voiceState);
+      //let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channelId}, voiceState);
+      //let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channelId}, voiceState);
+      //last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
+      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: true});
+    }
+    else {
+      await DiscordClient.selectTextChannel(channelId, {timeout: 5});
+    }
+  }
+  else if( message.actionId === "discord_hangup_voice" ) {
+    DiscordClient.selectVoiceChannel(null,{timeout:5});
+  }
+  else if( message.actionId === "discord_reset_push_to_talk_key" ) {
+    discordPTTKeys = [];
+  }
+  else if( message.actionId === "discord_push_to_talk_key" ) {
+    let keyCode = discordKeyMap.keyboard.keyMap[message.data[0].value];
+    discordPTTKeys.push({type:0, code: keyCode , name: message.data[0].value});
+  }
+  else if( message.actionId === "discord_set_push_to_talk_key" ) {
+    DiscordClient.setVoiceSettings({'mode':{'shortcut':discordPTTKeys}});
+  }
+  else if( message.actionId == "discord_voice_mode_change" ) {
+    if( message.data[0].id === "discordVoiceMode") {
+      let modeType = "VOICE_ACTIVITY";
+      if (message.data[0].value === "Push To Talk" ) {
+        modeType = "PUSH_TO_TALK";
+      }
+      else if( message.data[0].value === "Voice Activity" ) {
+        modeType = "VOICE_ACTIVITY";
+      }
+      else {
+        modeType = discord_voice_mode_type == "VOICE_ACTIVITY" ? "PUSH_TO_TALK": "VOICE_ACTIVITY";
+      }
+      DiscordClient.setVoiceSettings({'mode':{'type':modeType}});
+    }
+  }
+  else if (message.data && message.data.length > 0) {
+    if (message.data[0].id === "discordDeafenAction") {
+      if (message.data[0].value === "Toggle") {
         deafState = 1 - deafState;
-      } else if (data.data[0].value === "Off") {
+      } else if (message.data[0].value === "Off") {
         deafState = 0;
-      } else if (data.data[0].value === "On") {
+      } else if (message.data[0].value === "On") {
         deafState = 1;
       }
       DiscordClient.setVoiceSettings({ deaf: 1 === deafState });
     }
-    if (data.data[0].id === "discordMuteAction") {
-      if (data.data[0].value === "Toggle") {
+  else if (message.data[0].id === "discordMuteAction") {
+      if (message.data[0].value === "Toggle") {
         muteState = 1 - muteState;
-      } else if (data.data[0].value === "Off") {
+      } else if (message.data[0].value === "Off") {
         muteState = 0;
-      } else if (data.data[0].value === "On") {
+      } else if (message.data[0].value === "On") {
         muteState = 1;
       }
       DiscordClient.setVoiceSettings({ mute: 1 === muteState });
     }
   } else {
-    console.log(
-      pluginId,
-      ": WARN : No data in Action Message",
-      JSON.stringify(data)
+    logIt("WARN","No data in Action Message",
+      JSON.stringify(message)
     );
   }
 });
 
-TPClient.on("ListChange", (data) => {
-  console.log(pluginId, ": DEBUG : ListChange :" + JSON.stringify(data));
+TPClient.on("ListChange", async (data) => {
+  logIt("DEBUG","ListChange :" + JSON.stringify(data));
+  if( isEmpty(instanceIds[data.instanceId]) ) { instanceIds[data.instanceId] = {};}
+  if( isEmpty(instanceIds[data.instanceId][data.actionId]) ) { instanceIds[data.instanceId][data.actionId] = {}; }
+  if( data.actionId === 'discord_select_channel' && data.listId !== 'discordServerChannel') {
+    instanceIds[data.instanceId][data.actionId][data.listId]  = data.value;
+
+    let guildName = undefined;
+    let channelType = 'Text';
+
+    if( !isEmpty(instanceIds[data.instanceId][data.actionId].discordServerList)) {
+        guildName = instanceIds[data.instanceId][data.actionId].discordServerList;
+    }
+
+    if( !isEmpty(instanceIds[data.instanceId][data.actionId].discordChannelType)) {
+        channelType = instanceIds[data.instanceId][data.actionId].discordChannelType;
+    }
+
+    if( isEmpty(guildName) || isEmpty(channelType) ) { return; }
+
+    if( !isEmpty(guilds.idx) && guilds.idx[guildName] ) {
+      let guildId = guilds.idx[guildName];
+      let chData = await getGuildChannels(guildId);
+      channels[guildId] = {
+        voice: {
+          array: [],
+          idx: {},
+          names: {}
+        },
+        text: {
+          array: [],
+          idx: {},
+          names: {}
+        }
+      }
+
+      chData.forEach(async (channel,idx) => {
+        // Type 0 is Text channel, 2 is Voice channel
+        if( channel.type == 0 ) {
+          channels[guildId].text.array.push(channel.name);
+          channels[guildId].text.idx[channel.name] = channel.id;
+          channels[guildId].text.names[channel.id] = channel.name;
+        }
+        else if( channel.type == 2 ) {
+          channels[guildId].voice.array.push(channel.name);
+          channels[guildId].voice.idx[channel.name] = channel.id;
+          channels[guildId].voice.names[channel.id] = channel.name;
+          DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channel.id}, voiceState);
+          DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channel.id}, voiceState);
+          DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channel.id}, voiceState);
+        }
+      });
+      logIt("DEBUG", guildId, channelType);
+
+      TPClient.choiceUpdateSpecific('discordServerChannel',channels[guildId][channelType.toLowerCase()].array,data.instanceId);
+    }
+  }
 });
 
 TPClient.on("Info", (data) => {
-  console.log(pluginId, ": DEBUG : Info :" + JSON.stringify(data));
+  logIt("DEBUG","Info : We received info from Touch-Portal");
+
+  TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
+
+  logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
+  if( platform != 'darwin' ) {
+      procWatcher.watch(app_monitor[platform]);
+  }
 });
+
+TPClient.on("Settings", (data) => {
+  logIt("DEBUG","Settings: New Settings from Touch-Portal ");
+  data.forEach( (setting) => {
+    let key = Object.keys(setting)[0];
+    pluginSettings[key] = setting[key];
+    logIt("DEBUG","Settings: Setting received for |"+key+"|");
+  });
+  if( platform == 'darwin' ) {
+    doLogin();
+  }
+});
+TPClient.on("Update", (curVersion, newVersion) => {
+  logIt("DEBUG",curVersion, newVersion);
+});
+
 TPClient.on("Close", (data) => {
-  console.log(
-    pluginId,
-    ": WARN : Closing due to TouchPortal sending closePlugin message"
+  logIt("WARN","Closing due to TouchPortal sending closePlugin message"
   );
 });
 // - END - TP
 
 // - START - Discord
+let getGuildChannels = () => { };
+let voiceState = () => {};
+let voiceChannel = () => {};
+let guildCreate = () => {};
+let channelCreate = () => {};
+let voiceConnectionStatus = () => {};
+
 const connectToDiscord = function () {
   DiscordClient = new RPC.Client({ transport: "ipc" });
 
   const voiceActivity = function (data) {
+    logIt("DEBUG","voiceActivity", JSON.stringify(data));
     if (data.mute) {
       muteState = 1;
     } else {
@@ -89,121 +241,210 @@ const connectToDiscord = function () {
       deafState = 0;
     }
 
+    if( data.input.volume > -1) {
+      discord_voice_volume = data.input.volume.toFixed(2);
+    }
+    if( data.mode.type != '') {
+      logIt("DEBUG","voice mode is",data.mode.type);
+      discord_voice_mode_type = data.mode.type;
+    }
+
     let states = [
       { id: "discord_mute", value: muteState ? "On" : "Off" },
       { id: "discord_deafen", value: deafState ? "On" : "Off" },
+      { id: "discord_voice_volume", value: discord_voice_volume },
+      { id: "discord_voice_mode_type", value: discord_voice_mode_type }
     ];
     TPClient.stateUpdateMany(states);
   };
 
-  const subscribe = function (data) {
-    if (!data || !data.mode || !data.mode.type) {
-      console.log(
-        pluginId,
-        ": ERROR : subscribe : event has no data or known mode.type"
-      );
-      return;
-    }
-    switch (data.mode.type) {
-      case "VOICE_ACTIVITY":
-        voiceActivity(data);
-        break;
-      default:
-        console.log(
-          pluginId,
-          ": DEBUG : Unhandled mode.type " + data.mode.type
-        );
-    }
+  getGuildChannels = async (guildId ) => {
+    logIt("DEBUG","getGuildChannels for guildId",guildId);
+    let channels = await DiscordClient.getChannels(guildId);
+    if( !channels ) { logIt("ERROR","No channel data available for guildId",guildId); return; }
+    return channels; 
+  }
+
+  const getGuilds = async () => {
+    let data = await DiscordClient.getGuilds();
+
+    if( !data || !data.guilds ) { logIt("ERROR", "guild data not available"); return; }
+
+    guilds = {
+      array : [],
+      idx: {}
+    };
+
+    data.guilds.forEach( (guild,idx) => {
+      guilds.array.push(guild.name);
+      guilds.idx[guild.name] = guild.id;
+      guilds.idx[guild.id] = guild.name;
+
+      //Look into maybe using a promise and an await here.. 
+      // to limit having to do this timeout thingy
+      setTimeout(() => { 
+        buildGuildChannelIndex(guild.id);
+      },500*idx);
+
+    });
+
+    TPClient.choiceUpdate('discordServerList',guilds.array)
   };
 
-  DiscordClient.on("ready", () => {
-    if (!accessToken) {
-      discordDb.db.insert({
-        _id: "discordToken",
-        accessToken: DiscordClient.accessToken,
-      });
+  const buildGuildChannelIndex = async(guildId) => {
+    let chData = await getGuildChannels(guildId);
+
+    channels[guildId] = {
+      voice: {
+        array: [],
+        idx: {},
+        names: {}
+      },
+      text: {
+        array: [],
+        idx: {},
+        names: {}
+      }
+    };
+
+    chData.forEach(async (channel,idx) => {
+      // Type 0 is Text channel, 2 is Voice channel
+      if( channel.type == 0 ) {
+        channels[guildId].text.array.push(channel.name);
+        channels[guildId].text.idx[channel.name] = channel.id;
+        channels[guildId].text.names[channel.id] = channel.name;
+      }
+      else if( channel.type == 2 ) {
+        channels[guildId].voice.array.push(channel.name);
+        channels[guildId].voice.idx[channel.name] = channel.id;
+        channels[guildId].voice.names[channel.id] = channel.name;
+      }
+    });
+  };
+
+  voiceState = async (data) => {
+      logIt("DEBUG","Voice State", JSON.stringify(data));
+  };
+  voiceChannel = async (data) => {
+      logIt("DEBUG",'Voice Channel:',JSON.stringify(data));
+      if ( last_voice_channel_subs.length > 0 ) {
+        last_voice_channel_subs.forEach( sub => {
+          sub.unsubscribe();
+        })
+      }
+      if( data.channel_id == null ) {
+        discord_voice_channel_name = '<None>';
+      }
+      else if( data.guild_id == null ) {
+        discord_voice_channel_name = 'Personal';
+        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}, voiceState);
+        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}, voiceState);
+        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}, voiceState);
+        last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
+      }
+      else {
+        // Lookup Voice Channel Name
+        discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
+        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}, voiceState);
+        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}, voiceState);
+        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}, voiceState);
+        last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
+      }
+
+      TPClient.stateUpdate("discord_voice_channel_name",discord_voice_channel_name);
+  };
+  guildCreate = async (data) => {
+      logIt("DEBUG",'Guild Create:',JSON.stringify(data));
+      getGuilds();
+  };
+  channelCreate = async (data) => {
+      logIt("DEBUG",'Channel Create:',JSON.stringify(data));
+      getGuilds();
+  };
+  voiceConnectionStatus = async (data) => {
+      logIt("DEBUG",'Voice Connection:',JSON.stringify(data));
+      if( data.state != null && data.state == 'VOICE_CONNECTED' ) {
+        // Set Voice Channel Connect State
+        discord_voice_channel_connected = 'Yes';
+        discord_voice_average_ping = data.average_ping.toFixed(2);
+        discord_voice_hostname = data.hostname;
+      }
+      else if( data.state != null && data.state == 'DISCONNECTED' ) {
+        //Set Voice Channel Connect State Off
+        discord_voice_channel_connected = 'No';
+        discord_voice_average_ping = '0';
+        discord_voice_hostname = '<None>';
+      }
+      var states = [
+        { id: 'discord_voice_channel_connected', value: discord_voice_channel_connected},
+        { id: 'discord_voice_average_ping', value: discord_voice_average_ping},
+        { id: 'discord_voice_hostname', value: discord_voice_hostname},
+        { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
+      ];
+      TPClient.stateUpdateMany(states);
+  };
+
+  DiscordClient.on("ready", async () => {
+    if (!accessToken || ( DiscordClient.accessToken != undefined && accessToken != DiscordClient.accessToken )) {
+      accessToken = DiscordClient.accessToken;
     }
 
+    //DiscordClient.setVoiceSettings({'mode':{'type':'PUSH_TO_TALK','shortcut':[{'type':0,'code':16,'name':'shift'},{'type':0,'code':123,'name':'F12'}]}});
+    // Left Shift 160
+    // Right Shift = 161
+    // Left control = 162
+    // Right control = 163
+    // Left Alt = 164
+    // Right Alt = 165
+    //"shortcut":[{"type":0,"code":160,"name":"shift"},{"type":0,"code":123,"name":"f12"}]
 
-    DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", subscribe);
+    await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", voiceActivity);
+    await DiscordClient.subscribe("GUILD_CREATE", guildCreate);
+    await DiscordClient.subscribe("CHANNEL_CREATE", channelCreate);
+    await DiscordClient.subscribe("VOICE_CHANNEL_SELECT", voiceChannel);
+    await DiscordClient.subscribe("VOICE_CONNECTION_STATUS", voiceConnectionStatus);
+
+    getGuilds();
+    
   });
 
   DiscordClient.on("disconnected", () => {
-    console.log(pluginId, ": WARN : discord connection closed, will attempt reconnect");
-    doLogin();
+    logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
+    if( platform == 'darwin' ) {
+      return doLogin();
+    }
+    discordRunning = false;
   });
 
   DiscordClient.login({
-    clientId,
-    clientSecret,
+    clientId : pluginSettings["Discord Client Id"],
+    clientSecret: pluginSettings["Discord Client Secret"],
     accessToken,
     scopes,
-    redirectUri,
-  }).catch((error) => {});
+    redirectUri
+  }).catch((error) => {
+    logIt("ERROG","login error",error);
+    if( error.code == 4009 ) {
+      connecting = false;
+      accessToken = null;
+      logIt("DEBUG","Calling Login");
+      doLogin();
+    }
+  });
 };
 // - END - Discord
-
-// - START - WebServer
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname,"/html/discordkeys.html"));
-});
-
-app.post("/store", async (req, res) => {
-  const data = req.body;
-
-  if (data.clientId && data.clientSecret) {
-    clientId = data.clientId;
-    clientSecret = data.clientSecret;
-  } else {
-    res.sendFile(path.join(__dirname,"/html/error.html"));
-    return;
-  }
-
-  let appId = await discordDb.db.findOne({ _id: "appid" });
-  let id = "";
-  if (appId) {
-    id = appId._id;
-  }
-  if (id === undefined || id === "") {
-    discordDb.db.insert({
-      _id: "appid",
-      clientId: data.clientId,
-      clientSecret: data.clientSecret,
-    });
-  } else {
-    discordDb.db.update(
-      { _id: id },
-      {
-        _id: "appid",
-        clientId: data.clientId,
-        clientSecret: data.clientSecret,
-      },
-      {},
-      function (err, numReplaced) {}
-    );
-  }
-
-  res.sendFile(path.join(__dirname,"/html/success.html"));
-});
-
-app.use(express.static(path.join(__dirname,"/public")));
-app.listen(port, () =>
-  console.log(
-    pluginId,
-    `: DEBUG : Example app listening at http://localhost:${port}`
-  )
-);
-// - END - WebServer
 
 var waitForClientId = (timeoutms) =>
   new Promise((r, j) => {
     var check = () => {
-      if (clientId !== undefined) {
+      if (!isEmpty(pluginSettings["Discord Client Id"]) && !isEmpty(pluginSettings["Discord Client Secret"])) {
         r();
-      } else if ((timeoutms -= 100) < 0) j("timed out, restart Touch Portal!");
-      else setTimeout(check, 100);
+      } else if ((timeoutms -= 1000) < 0) { 
+        j("timed out, restart Touch Portal!"); 
+      }
+      else setTimeout(check, 1000);
     };
-    setTimeout(check, 100);
+    setTimeout(check, 1000);
   });
 
 var waitForLogin = () =>
@@ -233,35 +474,54 @@ async function doLogin() {
     DiscordClient.destroy();
     DiscordClient = null;
   }
-  let appDoc = await discordDb.db.findOne({ _id: "appid" });
-  if (!appDoc) {
+
+  if (isEmpty(pluginSettings["Discord Client Id"]) || isEmpty(pluginSettings["Discord Client Secret"]) ) {
     open(`https://discord.com/developers/applications`);
 
-    open(`http://localhost:${port}`);
-  }
-  if (
-    appDoc &&
-    appDoc.clientId !== undefined &&
-    appDoc.clientSecret !== undefined
-  ) {
-    clientId = appDoc.clientId;
-    clientSecret = appDoc.clientSecret;
-  }
-
-  if (clientId === undefined) {
     await waitForClientId(30 * 60 * 1000); // wait for 30 minutes
-  }
-
-  let aTDoc = await discordDb.db.findOne({ _id: "discordToken" });
-  if (aTDoc && aTDoc.accessToken !== undefined) {
-    accessToken = aTDoc.accessToken;
   }
 
   // Start Login process
   await waitForLogin(); 
 }
 
+// Process Watcher
+procWatcher.on('processRunning', (processName) => {
+  discordRunning = true;
+  // Lets shutdown the connection so we can re-establish it
+  setTimeout(function() {
+      logIt('INFO', "Discord is running, attempting to Connect");
+      doLogin();
+  }, 1000);
+});
+procWatcher.on('processTerminated', (processName) => {
+  logIt('WARN',`${processName} not detected as running`);
+  if( !discordRunning ) {
+      // We already did this once, don't need to keep repeating it
+      return;
+  }
+  logIt('WARN',`Disconnect active connections to Discord`);
+  discordRunning = false;
+  if ( DiscordClient ) {
+    DiscordClient.removeAllListeners();
+    DiscordClient.destroy();
+    DiscordClient = null;
+  }
+});
+// End Process Watcher
+
+
+function isEmpty(val) {
+  return val === undefined || val === null || val === '';
+}
+
+function logIt() {
+  var curTime = new Date().toISOString();
+  var message = [...arguments];
+  var type = message.shift();
+  console.log(curTime,":",pluginId,":"+type+":",message.join(" "));
+}
+
 // We are going to connect to TP first, then Discord
 // That way if TP shuts down the plugin will be shutdown too
-TPClient.connect({ pluginId });
-doLogin();
+TPClient.connect({ pluginId, updateUrl });

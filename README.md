@@ -2,101 +2,208 @@
 
 - [Touch Portal Plugin to Interact with Discord](#touch-portal-plugin-to-interact-with-discord)
   - [Description](#description)
-  - [Initial Setup or Reconfiguration](#initial-setup-or-reconfiguration)
-    - [Steps the Video guides you through](#steps-the-video-guides-you-through)
-  - [Buttons](#buttons)
-- [How-To Upgrade to v3.0.0](#how-to-upgrade-to-v300)
+  - [ChangeLog](#changelog)
+  - [Plugin Capabilities](#plugin-capabilities)
+    - [Actions](#actions)
+    - [States](#states)
+  - [Installation and Configuration](#installation-and-configuration)
+  - [Known Issues & Solutions](#known-issues--solutions)
+  - [Actions](#actions-1)
+    - [Discord Mute:](#discord-mute)
+    - [Discord Deafen:](#discord-deafen)
+    - [Discord Go To Channel](#discord-go-to-channel)
+    - [Discord Voice Type](#discord-voice-type)
+    - [Discord Voice Hangup](#discord-voice-hangup)
+    - [Discord Push To Talk Keys](#discord-push-to-talk-keys)
+  - [States](#states-1)
+- [Sample Page](#sample-page)
+- [Cleanup pre-v4.0.0 config](#cleanup-pre-v400-config)
+- [Dependencies](#dependencies)
+- [Versioning](#versioning)
+- [Authors](#authors)
+- [License](#license)
+- [Bugs/Enhancements](#bugsenhancements)
+- [Acknowledgements](#acknowledgements)
 
 ## Description
 
-Mute and Deafen Discord directly from Touch Portal with only Minor configuration needed
+Mute and Deafen Discord directly from Touch Portal with only Minor configuration needed<br>
+Jump to specific Voice or Text channels on servers you joiend to <br>
+Hangup voice calls<br>
+See Voice Connection Stats (server, ping)<br>
+Toggle/Set Push To Talk or Voice Activity Modes <br>
+Set Push To Talk Hotkey Combinations<br>
 
-## Initial Setup or Reconfiguration
-YouTube Video How-To Setup the Plugin: [https://youtu.be/NJOZKOGXnqw](https://youtu.be/NJOZKOGXnqw)
+## ChangeLog
+```
+pre-v4.0.0
+  - Mute yourself in Discord
+  - Deafen yourself in Discord
+  - Worked on fixing connection issues
+v4.0.0
+  Additions:
+    - Action for Voice Mode Changes - PTT to Voice Activity (and back again)
+    - Action for Push-To-Talk Hotkey Changing
+    - Action to Go to specific Voice or Text channel within a Discord server you belong to
+    - If in a Voice Channel allow you to hang up the call
+    - Voice Connection Statistics
+        Voice Server
+        Ping Average
+    - State for Voice Channel Connected to
+    - State for Voice Mode Type
+    - Watch for Discord.exe to be running before attempting to connect, polls every 10 seconds so could cause slight delay in connection if start up is slow (Win Only, still working Mac)
+  Updates:
+    - Reworked to with Touch Portal v2.3 plugin api enhancement/changes
+    - Settings moved from custom built config to inside Touch Portal (will require reconfiguration using discord dev app you already have setup)
+      - Will now request authorization EACH time Touch Portal (or the plug-in) starts, this way guaranteeing your Access Token is fresh
+        - *Note*: May be reworked in the future to store Access Token but found issues with this implementation during development. 
+  Bug Fixes:
+    - Added bug fix from pre-v4.0.0 here as well - longer wait times between attempted reconnect
+```
 
-### Steps the Video guides you through
-<ol>
-                  <li>Make sure Discord Application is open on your PC</li>
-                  <li>
-                    Visit:
-                    <a
-                      target="_blank"
-                      href="https://discord.com/developers/applications"
-                    >
-                      Discord Developer Portal
-                    </a>
-                  </li>
-                  <li>Login with your Discord Credentials</li>
-                  <li>Go to "Applications" on the left side of the portal</li>
-                  <li>
-                    Click "New Application" in the top right of the Applications
-                    page
-                  </li>
-                  <li>
-                    Name your Application "Touch Portal Plugin" (or whatever you
-                    want to call it), and click "Create"
-                  </li>
-                  <li>Go to "OAuth2" on the left side of the Site</li>
-                  <li>Click the "Add Redirect" button</li>
-                  <li>Enter in: http://localhost</li>
-                  <li>
-                    Go to OAuth2 URL Generator section, and in the dropdown
-                    "SELECT REDIRECT URL" select the only entry
-                  </li>
-                  <li>Click "Save Changes"</li>
-                  <li>
-                    Go to "General Information" on the left side of the Site
-                  </li>
-                  <li>
-                    Locate the Client Id and click the "Copy" button, go to the
-                    other site that was open (<a href="http://localhost:9403"
-                      >http://localhost:9403</a
-                    >) and paste in the client id into the "Discord App Client
-                    ID:" field
-                  </li>
-                  <li>Go back to the developer portal website</li>
-                  <li>
-                    Locate the Client Secret and click the "Copy" butto, go to
-                    the other site that was open (<a
-                      href="http://localhost:9403"
-                      >http://localhost:9403</a
-                    >) and paste in the client secret into the "Discord App
-                    Client Secret:" field
-                  </li>
-                  <li>
-                    Click "STORE", if for some reason you need to start over,
-                    click "RESET"
-                  </li>
-                  <li>
-                    At this point, you should get a pop-up in Discord to
-                    authorize your "Touch Portal Plugin" to access your discord,
-                    click "Authorize"
-                  </li>
-                  <li>
-                    Now setup your Mute and Deafen buttons inside Touch Portal
-                    and you are all set to go
-                  </li>
-                </ol>
+## Plugin Capabilities
+### Actions
+ - Discord Mute - Mute yourself in Discord
+ - Discord Deafen - Deafen yourself in Discord (inherently mutes as well)
+ - Discord Hang Up - When in a voice call this will hang up the voice call
+ - Discord Select Channel - go to a specific voice/text channel in a given server
+ - Discord Reset Push To Talk Keys - resets array inside the plugin, doesn't affect Discord directly
+ - Discord Push To Talk Key - adds key to the push to talk key array inside the plugin, doesn't affect Discord Directly
+ - Discord Store Push To Talk Keys - store the key combinations in the push to talk key array to Discord to use with Push to Talk
 
-## Buttons
-Discord Mute: (download)[resources/DiscordMute.tpb]
+### States
+ - Discord Mute 
+   - Valid Values: Yes, No
+ - Discord Deafen
+   - Valid Values: Yes, No
+ - Discord Voice Channel Connected
+   - Valid Values: Yes, No
+ - Discord Voice Channel Name 
+   - Value: Connected channel name or &lt;None&gt;
+ - Discord Voice Average Ping
+   - Value: in milliseconds)
+ - Discord Voice Hostname
+   - Value: Voice Host connected to at Discord
+ - Discord Voice Mode Type 
+   - Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY
 
-Discord Deafen: (download)[resources/DiscordDeafen.tpb]
+## Installation and Configuration
+1. Make sure Discord app is open on your PC or Mac
+1. Download the .tpp file the installer for your OS [Windows](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/Installers/TPDiscord-Win.tpp) OR [MacOS](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/Installers/TPDiscord-Mac.tpp):
+1. Go to Touch Portal Settings (the gear icon)
+1. Go To Plug-ins
+1. Click the Import Plug-in button
+1. Navigate to the downloaded tpp file, select it and press Open
+1. A popup should tell you Successfully Imported plugin
+   1. If this is your first time importing, you will be asked To Trust the Plugin, to prevent this from popping up each time you start Touch Portal, click Trust Always
+1. Now Select Touch Portal Discord Plugin in the dropdown on the Plug-ins settings page
+1. The Discord Application page should have auto opened on your PC in your browser
+   1. if not Visit: <a target="_blank" href="https://discord.com/developers/applications" > Discord Developer Portal </a>
+1. Login with your Discord Credentials
+1. **If you already have an application from previous plugin usage, skip to Step 20.**
+1. Go to "Applications" on the left side of the portal
+1. Click "New Application" in the top right of the Applications page
+1. Name your Application "Touch Portal Plugin" (or whatever you want to call it), and click "Create"
+1. Go to "OAuth2" on the left side of the Site
+1. Click the "Add Redirect" button
+1. Enter in: `http://localhost` exactly, not trailing slash, and not https://
+1. Go to OAuth2 URL Generator section, and in the dropdown "SELECT REDIRECT URL" select the only entry
+1. Click "Save Changes"
+1. Go to "General Information" on the left side of the Site
+1. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
+1. Go back to the developer portal website
+1. Locate the Client Secret and click the "Copy" button, go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
+   1. Example: <br> ![Discord Settings](resources/images/TP-Discord-Plugin-Config.png)
+2. Click "Save" 
+3. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
+   1. Example: I do NOT have the plugin reading all your messages but in order to use this plugin, it needs that scope<br>
+    ![TP Authorize](resources/images/Discord-Auth-Popup.png)
+4. If for some reason, you mis-clicked and the authorize window went away
+   1. Click the Stop button on the Touch Portal Discord Plugin settings page
+   2. Then Click Start button and it should then re-ask you to authorize
+5. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
+
+## Known Issues & Solutions
+1. **My Buttons no longer work**
+   1. Make sure Discord is open
+   2. Go to Touch Portal Settings
+   3. Click Plug-ins
+   4. Select Touch Portal Discord Plugin in the dropdown
+   5. Click Stop button
+   6. Click Start Button
+   7. Reauthorize the Plugin
+1. **The server list blanked out**
+   1. delete the action and readd it
+   2. if that doesn't work stop and start the plugin as notated above
+1. **The channel list blanked out**
+   1. Change the server dropdown to a different server, and back again to the server you want
+
+## Actions
+
+![Discord Actions](resources/images/TP-Discord-Plugin-Actions.png)
+
+### Discord Mute: 
+[Sample Mute Button](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/DiscordMute.tpb)
+<br>![Discord Mute](resources/images/TP-Discord-Mute.gif)
+
+### Discord Deafen: 
+[Sample Deafen Button](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/DiscordDeafen.tpb)
+<br>![Discord Deafen](resources/images/TP-Discord-Deafen.gif)
+
+### Discord Go To Channel
+![Discord Go To Channel](resources/images/TP-Discord-GoTo-Channel.gif)
+
+### Discord Voice Type
+![Discord Voice Type](resources/images/TP-Discord-VoiceType.gif)
+
+### Discord Voice Hangup
+![Discord Voice Hangup](resources/images/TP-Discord-Voice-Hangup.png)
+
+### Discord Push To Talk Keys
+*NOTE*: This DOES NOT press them, it sets them as the push to talk keys inside discord
+<br>
+![Discord PTT Keys](resources/images/TP-Discord-PTTKeys.gif)
+
+## States
+![Discord States](resources/images/TP-Discord-Plugin-States.png)
 
 
+# Sample Page
+[Sample Page Download](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/TPDiscord-Sample.tpz)
+<br>
+Has a sample button for all actions, and states to display info
 
+# Cleanup pre-v4.0.0 config
+1) After importing v4.0.0 plugin
+2) On Windows
+   1) Go to %APPDATA%\TouchPortal\plugins
+3) On Mac
+   1) Go to /Users/&lt;Your User Name&gt;/Documents/TouchPortal/plugins
+4) Delete the config folder (this was only used by this plugin)
 
-<br><br>
-# How-To Upgrade to v3.0.0
+# Dependencies
+ - [discord-rpc](https://www.npmjs.com/package/discord-rpc)
+ - [find-process](https://www.npmjs.com/package/find-process)
+ - [out-url](https://www.npmjs.com/package/out-url)
+ - [touchportal-api](https://www.npmjs.com/package/touchportal-api)
 
-1. Windows
-   1. Go to %APPDATA%\TouchPortal\plugins OR Users\\\<userid>\Documents\TouchPortal\plugins
-2. Mac
-   1. Go to User\\\<userid>\Documents\TouchPortal\plugins
-3. create new folder config
-4. go to TPDiscord folder
-5. copy tpdiscord.db
-6. go back to your newly created config directory, paste tpdiscord.db
-7. Open TouchPortal and import new plugin .tpp file for your OS
-8. This should utilize the file in the new config directory instead now.
-   1. If you experience issues, please jump into the TouchPortal discord, and find the #discord channel
+# Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/spdermn02/tpohm_plugin/tags).
+
+# Authors
+
+- **Jameson Allen** - _Initial work_ - [Spdermn02](https://github.com/spdermn02)
+
+# License
+
+This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) file for details
+
+# Bugs/Enhancements
+Use the Github Issues tab to report any bugs/enhancements for this plug-in. Or mention them in the Official Touch Portal discord channel #discord
+
+# Acknowledgements
+1. Thank you to Reinier and Ty the Touch Portal Creators
+2. Thank you to all the users of the Discord Plugin
+3. Thank you to [50 Shades of Skittles](https://www.twitch.tv/50_shades_of_skittles) for Testing
+4. Thank you Discord for not shutting down the RPC API
