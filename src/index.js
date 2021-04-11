@@ -11,8 +11,10 @@ const app_monitor = {
   "win32": "Discord.exe"
 };
 
+const PLUGIN_CONNECTED_SETTING = 'Plugin Connected';
+
 let discordRunning = false;
-let pluginSettings = {};
+let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No' };
 let accessToken = undefined;
 let connecting = false;
 const scopes = ["identify", "rpc",  "guilds", "messages.read" ];
@@ -190,7 +192,7 @@ TPClient.on("Info", (data) => {
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
 
   logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
-  if( platform != 'darwin' ) {
+  if( platform != 'darwin' ||  pluginSettings['Skip Process Watcher'] != 'No' ){
       procWatcher.watch(app_monitor[platform]);
   }
 });
@@ -202,7 +204,8 @@ TPClient.on("Settings", (data) => {
     pluginSettings[key] = setting[key];
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
-  if( platform == 'darwin' ) {
+  if( platform == 'darwin' || pluginSettings['Skip Process Watcher'] == 'Yes') {
+    procWatcher.stopWatch();
     doLogin();
   }
 });
@@ -211,8 +214,8 @@ TPClient.on("Update", (curVersion, newVersion) => {
 });
 
 TPClient.on("Close", (data) => {
-  logIt("WARN","Closing due to TouchPortal sending closePlugin message"
-  );
+  logIt("WARN","Closing due to TouchPortal sending closePlugin message");
+  TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Disconnected");
 });
 // - END - TP
 
@@ -398,6 +401,8 @@ const connectToDiscord = function () {
     // Right Alt = 165
     //"shortcut":[{"type":0,"code":160,"name":"shift"},{"type":0,"code":123,"name":"f12"}]
 
+    TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Connected");
+
     await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", voiceActivity);
     await DiscordClient.subscribe("GUILD_CREATE", guildCreate);
     await DiscordClient.subscribe("CHANNEL_CREATE", channelCreate);
@@ -410,6 +415,7 @@ const connectToDiscord = function () {
 
   DiscordClient.on("disconnected", () => {
     logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
+    TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Disconnected");
     if( platform == 'darwin' ) {
       return doLogin();
     }
