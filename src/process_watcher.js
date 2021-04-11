@@ -25,6 +25,10 @@ class ProcessReady extends EventEmitter {
     async isProcessReady(processName){
         let emitEvent = null;
         await find('name',processName,true).then((list) => {
+          if( this.loop == null ) {
+              emitEvent = null;
+              return;
+          }
           if( list.length > 0 ) {
               if(this.processNames[processName] == null || !this.processNames[processName]['isRunning'] ) {
                 this.processNames[processName].isRunning = true;

@@ -1,7 +1,7 @@
 {
     "sdk": 3,
-    "version": 4000,
-    "TPDiscord_Version": "4.0.0",
+    "version": 4001,
+    "TPDiscord_Version": "4.0.1",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
@@ -22,6 +22,12 @@
             "isPassword": true,
             "default": "",
             "maxLength": 36
+        },
+        {
+            "name": "Plugin Connected",
+            "type": "text",
+            "readOnly": true,
+            "default": "Disconnected"
         }
     ],
     "categories": [
