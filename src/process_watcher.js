@@ -39,6 +39,9 @@ class ProcessReady extends EventEmitter {
               this.processNames[processName].isRunning = false;
               emitEvent = false;
           }
+        }).catch((err) => {
+          emitEvent = null;
+          console.log(`TPDiscord: Unable to determine if process running, error occured - ${err}`);
         });
 
         if( emitEvent ) {
