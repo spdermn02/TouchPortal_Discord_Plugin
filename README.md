@@ -60,10 +60,15 @@ v4.0.0
   Bug Fixes:
     - Added bug fix from pre-v4.0.0 here as well - longer wait times between attempted reconnect
 v4.0.1
+  - Can't remember.. brain fried
+v4.0.2
   Updates:
     - Setting to tell you if Discord was successfully connected to - Valid values are 'Disconnected' or 'Connected'
     - (Windows Only) Setting to disable the Process Watcher if for some reason your system isn't recongizing the application properly.
       - *Note*: This could require a stop/start of TPDiscord if Discord closes while authenticated, this can be done inside Touch Portal Settings -> Plug-Ins -> Select "Touch Portal Discord Plugin" and clicking the Stop button, wait a few seconds, click the Start button
+v4.0.3
+   Bug Fix:
+    - Fixing Voice Activity and PTT switching
 ```
 
 ## Plugin Capabilities
