@@ -1,7 +1,7 @@
 {
     "sdk": 3,
-    "version": 4001,
-    "TPDiscord_Version":"4.0.1",
+    "version": 4003,
+    "TPDiscord_Version":"4.0.3",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
