@@ -119,19 +119,18 @@ v4.0.3
 1. Enter in: `http://localhost` exactly, not trailing slash, and not https://
 1. Go to OAuth2 URL Generator section, and in the dropdown "SELECT REDIRECT URL" select the only entry
 1. Click "Save Changes"
-1. Go to "General Information" on the left side of the Site
-1. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
-1. Go back to the developer portal website
-1. Locate the Client Secret and click the "Copy" button, go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
+2. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
+3. Go back to the developer portal website
+4. Locate the Client Secret and click the "Copy" button, go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
    1. Example: <br> ![Discord Settings](resources/images/TP-Discord-Plugin-Config.png)
-2. Click "Save" 
-3. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
+5. Click "Save" 
+6. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
    1. Example: I do NOT have the plugin reading all your messages but in order to use this plugin, it needs that scope<br>
     ![TP Authorize](resources/images/Discord-Auth-Popup.png)
-4. If for some reason, you mis-clicked and the authorize window went away
+7. If for some reason, you mis-clicked and the authorize window went away
    1. Click the Stop button on the Touch Portal Discord Plugin settings page
    2. Then Click Start button and it should then re-ask you to authorize
-5. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
+8. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
 
 ## Known Issues & Solutions
 1. **My Buttons no longer work**
