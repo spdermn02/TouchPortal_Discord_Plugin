@@ -190,9 +190,9 @@ TPClient.on("Info", (data) => {
   logIt("DEBUG","Info : We received info from Touch-Portal");
 
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
-
-  logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
-  if( platform != 'darwin' ||  pluginSettings['Skip Process Watcher'] != 'No' ){
+  
+  if( platform != 'darwin' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
+      logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
       procWatcher.watch(app_monitor[platform]);
   }
 });
@@ -204,7 +204,7 @@ TPClient.on("Settings", (data) => {
     pluginSettings[key] = setting[key];
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
-  if( platform == 'darwin' || pluginSettings['Skip Process Watcher'] == 'Yes') {
+  if( platform == 'darwin' || pluginSettings['Skip Process Watcher'].toLowerCase() == 'yes') {
     procWatcher.stopWatch();
     doLogin();
   }

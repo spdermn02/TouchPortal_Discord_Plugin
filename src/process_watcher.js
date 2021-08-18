@@ -2,6 +2,8 @@
 
 const EventEmitter = require("events")
 const find  = require('find-process');
+const path = require('path');
+const platform = require('process').platform;
 const LOOP_INTERVAL = 10000;
 
 class ProcessReady extends EventEmitter {
@@ -9,6 +11,12 @@ class ProcessReady extends EventEmitter {
         super();
         this.loop = null;
         this.processNames = {};
+        if( platform == 'win32') {
+            const CMDPath = path.resolve(process.env.windir +path.sep+'system32');
+            const pathArray = (process.env.PATH || '').split(path.delimiter);
+            pathArray.push(CMDPath);
+            process.env.PATH = pathArray.join(path.delimiter);
+        }
     }
     watch(processName) {
         this.processNames[processName] = {};
@@ -24,6 +32,7 @@ class ProcessReady extends EventEmitter {
     }
     async isProcessReady(processName){
         let emitEvent = null;
+        
         await find('name',processName,true).then((list) => {
           if( this.loop == null ) {
               emitEvent = null;
