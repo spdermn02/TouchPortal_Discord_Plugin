@@ -70,6 +70,9 @@ v4.0.2
 v4.0.3
    Bug Fix:
     - Fixing Voice Activity and PTT switching
+v4.0.4
+   Bug Fix:
+    - Fixes ProcessWatcher for those who experienced issues, it now forces onto the environment path the directories needed for this to work (Windows only)
 ```
 
 ## Plugin Capabilities
@@ -216,4 +219,5 @@ Use the Github Issues tab to report any bugs/enhancements for this plug-in. Or m
 1. Thank you to Reinier and Ty the Touch Portal Creators
 2. Thank you to all the users of the Discord Plugin
 3. Thank you to [50 Shades of Skittles](https://www.twitch.tv/50_shades_of_skittles) for Testing
-4. Thank you Discord for not shutting down the RPC API
+4. Thank you to Dominikk#5392 in the Touch Portal Discord for helping troubleshoot for 4.0.4 bug fix
+5. Thank you Discord for not shutting down the RPC API
