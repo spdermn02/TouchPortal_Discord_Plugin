@@ -15,7 +15,7 @@ class ProcessReady extends EventEmitter {
             const CMDPath = path.resolve(process.env.windir + path.sep + 'system32');
             const pathArray = (process.env.PATH || '').split(path.delimiter);
             pathArray.push(CMDPath);
-            const WBEMPath = path.resolve(CMDPATH + path.sep + 'wbem');
+            const WBEMPath = path.resolve(CMDPath + path.sep + 'wbem');
             pathArray.push(WBEMPath);
             process.env.PATH = pathArray.join(path.delimiter);
         }
