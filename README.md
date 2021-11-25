@@ -121,7 +121,6 @@ v4.0.4
 1. Go to "OAuth2" on the left side of the Site
 1. Click the "Add Redirect" button
 1. Enter in: `http://localhost` exactly, not trailing slash, and not https://
-1. Go to OAuth2 URL Generator section, and in the dropdown "SELECT REDIRECT URL" select the only entry
 1. Click "Save Changes"
 2. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
 3. Go back to the developer portal website
