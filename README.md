@@ -87,9 +87,9 @@ v4.0.4
 
 ### States
  - Discord Mute 
-   - Valid Values: Yes, No
+   - Valid Values: On, Off
  - Discord Deafen
-   - Valid Values: Yes, No
+   - Valid Values: On, Off
  - Discord Voice Channel Connected
    - Valid Values: Yes, No
  - Discord Voice Channel Name 
