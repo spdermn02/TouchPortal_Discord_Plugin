@@ -73,6 +73,9 @@ v4.0.3
 v4.0.4
    Bug Fix:
     - Fixes ProcessWatcher for those who experienced issues, it now forces onto the environment path the directories needed for this to work (Windows only)
+v4.0.5
+   Package Update:
+    - Update find-process npm module to 1.4.7 - to pick up bug fix for #32
 ```
 
 ## Plugin Capabilities
