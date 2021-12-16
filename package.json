@@ -29,5 +29,8 @@
     "find-process": "^1.4.7",
     "out-url": "^1.1.1",
     "touchportal-api": "^2.0.1"
+  },
+  "devDependencies": {
+    "pkg": "^5.5.1"
   }
 }
