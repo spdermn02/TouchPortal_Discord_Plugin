@@ -1,3 +1,4 @@
+
 {
   "name": "tpdiscord",
   "version": "4.0.5",
@@ -5,8 +6,7 @@
   "bin": {
     "tpdiscord": "src/index.js"
   },
-  "main": "src/index.js",
-  "scripts": {
+  "main": "src/index.js",  "scripts": {
     "start": "node src/index.js",
     "pkg": "pkg .",
     "pkg-win": "pkg --targets node12-win-x64 .",
