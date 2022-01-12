@@ -76,6 +76,13 @@ v4.0.4
 v4.0.5
    Package Update:
     - Update find-process npm module to 1.4.7 - to pick up bug fix for #32
+v4.1.0
+   Package Update:
+    - Update discord-rpc npm module to 4.0.1 - to pick up bug fix for #41 and ehancement #20
+   Updates:
+    - No More Re-Auhtorization prompt if you have already authorized your developer app, so restarts will be clean and connect without issue
+    - Refactored the event subscription process due to discord-rpc npm module update. Verified all events still fire as expected.
+    
 ```
 
 ## Plugin Capabilities

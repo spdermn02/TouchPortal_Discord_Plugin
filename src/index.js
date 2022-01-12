@@ -334,23 +334,30 @@ const connectToDiscord = function () {
         last_voice_channel_subs.forEach( sub => {
           sub.unsubscribe();
         })
+        last_voice_channel_subs = [];
       }
       if( data.channel_id == null ) {
         discord_voice_channel_name = '<None>';
       }
       else if( data.guild_id == null ) {
         discord_voice_channel_name = 'Personal';
-        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}, voiceState);
-        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}, voiceState);
-        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}, voiceState);
+        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
+        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
+        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id});
+        DiscordClient.on("VOICE_STATE_CREATE", (data) => {voiceState(data);})
+        DiscordClient.on("VOICE_STATE_UPDATE", (data) => {voiceState(data);})
+        DiscordClient.on("VOICE_STATE_DELETE", (data) => {voiceState(data);})
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       }
       else {
         // Lookup Voice Channel Name
         discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
-        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}, voiceState);
-        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}, voiceState);
-        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}, voiceState);
+        let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
+        let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
+        let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id});
+        DiscordClient.on("VOICE_STATE_CREATE", (data) => {voiceState(data);})
+        DiscordClient.on("VOICE_STATE_UPDATE", (data) => {voiceState(data);})
+        DiscordClient.on("VOICE_STATE_DELETE", (data) => {voiceState(data);})
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       }
 
@@ -403,15 +410,30 @@ const connectToDiscord = function () {
 
     TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Connected");
 
-    await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE", voiceActivity);
-    await DiscordClient.subscribe("GUILD_CREATE", guildCreate);
-    await DiscordClient.subscribe("CHANNEL_CREATE", channelCreate);
-    await DiscordClient.subscribe("VOICE_CHANNEL_SELECT", voiceChannel);
-    await DiscordClient.subscribe("VOICE_CONNECTION_STATUS", voiceConnectionStatus);
+    await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE");
+    await DiscordClient.subscribe("GUILD_CREATE");
+    await DiscordClient.subscribe("CHANNEL_CREATE");
+    await DiscordClient.subscribe("VOICE_CHANNEL_SELECT");
+    await DiscordClient.subscribe("VOICE_CONNECTION_STATUS");
 
     getGuilds();
     
   });
+  DiscordClient.on('VOICE_SETTINGS_UPDATE', (data) => {
+    voiceActivity(data);
+  })
+  DiscordClient.on('GUILD_CREATE', (data) => {
+    guildCreate(data);
+  })
+  DiscordClient.on('CHANNEL_CREATE', (data) => {
+    channelCreate(data);
+  })
+  DiscordClient.on('VOICE_CHANNEL_SELECT', (data) => {
+    voiceChannel(data);
+  })
+  DiscordClient.on('VOICE_CONNECTION_STATUS', (data) => {
+    voiceConnectionStatus(data);
+  })
 
   DiscordClient.on("disconnected", () => {
     logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
@@ -422,12 +444,14 @@ const connectToDiscord = function () {
     discordRunning = false;
   });
 
+  const prompt = 'none';
   DiscordClient.login({
     clientId : pluginSettings["Discord Client Id"],
     clientSecret: pluginSettings["Discord Client Secret"],
     accessToken,
     scopes,
-    redirectUri
+    redirectUri,
+    prompt
   }).catch((error) => {
     logIt("ERROG","login error",error);
     if( error.code == 4009 ) {
