@@ -82,7 +82,9 @@ v4.1.0
    Updates:
     - No More Re-Auhtorization prompt if you have already authorized your developer app, so restarts will be clean and connect without issue
     - Refactored the event subscription process due to discord-rpc npm module update. Verified all events still fire as expected.
-    
+v4.2.0
+   Updates:
+    - 3 New States - Discord Voice Channel ID, Discord Voice Channel Server, Discord Voice Channel Server ID
 ```
 
 ## Plugin Capabilities
@@ -103,7 +105,16 @@ v4.1.0
  - Discord Voice Channel Connected
    - Valid Values: Yes, No
  - Discord Voice Channel Name 
-   - Value: Connected channel name or &lt;None&gt;
+   - Value: Connected voice channel name or 'Personal' &lt;None&gt;
+   - Note: This will be 'Personal' when connecting an audio call outside of a server (through DM)
+ - Discord Voice Channel ID 
+   - Value: Connected voice channel id or &lt;None&gt;
+ - Discord Voice Channel Server Name 
+   - Value: Connected voice channel server name or 'Personal' or &lt;None&gt;
+   - Note: This will be 'Personal' when connecting an audio call outside of a server (through DM)
+- Discord Voice Channel Server ID 
+   - Value: Connected voice channel server id or 'Personal' or &lt;None&gt;
+   - Note: This will be 'Personal' when connecting an audio call outside of a server (through DM)
  - Discord Voice Average Ping
    - Value: in milliseconds)
  - Discord Voice Hostname

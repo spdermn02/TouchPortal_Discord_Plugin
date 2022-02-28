@@ -36,6 +36,9 @@ let deafState = 0;
 let last_voice_channel_subs = [];
 let discord_voice_channel_connected = 'No';
 let discord_voice_channel_name = '<None>';
+let discord_voice_channel_id = '<None>';
+let discord_voice_channel_server_name = '<None>';
+let discord_voice_channel_server_id = '<None>';
 let discord_voice_average_ping = '0.00';
 let discord_voice_hostname = '<None>';
 let discord_voice_volume = '0.00';
@@ -338,9 +341,15 @@ const connectToDiscord = function () {
       }
       if( data.channel_id == null ) {
         discord_voice_channel_name = '<None>';
+        discord_voice_channel_id = '<None>';
+        discord_voice_channel_server_id = '<None>';
+        discord_voice_channel_server_name = '<None>';
       }
       else if( data.guild_id == null ) {
+        discord_voice_channel_id = data.channel_id;
         discord_voice_channel_name = 'Personal';
+        discord_voice_channel_server_id = 'Personal';
+        discord_voice_channel_server_name = 'Personal';
         let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
         let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
         let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id});
@@ -352,6 +361,9 @@ const connectToDiscord = function () {
       else {
         // Lookup Voice Channel Name
         discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
+        discord_voice_channel_id = data.channel_id;
+        discord_voice_channel_server_id = data.guild_id;
+        discord_voice_channel_server_name = guilds.idx[data.guild_id];
         let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
         let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
         let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id});
@@ -361,7 +373,14 @@ const connectToDiscord = function () {
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       }
 
-      TPClient.stateUpdate("discord_voice_channel_name",discord_voice_channel_name);
+      var states = [
+        { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
+        { id: 'discord_voice_channel_id', value: discord_voice_channel_id},
+        { id: 'discord_voice_channel_server_name', value: discord_voice_channel_server_name},
+        { id: 'discord_voice_channel_server_id', value: discord_voice_channel_server_id},
+      ];
+
+      TPClient.stateUpdateMany(states);
   };
   guildCreate = async (data) => {
       logIt("DEBUG",'Guild Create:',JSON.stringify(data));
@@ -390,6 +409,9 @@ const connectToDiscord = function () {
         { id: 'discord_voice_average_ping', value: discord_voice_average_ping},
         { id: 'discord_voice_hostname', value: discord_voice_hostname},
         { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
+        { id: 'discord_voice_channel_id', value: discord_voice_channel_id},
+        { id: 'discord_voice_channel_server_name', value: discord_voice_channel_server_name},
+        { id: 'discord_voice_channel_server_id', value: discord_voice_channel_server_id},
       ];
       TPClient.stateUpdateMany(states);
   };
