@@ -207,6 +207,24 @@
                     ]
                 },
                 {
+                    "id": "discord_voice_channel_server_id",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Server ID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_channel_server_name",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Server Name",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_channel_id",
+                    "type": "text",
+                    "desc": "Discord Voice Channel ID",
+                    "default": ""
+                },
+                {
                     "id": "discord_voice_channel_name",
                     "type": "text",
                     "desc": "Discord Voice Channel Name",
