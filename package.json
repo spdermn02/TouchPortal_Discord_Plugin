@@ -28,7 +28,7 @@
     "discord-rpc": "^4.0.1",
     "find-process": "^1.4.7",
     "out-url": "^1.1.1",
-    "touchportal-api": "^2.0.1"
+    "touchportal-api": "^3.1.2"
   },
   "devDependencies": {
     "pkg": "^5.5.1"

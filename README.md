@@ -85,6 +85,9 @@ v4.1.0
 v4.2.0
    Updates:
     - 3 New States - Discord Voice Channel ID, Discord Voice Channel Server, Discord Voice Channel Server ID
+v4.2.1
+   Updates:
+    - pull in latest version  3.1.2 of touchportal-api module (fixes update check failing and killing process)
 ```
 
 ## Plugin Capabilities
