@@ -338,7 +338,7 @@ const connectToDiscord = function () {
     scopes,
     redirectUri
   }).catch((error) => {
-    logIt("ERROG","login error",error);
+    logIt("ERROR","login error",error);
     if( error.code == 4009 ) {
       connecting = false;
       accessToken = null;
