@@ -148,8 +148,9 @@ v4.2.1
 1. Click "Save Changes"
 2. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
 3. Go back to the developer portal website
-4. Locate the Client Secret and click the "Copy" button, go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
-   1. Example: <br> ![Discord Settings](resources/images/TP-Discord-Plugin-Config.png)
+4. Locate the Client Secret and click the "Reset Secret" button, If you have 2FA enabled it will ask for a Token
+   1. Once the secret displays, click "Copy", go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
+   2. Example: <br> ![Discord Settings](resources/images/TP-Discord-Plugin-Config.png)
 5. Click "Save" 
 6. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
    1. Example: I do NOT have the plugin reading all your messages but in order to use this plugin, it needs that scope<br>
