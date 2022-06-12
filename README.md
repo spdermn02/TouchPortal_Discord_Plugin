@@ -88,6 +88,10 @@ v4.2.0
 v4.2.1
    Updates:
     - pull in latest version  3.1.2 of touchportal-api module (fixes update check failing and killing process)
+v4.2.2
+   Bug Fix:
+    - Mute and Deafen state value correction from `0ff` to `Off`
+    - removed uneeded scope `messages.read` from discord scope list
 ```
 
 ## Plugin Capabilities
