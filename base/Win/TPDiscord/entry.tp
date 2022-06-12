@@ -1,7 +1,7 @@
 {
     "sdk": 3,
-    "version": 4201,
-    "TPDiscord_Version":"4.2.1",
+    "version": 4202,
+    "TPDiscord_Version":"4.2.2",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
@@ -187,9 +187,9 @@
                     "id": "discord_mute",
                     "type": "choice",
                     "desc": "Discord Mute",
-                    "default": "0ff",
+                    "default": "Off",
                     "valueChoices": [
-                        "0ff",
+                        "Off",
                         "On"
                     ]
                 },
@@ -197,9 +197,9 @@
                     "id": "discord_deafen",
                     "type": "choice",
                     "desc": "Discord Deafen",
-                    "default": "0ff",
+                    "default": "Off",
                     "valueChoices": [
-                        "0ff",
+                        "Off",
                         "On"
                     ]
                 },

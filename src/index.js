@@ -17,7 +17,7 @@ let discordRunning = false;
 let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No' };
 let accessToken = undefined;
 let connecting = false;
-const scopes = ["identify", "rpc",  "guilds", "messages.read" ];
+const scopes = ["identify", "rpc",  "guilds" ];
 //const scopes = ["identify", "rpc"];
 const redirectUri = "http://localhost";
 
