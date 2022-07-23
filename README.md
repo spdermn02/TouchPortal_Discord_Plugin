@@ -136,6 +136,8 @@ v4.3.0
  - Discord Process Running
    - Valid Values: Yes, No, Unknown 
    - Note: Windows only, Mac will always be Unknown (until I find a good process watcher script for MacOS)
+ - Discord Connected
+   - Valid Values: Connected, Disconnected
 
 ## Installation and Configuration
 1. Make sure Discord app is open on your PC or Mac
