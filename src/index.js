@@ -194,7 +194,7 @@ TPClient.on("Info", (data) => {
 
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
   TPClient.stateUpdate('discord_running','Unknown');
-  TPClient.stateUpdate("discord_connected","Connected");
+  TPClient.stateUpdate("discord_connected","Disconnected");
   if( platform != 'darwin' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
       logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
       procWatcher.watch(app_monitor[platform]);
