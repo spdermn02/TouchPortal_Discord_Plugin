@@ -275,6 +275,16 @@
                         "No",
                         "Unknown"
                     ]
+                },
+                {
+                    "id": "discord_connected",
+                    "type": "choice",
+                    "desc": "Discord Connected",
+                    "default": "",
+                    "valueChoices":[
+                        "Connected",
+                        "Disconnected"
+                    ]
                 }
             ],
             "events": []

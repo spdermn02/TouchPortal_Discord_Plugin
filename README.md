@@ -94,8 +94,9 @@ v4.2.2
     - removed uneeded scope `messages.read` from discord scope list
 v4.3.0
    Updates:
-    - 1 New State - Discord Process Running, will be Yes, No, Unknown (starts out as Unknown)
+    - New State - Discord Process Running, will be `Yes`, `No`, `Unknown` (starts out as Unknown)
       - Notes: Windows Only will have all 3 values, MacOS will always be Unknown until a process watcher is implemented for MacOS
+    - New State - Discord Connected, will be `Connected` or `Disconnected`
 ```
 
 ## Plugin Capabilities

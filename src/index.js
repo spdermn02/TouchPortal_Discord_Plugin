@@ -194,6 +194,7 @@ TPClient.on("Info", (data) => {
 
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
   TPClient.stateUpdate('discord_running','Unknown');
+  TPClient.stateUpdate("discord_connected","Connected");
   if( platform != 'darwin' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
       logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
       procWatcher.watch(app_monitor[platform]);
@@ -424,6 +425,8 @@ const connectToDiscord = function () {
       accessToken = DiscordClient.accessToken;
     }
 
+    TPClient.stateUpdate("discord_connected","Connected");
+
     //DiscordClient.setVoiceSettings({'mode':{'type':'PUSH_TO_TALK','shortcut':[{'type':0,'code':16,'name':'shift'},{'type':0,'code':123,'name':'F12'}]}});
     // Left Shift 160
     // Right Shift = 161
@@ -463,6 +466,7 @@ const connectToDiscord = function () {
   DiscordClient.on("disconnected", () => {
     logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
     TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Disconnected");
+    TPClient.stateUpdate("discord_connected","Disconnected");
     if( platform == 'darwin' ) {
       return doLogin();
     }
