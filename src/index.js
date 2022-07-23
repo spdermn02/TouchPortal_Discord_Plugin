@@ -193,11 +193,12 @@ TPClient.on("Info", (data) => {
   logIt("DEBUG","Info : We received info from Touch-Portal");
 
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
-  
+  TPClient.stateUpdate('discord_running','Unknown');
   if( platform != 'darwin' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
       logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
       procWatcher.watch(app_monitor[platform]);
   }
+  
 });
 
 TPClient.on("Settings", (data) => {
@@ -208,6 +209,7 @@ TPClient.on("Settings", (data) => {
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
   if( platform == 'darwin' || pluginSettings['Skip Process Watcher'].toLowerCase() == 'yes') {
+    TPClient.stateUpdate('discord_running','Unknown');
     procWatcher.stopWatch();
     doLogin();
   }
@@ -218,6 +220,7 @@ TPClient.on("Update", (curVersion, newVersion) => {
 
 TPClient.on("Close", (data) => {
   logIt("WARN","Closing due to TouchPortal sending closePlugin message");
+  TPClient.stateUpdate('discord_running','Unknown');
   TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Disconnected");
 });
 // - END - TP
@@ -463,7 +466,6 @@ const connectToDiscord = function () {
     if( platform == 'darwin' ) {
       return doLogin();
     }
-    discordRunning = false;
   });
 
   const prompt = 'none';
@@ -540,6 +542,7 @@ async function doLogin() {
 // Process Watcher
 procWatcher.on('processRunning', (processName) => {
   discordRunning = true;
+  TPClient.stateUpdate('discord_running',discordRunning ? 'Yes' : 'No');
   // Lets shutdown the connection so we can re-establish it
   setTimeout(function() {
       logIt('INFO', "Discord is running, attempting to Connect");
@@ -554,6 +557,7 @@ procWatcher.on('processTerminated', (processName) => {
   }
   logIt('WARN',`Disconnect active connections to Discord`);
   discordRunning = false;
+  TPClient.stateUpdate('discord_running',discordRunning ? 'Yes' : 'No');
   if ( DiscordClient ) {
     DiscordClient.removeAllListeners();
     DiscordClient.destroy();
