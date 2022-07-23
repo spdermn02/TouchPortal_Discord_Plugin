@@ -92,6 +92,11 @@ v4.2.2
    Bug Fix:
     - Mute and Deafen state value correction from `0ff` to `Off`
     - removed uneeded scope `messages.read` from discord scope list
+v4.3.0
+   Updates:
+    - New State - Discord Process Running, will be `Yes`, `No`, `Unknown` (starts out as Unknown)
+      - Notes: Windows Only will have all 3 values, MacOS will always be Unknown until a process watcher is implemented for MacOS
+    - New State - Discord Connected, will be `Connected` or `Disconnected`
 ```
 
 ## Plugin Capabilities
@@ -128,6 +133,11 @@ v4.2.2
    - Value: Voice Host connected to at Discord
  - Discord Voice Mode Type 
    - Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY
+ - Discord Process Running
+   - Valid Values: Yes, No, Unknown 
+   - Note: Windows only, Mac will always be Unknown (until I find a good process watcher script for MacOS)
+ - Discord Connected
+   - Valid Values: Connected, Disconnected
 
 ## Installation and Configuration
 1. Make sure Discord app is open on your PC or Mac

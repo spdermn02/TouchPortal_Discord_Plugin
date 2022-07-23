@@ -1,7 +1,7 @@
 {
     "sdk": 3,
-    "version": 4202,
-    "TPDiscord_Version": "4.2.2",
+    "version": 4300,
+    "TPDiscord_Version": "4.3.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
@@ -257,6 +257,27 @@
                     "type": "text",
                     "desc": "Discord Voice Volume",
                     "default": "0.00"
+                },
+                {
+                    "id": "discord_running",
+                    "type": "choice",
+                    "desc": "Discord Process Running",
+                    "default": "",
+                    "valueChoices":[
+                        "Yes",
+                        "No",
+                        "Unknown"
+                    ]
+                },
+                {
+                    "id": "discord_connected",
+                    "type": "choice",
+                    "desc": "Discord Connected",
+                    "default": "",
+                    "valueChoices":[
+                        "Connected",
+                        "Disconnected"
+                    ]
                 }
             ],
             "events": []
