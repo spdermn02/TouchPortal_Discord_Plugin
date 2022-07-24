@@ -23,6 +23,7 @@ const redirectUri = "http://localhost";
 
 //Change this to API?
 const updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
+const releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
 
 const pluginId = "TPDiscord";
 
@@ -152,38 +153,6 @@ TPClient.on("ListChange", async (data) => {
 
     if( !isEmpty(guilds.idx) && guilds.idx[guildName] ) {
       let guildId = guilds.idx[guildName];
-      let chData = await getGuildChannels(guildId);
-      channels[guildId] = {
-        voice: {
-          array: [],
-          idx: {},
-          names: {}
-        },
-        text: {
-          array: [],
-          idx: {},
-          names: {}
-        }
-      }
-
-      chData.forEach(async (channel,idx) => {
-        // Type 0 is Text channel, 2 is Voice channel
-        if( channel.type == 0 ) {
-          channels[guildId].text.array.push(channel.name);
-          channels[guildId].text.idx[channel.name] = channel.id;
-          channels[guildId].text.names[channel.id] = channel.name;
-        }
-        else if( channel.type == 2 ) {
-          channels[guildId].voice.array.push(channel.name);
-          channels[guildId].voice.idx[channel.name] = channel.id;
-          channels[guildId].voice.names[channel.id] = channel.name;
-          DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channel.id}, voiceState);
-          DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channel.id}, voiceState);
-          DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channel.id}, voiceState);
-        }
-      });
-      logIt("DEBUG", guildId, channelType);
-
       TPClient.choiceUpdateSpecific('discordServerChannel',channels[guildId][channelType.toLowerCase()].array,data.instanceId);
     }
   }
@@ -199,7 +168,8 @@ TPClient.on("Info", (data) => {
       logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
       procWatcher.watch(app_monitor[platform]);
   }
-  
+
+
 });
 
 TPClient.on("Settings", (data) => {
@@ -215,8 +185,20 @@ TPClient.on("Settings", (data) => {
     doLogin();
   }
 });
+
 TPClient.on("Update", (curVersion, newVersion) => {
   logIt("DEBUG",curVersion, newVersion);
+  TPClient.sendNotification(`${pluginId}_update_notification`,`Discord Plugin Update Available (${newVersion})`,
+    `\nPlease updated to get the latest bug fixes and new features\n\nCurrent Installed Version: ${curVersion}`,
+    [{id: `${pluginId}_update_notification_go_to_download`, title: "Go To Download Location" }]
+  );
+});
+
+TPClient.on("NotificationClicked", (data) => {
+  logIt("DEBUG",JSON.stringify(data))
+  if( data.optionId === `${pluginId}_update_notification_go_to_download`) {
+    open(releaseUrl);
+  }
 });
 
 TPClient.on("Close", (data) => {
@@ -286,19 +268,22 @@ const connectToDiscord = function () {
     };
 
     data.guilds.forEach( (guild,idx) => {
-      guilds.array.push(guild.name);
-      guilds.idx[guild.name] = guild.id;
-      guilds.idx[guild.id] = guild.name;
-
-      //Look into maybe using a promise and an await here.. 
-      // to limit having to do this timeout thingy
-      setTimeout(() => { 
-        buildGuildChannelIndex(guild.id);
-      },500*idx);
-
+      assignGuildIndex(guild,idx);
     });
 
     TPClient.choiceUpdate('discordServerList',guilds.array)
+  };
+
+  const assignGuildIndex = (guild, counter) => {
+    guilds.array.push(guild.name);
+    guilds.idx[guild.name] = guild.id;
+    guilds.idx[guild.id] = guild.name;
+
+    //Look into maybe using a promise and an await here.. 
+    // to limit having to do this timeout thingy
+    setTimeout(() => { 
+      buildGuildChannelIndex(guild.id);
+    },500*counter);
   };
 
   const buildGuildChannelIndex = async(guildId) => {
@@ -318,18 +303,34 @@ const connectToDiscord = function () {
     };
 
     chData.forEach(async (channel,idx) => {
-      // Type 0 is Text channel, 2 is Voice channel
-      if( channel.type == 0 ) {
-        channels[guildId].text.array.push(channel.name);
-        channels[guildId].text.idx[channel.name] = channel.id;
-        channels[guildId].text.names[channel.id] = channel.name;
-      }
-      else if( channel.type == 2 ) {
-        channels[guildId].voice.array.push(channel.name);
-        channels[guildId].voice.idx[channel.name] = channel.id;
-        channels[guildId].voice.names[channel.id] = channel.name;
-      }
+      assignChannelIndex(guildId, channel);
     });
+  };
+  const assignChannelIndex = (guildId, channel) => {
+    // Type 0 is Text channel, 2 is Voice channel
+    if( channel.type == 0 ) {
+      channels[guildId].text.array.push(channel.name);
+      channels[guildId].text.idx[channel.name] = channel.id;
+      channels[guildId].text.names[channel.id] = channel.name;
+    }
+    else if( channel.type == 2 ) {
+      channels[guildId].voice.array.push(channel.name);
+      channels[guildId].voice.idx[channel.name] = channel.id;
+      channels[guildId].voice.names[channel.id] = channel.name;
+    }
+  }
+
+  getGuild = async(data) => {
+    let guild = await DiscordClient.getGuild(data.id);
+    await assignGuildIndex(guild,1);
+
+    TPClient.choiceUpdate('discordServerList',guilds.array)
+  };
+
+  getChannel = async (data) => {
+    let channel = await DiscordClient.getChannel(data.id);
+    logIt("DEBUG:"+JSON.stringify(channel))
+    assignChannelIndex(channel.guild_id,channel);
   };
 
   voiceState = async (data) => {
@@ -388,12 +389,13 @@ const connectToDiscord = function () {
   };
   guildCreate = async (data) => {
       logIt("DEBUG",'Guild Create:',JSON.stringify(data));
-      getGuilds();
+      getGuild(data);
   };
   channelCreate = async (data) => {
       logIt("DEBUG",'Channel Create:',JSON.stringify(data));
-      getGuilds();
+      getChannel(data);
   };
+  
   voiceConnectionStatus = async (data) => {
       logIt("DEBUG",'Voice Connection:',JSON.stringify(data));
       if( data.state != null && data.state == 'VOICE_CONNECTED' ) {
