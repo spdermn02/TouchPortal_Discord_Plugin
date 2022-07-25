@@ -3,6 +3,7 @@ const TP = require("touchportal-api");
 const { open } = require("out-url");
 const path = require("path");
 const discordKeyMap = require("./discordkeys");
+const { settings } = require("cluster");
 const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
 const platform = require('process').platform;
 
@@ -14,7 +15,7 @@ const app_monitor = {
 const PLUGIN_CONNECTED_SETTING = 'Plugin Connected';
 
 let discordRunning = false;
-let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No' };
+let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Debug Mode':'Off' };
 let accessToken = undefined;
 let connecting = false;
 const scopes = ["identify", "rpc",  "guilds" ];
@@ -177,6 +178,7 @@ TPClient.on("Settings", (data) => {
   data.forEach( (setting) => {
     let key = Object.keys(setting)[0];
     pluginSettings[key] = setting[key];
+
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
   if( platform == 'darwin' || pluginSettings['Skip Process Watcher'].toLowerCase() == 'yes') {
@@ -187,7 +189,7 @@ TPClient.on("Settings", (data) => {
 });
 
 TPClient.on("Update", (curVersion, newVersion) => {
-  logIt("DEBUG",curVersion, newVersion);
+  logIt("DEBUG","Update: current version:"+curVersion+" new version:"+newVersion);
   TPClient.sendNotification(`${pluginId}_update_notification`,`Discord Plugin Update Available (${newVersion})`,
     `\nPlease updated to get the latest bug fixes and new features\n\nCurrent Installed Version: ${curVersion}`,
     [{id: `${pluginId}_update_notification_go_to_download`, title: "Go To Download Location" }]
@@ -267,23 +269,23 @@ const connectToDiscord = function () {
       idx: {}
     };
 
-    data.guilds.forEach( (guild,idx) => {
-      assignGuildIndex(guild,idx);
-    });
+    // Switched this up because of the .forEach not honoroing the await process,
+    // but native if does
+    for ( let i = 0; i < data.guilds.length; i++ ) {
+      await assignGuildIndex(data.guilds[i],i);
+    }
 
     TPClient.choiceUpdate('discordServerList',guilds.array)
   };
 
-  const assignGuildIndex = (guild, counter) => {
+  const assignGuildIndex = async (guild, counter) => {
     guilds.array.push(guild.name);
     guilds.idx[guild.name] = guild.id;
     guilds.idx[guild.id] = guild.name;
 
     //Look into maybe using a promise and an await here.. 
     // to limit having to do this timeout thingy
-    setTimeout(() => { 
-      buildGuildChannelIndex(guild.id);
-    },500*counter);
+    await buildGuildChannelIndex(guild.id);
   };
 
   const buildGuildChannelIndex = async(guildId) => {
@@ -329,7 +331,6 @@ const connectToDiscord = function () {
 
   getChannel = async (data) => {
     let channel = await DiscordClient.getChannel(data.id);
-    logIt("DEBUG:"+JSON.stringify(channel))
     assignChannelIndex(channel.guild_id,channel);
   };
 
@@ -487,7 +488,7 @@ const connectToDiscord = function () {
     if( error.code == 4009 ) {
       connecting = false;
       accessToken = null;
-      logIt("DEBUG","Calling Login");
+      logIt("INFO","Attempting Login again");
       doLogin();
     }
   });
@@ -578,9 +579,11 @@ function isEmpty(val) {
 }
 
 function logIt() {
-  var curTime = new Date().toISOString();
-  var message = [...arguments];
-  var type = message.shift();
+  const curTime = new Date().toISOString();
+  const message = [...arguments];
+  const type = message.shift();
+  if( type == "DEBUG" && pluginSettings["Debug Mode"].toLowerCase() == "off") { return }
+ 
   console.log(curTime,":",pluginId,":"+type+":",message.join(" "));
 }
 

@@ -1,10 +1,11 @@
 {
     "sdk": 3,
-    "version": 4300,
-    "TPDiscord_Version":"4.3.0",
+    "version": 4301,
+    "TPDiscord_Version":"4.3.1",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
-    "plugin_start_cmd": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
+    "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
+    "plugin_start_cmd_mac": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
     "configuration": {
         "colorDark": "#23272A",
         "colorLight": "#7289DA"
@@ -33,6 +34,12 @@
             "name": "Skip Process Watcher",
             "type": "text",
             "default": "No",
+            "maxLength": 3
+        },
+        {
+            "name": "Debug Mode",
+            "type": "text",
+            "default": "Off",
             "maxLength": 3
         }
     ],
