@@ -97,6 +97,18 @@ v4.3.0
     - New State - Discord Process Running, will be `Yes`, `No`, `Unknown` (starts out as Unknown)
       - Notes: Windows Only will have all 3 values, MacOS will always be Unknown until a process watcher is implemented for MacOS
     - New State - Discord Connected, will be `Connected` or `Disconnected`
+v4.3.1
+   Updates:
+    - Improved Startup time of plugin by correctly loading Guild and Channel information
+    - Modified Channel Create and Guild Create events to only handle their particular channel and/or guild so faster load times here too
+      - Notes: this mostly went unoticed if you weren't looking at Logs, but it was a problem and can cause issues
+    - Updated to touchportal-api 3.2.0
+    - Refactored entry.tp to a single file to support both windows and mac
+   Added:
+    - Setting to enable Debug Mode or not 
+      - Valid Values: Off or On
+      - Purpose: Stop spam of messages to log unless needed for debugging purposes
+    - Added in update notification process to actually utilize Touch Portal's notification system
 ```
 
 ## Plugin Capabilities
@@ -188,6 +200,12 @@ v4.3.0
    2. if that doesn't work stop and start the plugin as notated above
 1. **The channel list blanked out**
    1. Change the server dropdown to a different server, and back again to the server you want
+2. **Turn on Debug Log Mode**
+   1. Go to Settings -> Plug-ins
+   2. Select `Touch Portal Discord Plugin` in the dropdown
+   3. set `Debug Mode` to `On`
+   4. click Save button
+   5. to Turn off change it to `Off`
 
 ## Actions
 
