@@ -200,6 +200,12 @@ v4.3.1
    2. if that doesn't work stop and start the plugin as notated above
 1. **The channel list blanked out**
    1. Change the server dropdown to a different server, and back again to the server you want
+2. **Turn on Debug Log Mode**
+   1. Go to Settings -> Plug-ins
+   2. Select `Touch Portal Discord Plugin` in the dropdown
+   3. set `Debug Mode` to `On`
+   4. click Save button
+   5. to Turn off change it to `Off`
 
 ## Actions
 
