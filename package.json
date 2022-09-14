@@ -11,10 +11,12 @@
     "pkg": "pkg .",
     "pkg-win": "pkg --targets node12-win-x64 .",
     "pkg-mac": "pkg --targets node12-macos-x64 .",
+    "pkg-linux": "pkg --targets node12-linux .",
     "build-win": "pkg --targets node12-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
     "build-win-c": "pkg --targets node12-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win-DiscordCanary.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win-DiscordCanary.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
     "build-win-ptb": "pkg --targets node12-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win-PTB.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win-PTB.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
     "build-win-dev": "pkg --targets node12-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win-DEVELOPMENT.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win-DEVELOPMENT.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
+    "build-linux": "pkg --targets node12-linux-x64 . && mv tpdiscord base/Linux/TPDiscord/ && cp base/entry.tp base/Linux/TPDiscord/entry.tp && rm Installers/TPDiscord-Linux.tpp && cd base/Linux && 7z a -tzip ../../Installers/TPDiscord-Linux.tpp TPDiscord && rm TPDiscord/tpdiscord && rm TPDiscord/entry.tp",
     "build-mac": "pkg --targets node12-macos-x64 . && move tpdiscord base/Mac/TPDiscord/ && copy base\\entry.tp base\\Mac\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Mac.tpp && cd base\\Mac && 7z a -tzip ../../Installers/TPDiscord-Mac.tpp TPDiscord && del TPDiscord\\tpdiscord && del TPDiscord\\entry.tp"
   },
   "author": "Jameson Allen aka Spdermn02",
