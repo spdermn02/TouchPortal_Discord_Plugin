@@ -47,7 +47,7 @@
         {
             "id": "TPDiscord",
             "name": "Discord",
-            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/Discord-Logo-White.png",
+            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
             "actions": [
                 {
                     "id": "discord_deafen_action",

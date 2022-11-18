@@ -6,11 +6,7 @@ const discordKeyMap = require("./discordkeys");
 const { settings } = require("cluster");
 const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
 const platform = require('process').platform;
-
-const app_monitor = {
-  "darwin": "/Applications/Discord.app/Contents/MacOS/Discord",
-  "win32": "Discord.exe"
-};
+const Config = require('./config');
 
 const PLUGIN_CONNECTED_SETTING = 'Plugin Connected';
 
@@ -27,6 +23,11 @@ const updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Disco
 const releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
 
 const pluginId = "TPDiscord";
+
+const app_monitor = {
+  "darwin": "/Applications/Discord.app/Contents/MacOS/Discord",
+  "win32": Config.discordWin32
+};
 
 const TPClient = new TP.Client();
 const procWatcher = new ProcessWatcher();
