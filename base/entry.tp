@@ -292,6 +292,12 @@
                         "Connected",
                         "Disconnected"
                     ]
+                },
+                {
+                    "id": "discord_voice_channel_participants",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Participants",
+                    "default": "<None>"
                 }
             ],
             "events": []
