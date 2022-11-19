@@ -109,6 +109,11 @@ v4.3.1
       - Valid Values: Off or On
       - Purpose: Stop spam of messages to log unless needed for debugging purposes
     - Added in update notification process to actually utilize Touch Portal's notification system
+v4.3.2
+   Updates:
+    - New State - Discord Voice Channel Participants - will be a pipe delimited list of nicknames for users in your current voice channel you have joined. Will continually update as users join and leave.
+   Refactor:
+    - Using a new build process utilizing scripts/build.js instead of hard coding the build process in package.json, making it more generic as well.
 ```
 
 ## Plugin Capabilities

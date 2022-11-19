@@ -71,20 +71,22 @@ const build = async(platform, options ) => {
 
 const cleanInstallers  = () => {
     try {
-        dirPath = './Installers/'
-        // Read the directory given in `path`
-        const files = fs.readdir(dirPath, (err, files) => {
-          if (err)
-            throw err;
+      fs.rmdirSync('./Installers/', { recursive : true})
+      fs.mkdirSync('./Installers/')
+        // dirPath = './Installers/'
+        // // Read the directory given in `path`
+        // const files = fs.readdir(dirPath, (err, files) => {
+        //   if (err)
+        //     throw err;
       
-          files.forEach((file) => { 
-            // Check if the file is with a PDF extension, remove it
-            if (file.split('.').pop().toLowerCase() == 'tpp') {
-              console.log(`Deleting file: ${file}`);
-              fs.unlinkSync(dirPath + file)
-            }
-          });
-        });
+        //   files.forEach((file) => { 
+        //     // Check if the file is with a PDF extension, remove it
+        //     if (file.split('.').pop().toLowerCase() == 'tpp') {
+        //       console.log(`Deleting file: ${file}`);
+        //       fs.unlinkSync(dirPath + file)
+        //     }
+        //   });
+        // });
       } catch (err) {
         console.error(err);
       }

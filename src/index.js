@@ -272,7 +272,7 @@ const connectToDiscord = function () {
       idx: {}
     };
 
-    // Switched this up because of the .forEach not honoroing the await process,
+    // Switched this up because of the .forEach not honoring the await process,
     // but native if does
     for ( let i = 0; i < data.guilds.length; i++ ) {
       await assignGuildIndex(data.guilds[i],i);
@@ -339,14 +339,13 @@ const connectToDiscord = function () {
 
   voiceState = async (event,data) => {
       logIt("DEBUG","Voice State", event, JSON.stringify(data));
-      if( event !== 'delete'  ) { // So this is for create and update
+      if( event !== "delete" ) {
         currentVoiceUsers[data.nick] = data;
       }
       else {
-        delete currentVoiceUsers[data.nick];
+        delete currentVoiceUsers[data.nick]
       }
-      
-      discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : "<None>"
+      discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
       TPClient.stateUpdate('discord_voice_channel_participants', discord_voice_channel_participants)
   
   };
@@ -371,9 +370,9 @@ const connectToDiscord = function () {
         discord_voice_channel_name = 'Personal';
         discord_voice_channel_server_id = 'Personal';
         discord_voice_channel_server_name = 'Personal';
-        const vsCreate = DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
-        const vsUpdate = DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
-        const vsDelete = DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}); 
+        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
+        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
+        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}); 
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       }
       else {
@@ -386,6 +385,14 @@ const connectToDiscord = function () {
         const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
         const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id});
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
+      }
+      
+      if(discord_voice_channel_id !== '<None>' ) {
+        const channel = await DiscordClient.getChannel(discord_voice_channel_id)
+        channel.voice_states.forEach((vs,i) => {
+          currentVoiceUsers[vs.nick] = vs;
+        })
+        discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
       }
 
       var states = [
