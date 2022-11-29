@@ -62,9 +62,6 @@ const build = async(platform, options ) => {
     zip.writeZip(path.normalize(packageName))
 
     console.log("Cleaning Up")
-    // fs.unlinkSync(`./base/${platform}/entry.tp`)
-    // fs.unlinkSync(`./base/${platform}/${packageJson.name}.png`)
-    // fs.unlinkSync(`./base/${platform}/${execName}`)
     fs.unlinkSync(`./src/config.js`)
     fs.rmdirSync(`./base/${platform}`, { recursive : true})
 }
@@ -73,20 +70,6 @@ const cleanInstallers  = () => {
     try {
       fs.rmdirSync('./Installers/', { recursive : true})
       fs.mkdirSync('./Installers/')
-        // dirPath = './Installers/'
-        // // Read the directory given in `path`
-        // const files = fs.readdir(dirPath, (err, files) => {
-        //   if (err)
-        //     throw err;
-      
-        //   files.forEach((file) => { 
-        //     // Check if the file is with a PDF extension, remove it
-        //     if (file.split('.').pop().toLowerCase() == 'tpp') {
-        //       console.log(`Deleting file: ${file}`);
-        //       fs.unlinkSync(dirPath + file)
-        //     }
-        //   });
-        // });
       } catch (err) {
         console.error(err);
       }
@@ -101,6 +84,7 @@ const executeBuilds= async () => {
     await build("Windows", { type: "PTB"} )
     //await build("Windows", { type: "DEVELOP"} )
     
+    fs.copyFileSync(`./configs/config.js`, './src/config.js')
 }
 
 executeBuilds();
