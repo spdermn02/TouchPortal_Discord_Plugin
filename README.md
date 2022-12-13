@@ -8,7 +8,7 @@
     - [Actions](#actions)
     - [States](#states)
   - [Installation and Configuration](#installation-and-configuration)
-  - [Known Issues & Solutions](#known-issues--solutions)
+  - [Known Issues \& Solutions](#known-issues--solutions)
   - [Actions](#actions-1)
     - [Discord Mute:](#discord-mute)
     - [Discord Deafen:](#discord-deafen)
@@ -109,6 +109,9 @@ v4.3.1
       - Valid Values: Off or On
       - Purpose: Stop spam of messages to log unless needed for debugging purposes
     - Added in update notification process to actually utilize Touch Portal's notification system
+v4.3.2
+   Updates:
+    - Removed rpc scope as it no longer is allowed by the latest Discord Client
 ```
 
 ## Plugin Capabilities
