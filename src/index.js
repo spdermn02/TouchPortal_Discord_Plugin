@@ -14,8 +14,8 @@ let discordRunning = false;
 let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Debug Mode':'Off' };
 let accessToken = undefined;
 let connecting = false;
-const scopes = ["identify", "rpc",  "guilds" ];
-//const scopes = ["identify", "rpc"];
+const scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write" ];
+
 const redirectUri = "http://localhost";
 
 //Change this to API?
@@ -36,6 +36,11 @@ let DiscordClient = null;
 // - START - TP
 let muteState = 0;
 let deafState = 0;
+let discord_automatic_gain_control = 0;
+let discord_noise_suppression = 0;
+let discord_echo_cancellation = 0;
+let discord_silence_warning = 0;
+let discord_qos_priority = 0;
 let last_voice_channel_subs = [];
 let discord_voice_channel_connected = 'No';
 let discord_voice_channel_name = '<None>';
@@ -44,7 +49,9 @@ let discord_voice_channel_server_name = '<None>';
 let discord_voice_channel_server_id = '<None>';
 let discord_voice_average_ping = '0.00';
 let discord_voice_hostname = '<None>';
-let discord_voice_volume = '0.00';
+let discord_voice_volume = '0';
+let discord_speaker_volume = '0';
+let discord_speaker_volume_connector = '0';
 let discord_voice_mode_type = 'UNKNOWN';
 let discord_voice_channel_participants = '<None>';
 let guilds = {};
@@ -54,6 +61,12 @@ let discordPTTKeys = [];
 let pttKeyStateId = 'discordPTTKeyboardKey';
 
 let instanceIds = {};
+
+const convertPercentageToVolume = ( value ) => {
+  if( value === 0 ) { return 0; }
+  const translation = value > 100 ? ( value - 100 ) / 100 * 6 : value / 100 * 50 - 50
+  return 100 * Math.pow(10, translation / 20)
+}
 
 TPClient.on("Action", async (message) => {
   logIt("DEBUG",JSON.stringify(message));
@@ -76,6 +89,7 @@ TPClient.on("Action", async (message) => {
     }
     else {
       await DiscordClient.selectTextChannel(channelId, {timeout: 5});
+      await DiscordClient.subscribe("MESSAGE_CREATE",{channel_id: channelId});
     }
   }
   else if( message.actionId === "discord_hangup_voice" ) {
@@ -117,7 +131,7 @@ TPClient.on("Action", async (message) => {
       }
       DiscordClient.setVoiceSettings({ deaf: 1 === deafState });
     }
-  else if (message.data[0].id === "discordMuteAction") {
+    else if (message.data[0].id === "discordMuteAction") {
       if (message.data[0].value === "Toggle") {
         muteState = 1 - muteState;
       } else if (message.data[0].value === "Off") {
@@ -127,6 +141,57 @@ TPClient.on("Action", async (message) => {
       }
       DiscordClient.setVoiceSettings({ mute: 1 === muteState });
     }
+    else if (message.data[0].id === "discordEchoCancellationAction") {
+      if (message.data[0].value === "Toggle") {
+        discord_echo_cancellation = 1 - discord_echo_cancellation;
+      } else if (message.data[0].value === "Off") {
+        discord_echo_cancellation = 0;
+      } else if (message.data[0].value === "On") {
+        discord_echo_cancellation = 1;
+      }
+      DiscordClient.setVoiceSettings({ echoCancellation: 1 === discord_echo_cancellation });
+    }
+    else if (message.data[0].id === "discordNoiseSuppressionAction") {
+      if (message.data[0].value === "Toggle") {
+        discord_noise_suppression = 1 - discord_noise_suppression;
+      } else if (message.data[0].value === "Off") {
+        discord_noise_suppression = 0;
+      } else if (message.data[0].value === "On") {
+        discord_noise_suppression = 1;
+      }
+      DiscordClient.setVoiceSettings({ noiseSuppression: 1 === discord_noise_suppression });
+    }
+    else if (message.data[0].id === "discordAutoGainControlAction") {
+      if (message.data[0].value === "Toggle") {
+        discord_automatic_gain_control = 1 - discord_automatic_gain_control;
+      } else if (message.data[0].value === "Off") {
+        discord_automatic_gain_control = 0;
+      } else if (message.data[0].value === "On") {
+        discord_automatic_gain_control = 1;
+      }
+      DiscordClient.setVoiceSettings({ automaticGainControl: 1 === discord_automatic_gain_control });
+    }
+    else if (message.data[0].id === "discordQOSHighPacketPriorityAction") {
+      if (message.data[0].value === "Toggle") {
+        discord_qos_priority = 1 - discord_qos_priority;
+      } else if (message.data[0].value === "Off") {
+        discord_qos_priority = 0;
+      } else if (message.data[0].value === "On") {
+        discord_qos_priority = 1;
+      }
+      DiscordClient.setVoiceSettings({ qos: 1 === discord_qos_priority });
+    }
+    else if (message.data[0].id === "discordSilenceWarningAction") {
+      if (message.data[0].value === "Toggle") {
+        discord_silence_warning = 1 - discord_silence_warning;
+      } else if (message.data[0].value === "Off") {
+        discord_silence_warning = 0;
+      } else if (message.data[0].value === "On") {
+        discord_silence_warning = 1;
+      }
+      DiscordClient.setVoiceSettings({ silenceWarning: 1 === discord_silence_warning });
+    }
+
   } else {
     logIt("WARN","No data in Action Message",
       JSON.stringify(message)
@@ -158,6 +223,27 @@ TPClient.on("ListChange", async (data) => {
       let guildId = guilds.idx[guildName];
       TPClient.choiceUpdateSpecific('discordServerChannel',channels[guildId][channelType.toLowerCase()].array,data.instanceId);
     }
+  }
+});
+
+TPClient.on("ConnectorChange",(message) => {
+  logIt("DEBUG",`Connector change event fired `+JSON.stringify(message));
+  // {"data":[{"id":"streamraiders_volume_type_connector","value":"Music"}],"pluginId":"Touch Portal Stream Raiders","connectorId":"streamraiders_volume_connector","type":"connectorChange","value":42}
+  const action = message.connectorId
+  console.log(pluginId, ": DEBUG : ",`calling action ${action}`);
+  if( action == 'discord_voice_volume_connector' ) {
+    let newVol = parseInt(message.value,10);
+    newVol = newVol > 100 ? 100 : newVol < 0 ? 0 : newVol;
+    DiscordClient.setVoiceSettings({'input':{'volume':convertPercentageToVolume(newVol)}})
+  }
+  else if( action == 'discord_speaker_volume_connector' ) {
+    let newVol = parseInt(message.value,10);
+    //Double speaker volume as percentage is actually double what it should be since Discord goes to 200%
+    newVol = newVol > 100 ? 100 : newVol < 0 ? 0 : newVol * 2 ;
+    DiscordClient.setVoiceSettings({'output':{'volume':convertPercentageToVolume(newVol)}})
+  }
+  else {
+    console.log(pluginId, ": ERROR : ",`Unknown action called ${action}`);
   }
 });
 
@@ -221,11 +307,18 @@ let channelCreate = () => {}
 let voiceConnectionStatus = () => {}
 let currentVoiceUsers = {}
 
+const convertVolumeToPercentage = ( value ) => {
+  if( value === 0 ){ return 0; }
+  const translation = 20 * Math.log10(value / 100)
+  return Math.round(100 * (translation > 0 ? translation / 6 + 1 : (50 + translation) / 50))
+}
+
 const connectToDiscord = function () {
   DiscordClient = new RPC.Client({ transport: "ipc" });
 
   const voiceActivity = function (data) {
     logIt("DEBUG","voiceActivity", JSON.stringify(data));
+
     if (data.mute) {
       muteState = 1;
     } else {
@@ -239,20 +332,43 @@ const connectToDiscord = function () {
     }
 
     if( data.input.volume > -1) {
-      discord_voice_volume = data.input.volume.toFixed(2);
+      discord_voice_volume = convertVolumeToPercentage(data.input.volume);
+    }
+    if( data.output.volume > -1) {
+      discord_speaker_volume = convertVolumeToPercentage(data.output.volume);
+      discord_speaker_volume_connector = Math.round(convertVolumeToPercentage(data.output.volume)/2);
     }
     if( data.mode.type != '') {
       logIt("DEBUG","voice mode is",data.mode.type);
       discord_voice_mode_type = data.mode.type;
     }
+    discord_automatic_gain_control = data.automatic_gain_control || data.automaticGainControl ? 1 : 0;
+    discord_noise_suppression = data.noise_suppression || data.noiseSuppression ? 1 : 0;
+    discord_echo_cancellation = data.echo_cancellation || data.echoCancellation ? 1 : 0;
+    discord_silence_warning = data.silence_warning || data.silenceWarning ? 1 : 0;
+    discord_qos_priority = data.qos ? 1 : 0;
 
-    let states = [
+    const states = [
       { id: "discord_mute", value: muteState ? "On" : "Off" },
       { id: "discord_deafen", value: deafState ? "On" : "Off" },
       { id: "discord_voice_volume", value: discord_voice_volume },
-      { id: "discord_voice_mode_type", value: discord_voice_mode_type }
-    ];
+      { id: "discord_voice_mode_type", value: discord_voice_mode_type },
+      { id: "discord_speaker_volume", value: discord_speaker_volume },
+      { id: "discord_automatic_gain_control", value: discord_automatic_gain_control ? "On" : "Off" },
+      { id: "discord_echo_cancellation", value: discord_echo_cancellation ? "On" : "Off" },
+      { id: "discord_noise_suppression", value: discord_noise_suppression ? "On" : "Off" },
+      { id: "discord_silence_warning", value: discord_silence_warning ? "On" : "Off" },
+      { id: "discord_qos_priority", value: discord_qos_priority ? "On" : "Off" },
+    ]
     TPClient.stateUpdateMany(states);
+
+    const connectors = [
+      { id: "discord_voice_volume_connector", value: discord_voice_volume },
+      { id: "discord_speaker_volume_connector", value: discord_speaker_volume_connector },
+    ]
+    if( connectors.length > 0 ) {
+      TPClient.connectorUpdateMany(connectors);
+    }
   };
 
   getGuildChannels = async (guildId ) => {
@@ -469,8 +585,13 @@ const connectToDiscord = function () {
     DiscordClient.on("VOICE_STATE_CREATE", (data) => {voiceState('create',data);})
     DiscordClient.on("VOICE_STATE_UPDATE", (data) => {voiceState('update',data);})
     DiscordClient.on("VOICE_STATE_DELETE", (data) => {voiceState('delete',data);})
-
+    //DiscordClient.on("MESSAGE_CREATE", (data) => {logIt("DEBUG", JSON.stringify(data))}) 
+    const voiceSettings = await DiscordClient.getVoiceSettings();
+    voiceActivity(voiceSettings);
     getGuilds();
+    
+    //DiscordClient.setActivity({'state':'Developing', 'details':'Working on testing update to Touch Portal Discord Plugin'})
+    //setInterval(() => { DiscordClient.clearActivity() }, 10000)
     
   });
   DiscordClient.on('VOICE_SETTINGS_UPDATE', (data) => {

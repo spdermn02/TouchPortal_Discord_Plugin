@@ -18,7 +18,8 @@
   "license": "ISC",
   "pkg": {
     "scripts": [
-      "src/**/*.js"
+      "src/**/*.js",
+      "src/*.js"
     ]
   },
   "dependencies": {

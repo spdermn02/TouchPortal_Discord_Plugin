@@ -1,5 +1,5 @@
 {
-    "sdk": 3,
+    "sdk": 6,
     "version": 4302,
     "TPDiscord_Version":"4.3.2-beta",
     "name": "Touch Portal Discord Plugin",
@@ -48,6 +48,20 @@
             "id": "TPDiscord",
             "name": "Discord",
             "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
+            "connectors":[
+                {
+                    "id": "discord_voice_volume_connector",
+                    "prefix": "Discord:",
+                    "name":"Adjust Input Volume",
+                    "format":"Discord: Adjust Input Volume"
+                },
+                {
+                    "id": "discord_speaker_volume_connector",
+                    "prefix": "Discord:",
+                    "name":"Adjust Output Volume",
+                    "format":"Discord: Adjust Output Volume"
+                }
+            ],
             "actions": [
                 {
                     "id": "discord_deafen_action",
@@ -82,6 +96,111 @@
                             "id": "discordMuteAction",
                             "type": "choice",
                             "label": "Mute Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_echo_cancellation_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Echo Cancellation",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Echo Cancellation {$discordEchoCancellationAction$}",
+                    "data": [
+                        {
+                            "id": "discordEchoCancellationAction",
+                            "type": "choice",
+                            "label": "Echo Cancellation Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_noise_suppression_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Noise Suppression",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Noise Suppression {$discordNoiseSuppressionAction$} (Note: If using Krisp, this action seems to do nothing)",
+                    "data": [
+                        {
+                            "id": "discordNoiseSuppressionAction",
+                            "type": "choice",
+                            "label": "Noise Suppression Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_auto_gain_control_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Auto Gain Control",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Auto Gain Control {$discordAutoGainControlAction$}",
+                    "data": [
+                        {
+                            "id": "discordAutoGainControlAction",
+                            "type": "choice",
+                            "label": "Auto Gain Control Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_qos_high_packet_priority_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Quality of Service Priority",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Quality of Service High Packet Priority {$discordQOSHighPacketPriorityAction$}",
+                    "data": [
+                        {
+                            "id": "discordQOSHighPacketPriorityAction",
+                            "type": "choice",
+                            "label": "Quality of Service High Packet Priority Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_silence_warning_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Silence Warning",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Silence Warning {$discordSilenceWarningAction$}",
+                    "data": [
+                        {
+                            "id": "discordSilenceWarningAction",
+                            "type": "choice",
+                            "label": "Silence Warning Action",
                             "default": "",
                             "valueChoices": [
                                 "Toggle",
@@ -267,10 +386,66 @@
                     ]
                 },
                 {
+                    "id": "discord_speaker_volume",
+                    "type": "text",
+                    "desc": "Discord Speaker Volume",
+                    "default": "0.00"
+                },
+                {
                     "id": "discord_voice_volume",
                     "type": "text",
                     "desc": "Discord Voice Volume",
                     "default": "0.00"
+                },
+                {
+                    "id": "discord_automatic_gain_control",
+                    "type": "choice",
+                    "desc": "Discord Automatic Gain Control",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_echo_cancellation",
+                    "type": "choice",
+                    "desc": "Discord Echo Cancellation",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_noise_suppression",
+                    "type": "choice",
+                    "desc": "Discord Noise Suppression",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_silence_warning",
+                    "type": "choice",
+                    "desc": "Discord Silence Warning",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_qos_priority",
+                    "type": "choice",
+                    "desc": "Discord Quality of Service Priority",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
                 },
                 {
                     "id": "discord_running",
