@@ -6,6 +6,7 @@
     "id": "TPDiscord",
     "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
     "plugin_start_cmd_mac": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
+    "plugin_start_cmd_linux": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
     "configuration": {
         "colorDark": "#23272A",
         "colorLight": "#7289DA"

@@ -63,12 +63,12 @@ const build = async(platform, options ) => {
 
     console.log("Cleaning Up")
     fs.unlinkSync(`./src/config.js`)
-    fs.rmdirSync(`./base/${platform}`, { recursive : true})
+    fs.rmSync(`./base/${platform}`, { recursive : true})
 }
 
 const cleanInstallers  = () => {
     try {
-      fs.rmdirSync('./Installers/', { recursive : true})
+      fs.rmSync('./Installers/', { recursive : true})
       fs.mkdirSync('./Installers/')
       } catch (err) {
         console.error(err);

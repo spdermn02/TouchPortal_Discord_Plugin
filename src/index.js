@@ -3,7 +3,6 @@ const TP = require("touchportal-api");
 const { open } = require("out-url");
 const path = require("path");
 const discordKeyMap = require("./discordkeys");
-const { settings } = require("cluster");
 const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
 const platform = require('process').platform;
 const Config = require('./config');
@@ -253,11 +252,7 @@ TPClient.on("Info", (data) => {
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
   TPClient.stateUpdate('discord_running','Unknown');
   TPClient.stateUpdate("discord_connected","Disconnected");
-  if( platform != 'darwin' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
-      logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
-      procWatcher.watch(app_monitor[platform]);
-  }
-
+  
 
 });
 
@@ -269,10 +264,16 @@ TPClient.on("Settings", (data) => {
 
     logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
-  if( platform == 'darwin' || pluginSettings['Skip Process Watcher'].toLowerCase() == 'yes') {
+  if( platform != 'win32' || pluginSettings['Skip Process Watcher'].toLowerCase() == 'yes') {
     TPClient.stateUpdate('discord_running','Unknown');
     procWatcher.stopWatch();
     doLogin();
+  }
+  else if( platform == 'win32' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
+    logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
+    procWatcher.watch(app_monitor[platform]);
+} {
+
   }
 });
 
@@ -614,7 +615,7 @@ const connectToDiscord = function () {
     logIt("WARN","discord connection closed, will attempt reconnect, once process detected");
     TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Disconnected");
     TPClient.stateUpdate("discord_connected","Disconnected");
-    if( platform == 'darwin' ) {
+    if( platform != 'win32' ) {
       return doLogin();
     }
   });
