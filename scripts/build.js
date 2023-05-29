@@ -20,7 +20,7 @@ const build = async(platform, options ) => {
       fs.copyFileSync(`./configs/config.js`, './src/config.js')
     }
 
-    let nodeVersion = 'node16-win-x64'
+    let nodeVersion = 'node18-win-x64'
     let execName = `${packageJson.name}.exe`
 
     if( platform != "Windows" ) {
@@ -29,13 +29,13 @@ const build = async(platform, options ) => {
     }
 
     if( platform == "MacOS") {
-        nodeVersion = 'node16-macos-x64'
+        nodeVersion = 'node18-macos-x64'
     }
     if( platform == "MacOS-Arm64") {
         nodeVersion = '???'
     }
     if( platform == "Linux") {
-        nodeVersion = 'node16-linux-x64'
+        nodeVersion = 'node18-linux-x64'
     }
 
     console.log("Running pkg")

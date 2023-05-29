@@ -1,12 +1,12 @@
 {
     "sdk": 6,
-    "version": 4302,
-    "TPDiscord_Version":"4.3.2-beta",
+    "version": 4400,
+    "TPDiscord_Version":"4.4.0-alpha-1",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
-    "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%TPDiscord\\tpdiscord.exe\"",
-    "plugin_start_cmd_mac": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
-    "plugin_start_cmd_linux": "sh %TP_PLUGIN_FOLDER%TPDiscord/start_tpdiscord.sh",
+    "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe\"",
+    "plugin_start_cmd_mac": "sh %TP_PLUGIN_FOLDER%tpdiscord/start_tpdiscord.sh",
+    "plugin_start_cmd_linux": "sh %TP_PLUGIN_FOLDER%tpdiscord/start_tpdiscord.sh",
     "configuration": {
         "colorDark": "#23272A",
         "colorLight": "#7289DA"
@@ -38,7 +38,7 @@
             "maxLength": 3
         },
         {
-            "name": "Debug Mode",
+            "name": "Discord Debug Mode",
             "type": "text",
             "default": "Off",
             "maxLength": 3
@@ -307,6 +307,38 @@
                    "type":"communicate",
                    "tryInline":"true",
                    "format":"Discord: Store Push To Talk Keys"
+                },
+                {
+                   "id": "discord_dm_voice_select",
+                   "prefix": "Discord:",
+                   "name":"Discord DM Voice Channel",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"Discord: Go to DM Voice Channel with id: {$discordDMVoiceChannelId$}",
+                   "data":[
+                        {
+                           "id":"discordDMVoiceChannelId",
+                           "type":"text",
+                           "label":"Discord DM Voice Channel Id",
+                           "default":""
+                       }
+                   ]
+                },
+                {
+                   "id": "discord_dm_text_select",
+                   "prefix": "Discord:",
+                   "name":"Discord DM Text Channel",
+                   "type":"communicate",
+                   "tryInline":"true",
+                   "format":"Discord: Go to DM Text Channel with id: {$discordDMTextChannelId$}",
+                   "data":[
+                        {
+                           "id":"discordDMTextChannelId",
+                           "type":"text",
+                           "label":"Discord DM Text Channel Id",
+                           "default":""
+                       }
+                   ]
                 }
             ],
             "states": [

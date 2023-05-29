@@ -6,17 +6,17 @@
   - [ChangeLog](#changelog)
   - [Plugin Capabilities](#plugin-capabilities)
     - [Actions](#actions)
+    - [Connectors](#connectors)
     - [States](#states)
+    - [Events](#events)
   - [Installation and Configuration](#installation-and-configuration)
-  - [Known Issues & Solutions](#known-issues--solutions)
-  - [Actions](#actions-1)
+  - [Known Issues \& Solutions](#known-issues--solutions)
     - [Discord Mute:](#discord-mute)
     - [Discord Deafen:](#discord-deafen)
     - [Discord Go To Channel](#discord-go-to-channel)
     - [Discord Voice Type](#discord-voice-type)
     - [Discord Voice Hangup](#discord-voice-hangup)
     - [Discord Push To Talk Keys](#discord-push-to-talk-keys)
-  - [States](#states-1)
 - [Sample Page](#sample-page)
 - [Cleanup pre-v4.0.0 config](#cleanup-pre-v400-config)
 - [Dependencies](#dependencies)
@@ -109,22 +109,44 @@ v4.3.1
       - Valid Values: Off or On
       - Purpose: Stop spam of messages to log unless needed for debugging purposes
     - Added in update notification process to actually utilize Touch Portal's notification system
-v4.3.2
+v4.4.0
    Updates:
-    - New State - Discord Voice Channel Participants - will be a pipe delimited list of nicknames for users in your current voice channel you have joined. Will continually update as users join and leave.
+    - New States -
+       - Discord Voice Channel Participants - will be a pipe delimited list of nicknames for users in your current voice channel you have joined. Will continually update as users join and leave.
+       - All new states related to Voice Settings and Voice/Speaker Volume
+    - New Actions - 
+       - A bunch of new Audio based actions to control the different voice settings
+       - New action to join DM based Text or Voice Channel by ID (voice does NOT ring the person, just joins voice channel)
+    - New Connectors - Sliders to control input and output volumes
    Refactor:
     - Using a new build process utilizing scripts/build.js instead of hard coding the build process in package.json, making it more generic as well.
+    - improved Voice Settings changes to only send back relevant changes and not everything time.
+
 ```
 
 ## Plugin Capabilities
 ### Actions
  - Discord Mute - Mute yourself in Discord
  - Discord Deafen - Deafen yourself in Discord (inherently mutes as well)
+ - Discord Voice Mode - Change between Voice Activity and Push-To-Talk Modes
  - Discord Hang Up - When in a voice call this will hang up the voice call
  - Discord Select Channel - go to a specific voice/text channel in a given server
  - Discord Reset Push To Talk Keys - resets array inside the plugin, doesn't affect Discord directly
  - Discord Push To Talk Key - adds key to the push to talk key array inside the plugin, doesn't affect Discord Directly
  - Discord Store Push To Talk Keys - store the key combinations in the push to talk key array to Discord to use with Push to Talk
+ - Discord Auto Gain Control - Toggle/Enable/Disable Auto Gain Control
+ - Discord Quality of Service Priority - Toggle/Enable/Disable Quality of Service Priority
+ - Discord Echo Cancellation - Toggle/Enable/Disable Echo Cancellation
+ - Discord Noise Suppression - Toggle/Enable/Disable Noise Suppression - if using Krisp, doesn't do anything to disable that
+ - Discord Silence Warning - Toggle/Enable/Disable Silence Warning (not exactly sure what this does due to not much documentation around this)
+ - Discord DM Voice Channel - Join a Personal or Group DM Voice Channel by Channel ID (Note: Does not ring the other person, it just forces you into the voice channel)
+ - Discord DM Text Channel - Join a Personal or Group DM Text Channel by Channel ID
+
+### Connectors
+ - Adjust Input Volume
+   - Slider to control the Voice Volume
+ - Adjust Output Volume
+   - Slider to control the Speaker Volume
 
 ### States
  - Discord Mute 
@@ -145,7 +167,7 @@ v4.3.2
    - Value: Connected voice channel server id or 'Personal' or &lt;None&gt;
    - Note: This will be 'Personal' when connecting an audio call outside of a server (through DM)
  - Discord Voice Average Ping
-   - Value: in milliseconds)
+   - Value: in milliseconds
  - Discord Voice Hostname
    - Value: Voice Host connected to at Discord
  - Discord Voice Mode Type 
@@ -155,6 +177,23 @@ v4.3.2
    - Note: Windows only, Mac will always be Unknown (until I find a good process watcher script for MacOS)
  - Discord Connected
    - Valid Values: Connected, Disconnected
+ - Discord Automatic Gain Control
+   - Valid Values: On, Off
+ - Discord Echo Cancellation
+   - Valid Values: On, Off
+ - Discord Noise Suppression
+   - Valid Values: On, Off
+ - Discord Quality of Service Priority
+   - Valid Values: On, Off
+ - Discord Voice Channel Participants
+   - Value: Will be a string of all participants in the current voice channel separated by a `|` character (for now)
+ - Discord Voice Volume
+   - Value: Number indicating your current Voice Volume
+ - Discord Speaker Volume
+   - Value: Number indicating your current Speaker Volume
+
+### Events
+This plugin does not use any hardcoded events, you will just want to use `When Plug-in state Changes` Event that is built into Touch Portal if you want to trigger things based on state changes from this plugin
 
 ## Installation and Configuration
 1. Make sure Discord app is open on your PC or Mac
@@ -208,13 +247,9 @@ v4.3.2
 2. **Turn on Debug Log Mode**
    1. Go to Settings -> Plug-ins
    2. Select `Touch Portal Discord Plugin` in the dropdown
-   3. set `Debug Mode` to `On`
+   3. set `Discord Debug Mode` to `On`
    4. click Save button
    5. to Turn off change it to `Off`
-
-## Actions
-
-![Discord Actions](resources/images/TP-Discord-Plugin-Actions.png)
 
 ### Discord Mute: 
 [Sample Mute Button](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/DiscordMute.tpb)
@@ -238,14 +273,10 @@ v4.3.2
 <br>
 ![Discord PTT Keys](resources/images/TP-Discord-PTTKeys.gif)
 
-## States
-![Discord States](resources/images/TP-Discord-Plugin-States.png)
-
-
 # Sample Page
 [Sample Page Download](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/TPDiscord-Sample.tpz)
 <br>
-Has a sample button for all actions, and states to display info
+Has a sample button for all actions, and states to display info (TODO: Need to update this page)
 
 # Cleanup pre-v4.0.0 config
 1) After importing v4.0.0 plugin
@@ -260,6 +291,8 @@ Has a sample button for all actions, and states to display info
  - [find-process](https://www.npmjs.com/package/find-process)
  - [out-url](https://www.npmjs.com/package/out-url)
  - [touchportal-api](https://www.npmjs.com/package/touchportal-api)
+ - [pkg](https://www.npmjs.com/package/pkg)
+ - [adm-zip](https://www.npmjs.com/package/adm-zip)
 
 # Versioning
 

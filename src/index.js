@@ -10,7 +10,7 @@ const Config = require('./config');
 const PLUGIN_CONNECTED_SETTING = 'Plugin Connected';
 
 let discordRunning = false;
-let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Debug Mode':'Off' };
+let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Discord Debug Mode':'Off' };
 let accessToken = undefined;
 let connecting = false;
 const scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write" ];
@@ -61,6 +61,33 @@ let pttKeyStateId = 'discordPTTKeyboardKey';
 
 let instanceIds = {};
 
+
+// Pulled from: https://stackoverflow.com/questions/8431651/getting-a-diff-of-two-json-objects
+// BSD License
+// Author: Gabriel Gartz
+// link: https://stackoverflow.com/users/583049/gabriel-gartz
+function diff(obj1, obj2) {
+  const result = {};
+  if (Object.is(obj1, obj2)) {
+      return undefined;
+  }
+  if (!obj2 || typeof obj2 !== 'object') {
+      return obj2;
+  }
+  Object.keys(obj1 || {}).concat(Object.keys(obj2 || {})).forEach(key => {
+      if(obj2[key] !== obj1[key] && !Object.is(obj1[key], obj2[key])) {
+          result[key] = obj2[key];
+      }
+      if(typeof obj2[key] === 'object' && typeof obj1[key] === 'object') {
+          const value = diff(obj1[key], obj2[key]);
+          if (value !== undefined) {
+              result[key] = value;
+          }
+      }
+  });
+  return result;
+}
+
 const convertPercentageToVolume = ( value ) => {
   if( value === 0 ) { return 0; }
   const translation = value > 100 ? ( value - 100 ) / 100 * 6 : value / 100 * 50 - 50
@@ -80,16 +107,19 @@ TPClient.on("Action", async (message) => {
     let channelId = channels[guildId][type.toLowerCase()].idx[channelName];
     
     if( type === 'Voice' ) {
-      //let vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: channelId}, voiceState);
-      //let vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: channelId}, voiceState);
-      //let vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: channelId}, voiceState);
-      //last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
-      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: true});
+      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: false});
     }
     else {
       await DiscordClient.selectTextChannel(channelId, {timeout: 5});
-      await DiscordClient.subscribe("MESSAGE_CREATE",{channel_id: channelId});
     }
+  }
+  else if( message.actionId === "discord_dm_voice_select" ) {
+    let channelId = message.data[0].value;
+    await DiscordClient.selectVoiceChannel(channelId,{timeout: 5, force: false});
+  }
+  else if( message.actionId === "discord_dm_text_select" ) {
+    let channelId = message.data[0].value;
+    await DiscordClient.selectTextChannel(channelId,{timeout: 5});
   }
   else if( message.actionId === "discord_hangup_voice" ) {
     DiscordClient.selectVoiceChannel(null,{timeout:5});
@@ -106,7 +136,7 @@ TPClient.on("Action", async (message) => {
   }
   else if( message.actionId == "discord_voice_mode_change" ) {
     if( message.data[0].id === "discordVoiceMode") {
-      let modeType = "VOICE_ACTIVITY";
+      let modeType = "";
       if (message.data[0].value === "Push To Talk" ) {
         modeType = "PUSH_TO_TALK";
       }
@@ -227,18 +257,19 @@ TPClient.on("ListChange", async (data) => {
 
 TPClient.on("ConnectorChange",(message) => {
   logIt("DEBUG",`Connector change event fired `+JSON.stringify(message));
-  // {"data":[{"id":"streamraiders_volume_type_connector","value":"Music"}],"pluginId":"Touch Portal Stream Raiders","connectorId":"streamraiders_volume_connector","type":"connectorChange","value":42}
   const action = message.connectorId
   console.log(pluginId, ": DEBUG : ",`calling action ${action}`);
   if( action == 'discord_voice_volume_connector' ) {
     let newVol = parseInt(message.value,10);
-    newVol = newVol > 100 ? 100 : newVol < 0 ? 0 : newVol;
+    newVol = newVol > 100 ? 100 : newVol;
+    newVol = newVol < 0 ? 0 : newVol;
     DiscordClient.setVoiceSettings({'input':{'volume':convertPercentageToVolume(newVol)}})
   }
   else if( action == 'discord_speaker_volume_connector' ) {
     let newVol = parseInt(message.value,10);
     //Double speaker volume as percentage is actually double what it should be since Discord goes to 200%
-    newVol = newVol > 100 ? 100 : newVol < 0 ? 0 : newVol * 2 ;
+    newVol = newVol > 100 ? 100 : newVol;
+    newVol = newVol < 0 ? 0 : newVol * 2 ;
     DiscordClient.setVoiceSettings({'output':{'volume':convertPercentageToVolume(newVol)}})
   }
   else {
@@ -272,8 +303,6 @@ TPClient.on("Settings", (data) => {
   else if( platform == 'win32' && pluginSettings['Skip Process Watcher'].toLowerCase() == 'no' ){
     logIt('INFO',`Starting process watcher for ${app_monitor[platform]}`);
     procWatcher.watch(app_monitor[platform]);
-} {
-
   }
 });
 
@@ -300,12 +329,12 @@ TPClient.on("Close", (data) => {
 // - END - TP
 
 // - START - Discord
-let getGuildChannels = () => {}
-let voiceState = () => {}
-let voiceChannel = () => {}
-let guildCreate = () => {}
-let channelCreate = () => {}
-let voiceConnectionStatus = () => {}
+let getGuildChannels = () => { /* Empty as it will be assigned later */ }
+let voiceState = () => { /* Empty as it will be assigned later */ }
+let voiceChannel = () => { /* Empty as it will be assigned later */ }
+let guildCreate = () => { /* Empty as it will be assigned later */ }
+let channelCreate = () => { /* Empty as it will be assigned later */ }
+let voiceConnectionStatus = () => { /* Empty as it will be assigned later */ }
 let currentVoiceUsers = {}
 
 const convertVolumeToPercentage = ( value ) => {
@@ -316,57 +345,71 @@ const convertVolumeToPercentage = ( value ) => {
 
 const connectToDiscord = function () {
   DiscordClient = new RPC.Client({ transport: "ipc" });
+  let prevVoiceActivityData = {}
+  const voiceActivity = function (newData) {
+    logIt("DEBUG","voiceActivity", JSON.stringify(newData));
+    const data = diff(prevVoiceActivityData, newData)
+    prevVoiceActivityData = newData;
+    const states = []
+    const connectors = []
 
-  const voiceActivity = function (data) {
-    logIt("DEBUG","voiceActivity", JSON.stringify(data));
-
-    if (data.mute) {
-      muteState = 1;
-    } else {
-      muteState = 0;
+    if( data.hasOwnProperty('mute')) {
+      if (data.mute) {
+        muteState = 1;
+      } else {
+        muteState = 0;
+      }
+      states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
     }
-    if (data.deaf) {
-      deafState = 1;
-      muteState = 1;
-    } else {
-      deafState = 0;
+    if( data.hasOwnProperty('deaf')) {
+      if (data.deaf) {
+        deafState = 1;
+        muteState = 1;
+      } else {
+        deafState = 0;
+      }
+      states.push({ id: "discord_deafen", value: deafState ? "On" : "Off" })
     }
 
-    if( data.input.volume > -1) {
+    if( data.hasOwnProperty('input') && data.input.hasOwnProperty('volume') && data.input.volume > -1) {
       discord_voice_volume = convertVolumeToPercentage(data.input.volume);
+      states.push({ id: "discord_voice_volume", value: discord_voice_volume })
+      connectors.push({ id: "discord_voice_volume_connector", value: discord_voice_volume })
     }
-    if( data.output.volume > -1) {
+    if( data.hasOwnProperty('output') && data.output.hasOwnProperty('volume') && data.output.volume > -1) {
       discord_speaker_volume = convertVolumeToPercentage(data.output.volume);
       discord_speaker_volume_connector = Math.round(convertVolumeToPercentage(data.output.volume)/2);
+      states.push({ id: "discord_speaker_volume", value: discord_speaker_volume })
+      connectors.push({ id: "discord_speaker_volume_connector", value: discord_speaker_volume_connector })
     }
-    if( data.mode.type != '') {
-      logIt("DEBUG","voice mode is",data.mode.type);
+    if( data.hasOwnProperty('mode') && data.mode.hasOwnProperty('type') && data.mode.type != '') {
       discord_voice_mode_type = data.mode.type;
+      states.push( { id: "discord_voice_mode_type", value: discord_voice_mode_type })
     }
-    discord_automatic_gain_control = data.automatic_gain_control || data.automaticGainControl ? 1 : 0;
-    discord_noise_suppression = data.noise_suppression || data.noiseSuppression ? 1 : 0;
-    discord_echo_cancellation = data.echo_cancellation || data.echoCancellation ? 1 : 0;
-    discord_silence_warning = data.silence_warning || data.silenceWarning ? 1 : 0;
-    discord_qos_priority = data.qos ? 1 : 0;
+    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+      discord_automatic_gain_control = data.automatic_gain_control || data.automaticGainControl ? 1 : 0;
+      states.push({ id: "discord_automatic_gain_control", value: discord_automatic_gain_control ? "On" : "Off" })
+    }
+    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+      discord_noise_suppression = data.noise_suppression || data.noiseSuppression ? 1 : 0;
+      states.push({ id: "discord_noise_suppression", value: discord_noise_suppression ? "On" : "Off" })
+    }
+    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+      discord_echo_cancellation = data.echo_cancellation || data.echoCancellation ? 1 : 0;
+      states.push({ id: "discord_echo_cancellation", value: discord_echo_cancellation ? "On" : "Off" })
+    }
+    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+      discord_silence_warning = data.silence_warning || data.silenceWarning ? 1 : 0;
+      states.push({ id: "discord_silence_warning", value: discord_silence_warning ? "On" : "Off" })
+    }
+    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+      discord_qos_priority = data.qos ? 1 : 0;
+      states.push({ id: "discord_qos_priority", value: discord_qos_priority ? "On" : "Off" })
+    }
 
-    const states = [
-      { id: "discord_mute", value: muteState ? "On" : "Off" },
-      { id: "discord_deafen", value: deafState ? "On" : "Off" },
-      { id: "discord_voice_volume", value: discord_voice_volume },
-      { id: "discord_voice_mode_type", value: discord_voice_mode_type },
-      { id: "discord_speaker_volume", value: discord_speaker_volume },
-      { id: "discord_automatic_gain_control", value: discord_automatic_gain_control ? "On" : "Off" },
-      { id: "discord_echo_cancellation", value: discord_echo_cancellation ? "On" : "Off" },
-      { id: "discord_noise_suppression", value: discord_noise_suppression ? "On" : "Off" },
-      { id: "discord_silence_warning", value: discord_silence_warning ? "On" : "Off" },
-      { id: "discord_qos_priority", value: discord_qos_priority ? "On" : "Off" },
-    ]
-    TPClient.stateUpdateMany(states);
-
-    const connectors = [
-      { id: "discord_voice_volume_connector", value: discord_voice_volume },
-      { id: "discord_speaker_volume_connector", value: discord_speaker_volume_connector },
-    ]
+    if( states.length > 0 ) {
+      TPClient.stateUpdateMany(states);
+    }
     if( connectors.length > 0 ) {
       TPClient.connectorUpdateMany(connectors);
     }
@@ -442,19 +485,19 @@ const connectToDiscord = function () {
     }
   }
 
-  getGuild = async(data) => {
+  const getGuild = async(data) => {
     let guild = await DiscordClient.getGuild(data.id);
     await assignGuildIndex(guild,1);
 
     TPClient.choiceUpdate('discordServerList',guilds.array)
   };
 
-  getChannel = async (data) => {
+  const getChannel = async (data) => {
     let channel = await DiscordClient.getChannel(data.id);
     assignChannelIndex(channel.guild_id,channel);
   };
 
-  voiceState = async (event,data) => {
+  const voiceState = async (event,data) => {
       logIt("DEBUG","Voice State", event, JSON.stringify(data));
       if( event !== "delete" ) {
         currentVoiceUsers[data.nick] = data;
@@ -466,7 +509,7 @@ const connectToDiscord = function () {
       TPClient.stateUpdate('discord_voice_channel_participants', discord_voice_channel_participants)
   
   };
-  voiceChannel = async (data) => {
+  const voiceChannel = async (data) => {
       logIt("DEBUG",'Voice Channel:',JSON.stringify(data));
       if ( last_voice_channel_subs.length > 0 ) {
         for( let i  = 0; i < last_voice_channel_subs.length ; i++ ) {
@@ -512,7 +555,7 @@ const connectToDiscord = function () {
         discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
       }
 
-      var states = [
+      let states = [
         { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
         { id: 'discord_voice_channel_id', value: discord_voice_channel_id},
         { id: 'discord_voice_channel_server_name', value: discord_voice_channel_server_name},
@@ -522,16 +565,16 @@ const connectToDiscord = function () {
 
       TPClient.stateUpdateMany(states);
   };
-  guildCreate = async (data) => {
+  const guildCreate = async (data) => {
       logIt("DEBUG",'Guild Create:',JSON.stringify(data));
       getGuild(data);
   };
-  channelCreate = async (data) => {
+  const channelCreate = async (data) => {
       logIt("DEBUG",'Channel Create:',JSON.stringify(data));
       getChannel(data);
   };
   
-  voiceConnectionStatus = async (data) => {
+  const voiceConnectionStatus = async (data) => {
       logIt("DEBUG",'Voice Connection:',JSON.stringify(data));
       if( data.state != null && data.state == 'VOICE_CONNECTED' ) {
         // Set Voice Channel Connect State
@@ -546,7 +589,7 @@ const connectToDiscord = function () {
         discord_voice_hostname = '<None>';
         discord_voice_channel_participants = '<None>'
       }
-      var states = [
+      let states = [
         { id: 'discord_voice_channel_connected', value: discord_voice_channel_connected},
         { id: 'discord_voice_average_ping', value: discord_voice_average_ping},
         { id: 'discord_voice_hostname', value: discord_voice_hostname},
@@ -565,15 +608,6 @@ const connectToDiscord = function () {
     }
 
     TPClient.stateUpdate("discord_connected","Connected");
-
-    //DiscordClient.setVoiceSettings({'mode':{'type':'PUSH_TO_TALK','shortcut':[{'type':0,'code':16,'name':'shift'},{'type':0,'code':123,'name':'F12'}]}});
-    // Left Shift 160
-    // Right Shift = 161
-    // Left control = 162
-    // Right control = 163
-    // Left Alt = 164
-    // Right Alt = 165
-    //"shortcut":[{"type":0,"code":160,"name":"shift"},{"type":0,"code":123,"name":"f12"}]
 
     TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Connected");
 
@@ -640,9 +674,9 @@ const connectToDiscord = function () {
 };
 // - END - Discord
 
-var waitForClientId = (timeoutms) =>
+const waitForClientId = (timeoutms) =>
   new Promise((r, j) => {
-    var check = () => {
+    const check = () => {
       if (!isEmpty(pluginSettings["Discord Client Id"]) && !isEmpty(pluginSettings["Discord Client Secret"])) {
         r();
       } else if ((timeoutms -= 1000) < 0) { 
@@ -653,10 +687,10 @@ var waitForClientId = (timeoutms) =>
     setTimeout(check, 1000);
   });
 
-var waitForLogin = () =>
+  const waitForLogin = () =>
   new Promise((r, j) => {
     connecting = true;
-    var check = () => {
+    const check = () => {
       if (DiscordClient && DiscordClient.user != null) {
         connecting = false;
         r();
@@ -727,7 +761,7 @@ function logIt() {
   const curTime = new Date().toISOString();
   const message = [...arguments];
   const type = message.shift();
-  if( type == "DEBUG" && pluginSettings["Debug Mode"].toLowerCase() == "off") { return }
+  if( type == "DEBUG" && pluginSettings["Discord Debug Mode"].toLowerCase() == "off") { return }
  
   console.log(curTime,":",pluginId,":"+type+":",message.join(" "));
 }
