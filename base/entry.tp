@@ -506,6 +506,12 @@
                     "type": "text",
                     "desc": "Discord Voice Channel Participants",
                     "default": "<None>"
+                },
+                {
+                    "id": "discord_voice_channel_participant_ids",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Participant IDs",
+                    "default": "<None>"
                 }
             ],
             "events": []
