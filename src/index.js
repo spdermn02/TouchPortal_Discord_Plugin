@@ -53,6 +53,7 @@ let discord_speaker_volume = '0';
 let discord_speaker_volume_connector = '0';
 let discord_voice_mode_type = 'UNKNOWN';
 let discord_voice_channel_participants = '<None>';
+let discord_voice_channel_participant_ids = '<None>';
 let guilds = {};
 let channels = {};
 let discordPTTKeys = [];
@@ -107,7 +108,7 @@ TPClient.on("Action", async (message) => {
     let channelId = channels[guildId][type.toLowerCase()].idx[channelName];
     
     if( type === 'Voice' ) {
-      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: false});
+      await DiscordClient.selectVoiceChannel(channelId, {timeout: 5, force: true});
     }
     else {
       await DiscordClient.selectTextChannel(channelId, {timeout: 5});
@@ -115,7 +116,7 @@ TPClient.on("Action", async (message) => {
   }
   else if( message.actionId === "discord_dm_voice_select" ) {
     let channelId = message.data[0].value;
-    await DiscordClient.selectVoiceChannel(channelId,{timeout: 5, force: false});
+    await DiscordClient.selectVoiceChannel(channelId,{timeout: 5, force: true});
   }
   else if( message.actionId === "discord_dm_text_select" ) {
     let channelId = message.data[0].value;
@@ -347,7 +348,7 @@ const connectToDiscord = function () {
   DiscordClient = new RPC.Client({ transport: "ipc" });
   let prevVoiceActivityData = {}
   const voiceActivity = function (newData) {
-    logIt("DEBUG","voiceActivity", JSON.stringify(newData));
+    logIt("ERROR","voiceActivity", JSON.stringify(newData));
     const data = diff(prevVoiceActivityData, newData)
     prevVoiceActivityData = newData;
     const states = []
@@ -390,19 +391,19 @@ const connectToDiscord = function () {
       discord_automatic_gain_control = data.automatic_gain_control || data.automaticGainControl ? 1 : 0;
       states.push({ id: "discord_automatic_gain_control", value: discord_automatic_gain_control ? "On" : "Off" })
     }
-    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+    if( data.hasOwnProperty('noise_suppression') || data.hasOwnProperty('noise_suppression')) {
       discord_noise_suppression = data.noise_suppression || data.noiseSuppression ? 1 : 0;
       states.push({ id: "discord_noise_suppression", value: discord_noise_suppression ? "On" : "Off" })
     }
-    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+    if( data.hasOwnProperty('echo_cancellation') || data.hasOwnProperty('echo_cancellation')) {
       discord_echo_cancellation = data.echo_cancellation || data.echoCancellation ? 1 : 0;
       states.push({ id: "discord_echo_cancellation", value: discord_echo_cancellation ? "On" : "Off" })
     }
-    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+    if( data.hasOwnProperty('silence_warning') || data.hasOwnProperty('silence_warning')) {
       discord_silence_warning = data.silence_warning || data.silenceWarning ? 1 : 0;
       states.push({ id: "discord_silence_warning", value: discord_silence_warning ? "On" : "Off" })
     }
-    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+    if( data.hasOwnProperty('qos') || data.hasOwnProperty('qos')) {
       discord_qos_priority = data.qos ? 1 : 0;
       states.push({ id: "discord_qos_priority", value: discord_qos_priority ? "On" : "Off" })
     }
@@ -439,6 +440,12 @@ const connectToDiscord = function () {
     }
 
     TPClient.choiceUpdate('discordServerList',guilds.array)
+
+    const voiceChannelData = await DiscordClient.getSelectedVoiceChannel();
+    if( voiceChannelData != null ) {
+      voiceChannelData.channel_id = voiceChannelData.id;
+      voiceChannel(voiceChannelData);
+    }
   };
 
   const assignGuildIndex = async (guild, counter) => {
@@ -498,7 +505,8 @@ const connectToDiscord = function () {
   };
 
   const voiceState = async (event,data) => {
-      logIt("DEBUG","Voice State", event, JSON.stringify(data));
+      logIt("ERROR","Voice State", event, JSON.stringify(data));
+      let ids = [];
       if( event !== "delete" ) {
         currentVoiceUsers[data.nick] = data;
       }
@@ -506,11 +514,17 @@ const connectToDiscord = function () {
         delete currentVoiceUsers[data.nick]
       }
       discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
-      TPClient.stateUpdate('discord_voice_channel_participants', discord_voice_channel_participants)
+      Object.keys(currentVoiceUsers).forEach((key,i) => {
+        ids.push(currentVoiceUsers[key].user.id);
+      })
+      discord_voice_channel_participant_ids = ids.join("|");
+      TPClient.stateUpdateMany([
+        { 'id': 'discord_voice_channel_participants', 'value': discord_voice_channel_participants },
+        { 'id': 'discord_voice_channel_participant_ids', 'value': discord_voice_channel_participant_ids}
+      ])
   
   };
   const voiceChannel = async (data) => {
-      logIt("DEBUG",'Voice Channel:',JSON.stringify(data));
       if ( last_voice_channel_subs.length > 0 ) {
         for( let i  = 0; i < last_voice_channel_subs.length ; i++ ) {
           await last_voice_channel_subs[i].unsubscribe();
@@ -524,6 +538,7 @@ const connectToDiscord = function () {
         discord_voice_channel_server_id = '<None>'
         discord_voice_channel_server_name = '<None>'
         discord_voice_channel_participants = '<None>'
+        discord_voice_channel_participant_ids = '<None>'
       }
       else if( data.guild_id == null ) {
         discord_voice_channel_id = data.channel_id;
@@ -548,11 +563,16 @@ const connectToDiscord = function () {
       }
       
       if(discord_voice_channel_id !== '<None>' ) {
+        let ids = [];
         const channel = await DiscordClient.getChannel(discord_voice_channel_id)
         channel.voice_states.forEach((vs,i) => {
           currentVoiceUsers[vs.nick] = vs;
         })
         discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
+        Object.keys(currentVoiceUsers).forEach((key,i) => {
+          ids.push(currentVoiceUsers[key].user.id);
+        })
+        discord_voice_channel_participant_ids = ids.length > 0 ? ids.join("|") : '<None>'
       }
 
       let states = [
@@ -560,7 +580,8 @@ const connectToDiscord = function () {
         { id: 'discord_voice_channel_id', value: discord_voice_channel_id},
         { id: 'discord_voice_channel_server_name', value: discord_voice_channel_server_name},
         { id: 'discord_voice_channel_server_id', value: discord_voice_channel_server_id},
-        { id: 'discord_voice_channel_participants', value: discord_voice_channel_participants}
+        { id: 'discord_voice_channel_participants', value: discord_voice_channel_participants},
+        { id: 'discord_voice_channel_participant_ids', value: discord_voice_channel_participant_ids}
       ];
 
       TPClient.stateUpdateMany(states);
@@ -625,7 +646,23 @@ const connectToDiscord = function () {
     voiceActivity(voiceSettings);
     getGuilds();
     
-    //DiscordClient.setActivity({'state':'Developing', 'details':'Working on testing update to Touch Portal Discord Plugin'})
+    // TODO: Testing with SetActivity
+    // DiscordClient.setActivity({
+    //   // 'name': 'Touch Portal Plugin Development',
+    //   // 'type': 2,
+    //   // 'url': 'https://twitch.tv/spdermn02',
+    //   // 'state':'Touch Portal', 
+    //   // 'details':'Working on testing update to Touch Portal Discord Plugin'
+    //   "state": "In a Group",
+    //   "details": "Competitive | In a Match",
+    //   "assets": {
+    //     "large_image": "numbani_map",
+    //     "large_text": "Numbani",
+    //     "small_image": "pharah_profile",
+    //     "small_text": "Pharah"
+    //   },
+    //   "instance": true
+    // })
     //setInterval(() => { DiscordClient.clearActivity() }, 10000)
     
   });
