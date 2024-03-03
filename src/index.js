@@ -58,6 +58,7 @@ let discord_voice_channel_participant_ids = '<None>';
 let guilds = {};
 let channels = {};
 let discordPTTKeys = [];
+let soundBoard = {};
 
 let pttKeyStateId = 'discordPTTKeyboardKey';
 
@@ -113,6 +114,15 @@ TPClient.on("Action", async (message) => {
     }
     else {
       await DiscordClient.selectTextChannel(channelId, {timeout: 5});
+    }
+  }
+  else if( message.actionId === "discord_play_sound" ) {
+    let sound = soundBoard.idx[message.data[0].value];
+    try {
+      await DiscordClient.playSoundboardSound(sound.name, sound.sound_id, sound.guild_id);
+    }
+    catch(err) {
+      logIt("ERROR","Playing a sound failed "+err);
     }
   }
   else if( message.actionId === "discord_toggle_camera" )  {
@@ -471,6 +481,31 @@ const connectToDiscord = function () {
     }
   };
 
+  const getSoundboardSounds = async () => {
+    let sounds = await DiscordClient.getSoundboardSounds();
+    logIt("INFO","Soundboard Sounds",JSON.stringify(sounds,undefined,"  "));
+    if( sounds != null ) {
+      soundBoard = {
+        array: [],
+        idx: {}
+      }
+
+      for( const sound of sounds ) {
+        let emojiName = sound.emoji_name != null ? sound.emoji_name + ' - ' : '';
+        let guildName = sound.guild_id === "DEFAULT" ? "Discord Sounds" : guilds.idx[sound.guild_id]
+        let soundName = guildName + " - " + emojiName + sound.name;
+        soundBoard.array.push(soundName);
+        soundBoard.idx[soundName] = sound;
+        soundBoard.idx[sound.sound_id] = sound;
+      }
+
+      soundBoard.array.sort();
+      logIt("DEBUG","Soundboard Sounds",JSON.stringify(soundBoard,undefined,"  "));
+
+      TPClient.choiceUpdate('discordSound',soundBoard.array);
+    }
+  };
+
   const assignGuildIndex = async (guild, counter) => {
     guilds.array.push(guild.name);
     guilds.idx[guild.name] = guild.id;
@@ -676,7 +711,8 @@ const connectToDiscord = function () {
     //DiscordClient.on("MESSAGE_CREATE", (data) => {logIt("DEBUG", JSON.stringify(data))}) 
     const voiceSettings = await DiscordClient.getVoiceSettings().catch((err) => {logIt("ERROR",err)});
     voiceActivity(voiceSettings);
-    getGuilds();
+    await getGuilds();
+    await getSoundboardSounds();
     // DiscordClient.getSoundboardSounds();
 
     // DiscordClient.playSoundboardSound();

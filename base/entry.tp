@@ -220,6 +220,23 @@
                    "format":"Discord: Hang Up Voice Channel"
                 },
                 {
+                    "id": "discord_play_sound",
+                    "prefix": "Discord:",
+                    "name": "Discord Play Sound",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Play Sound {$discordSound$}",
+                    "data": [
+                        {
+                            "id": "discordSound",
+                            "type": "choice",
+                            "label": "Discord Sound",
+                            "default": "",
+                            "valueChoices": []
+                        }
+                    ]
+                },
+                {
                    "id": "discord_select_channel",
                    "prefix": "Discord:",
                    "name":"Discord Select Channel",
