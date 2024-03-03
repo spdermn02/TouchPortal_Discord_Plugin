@@ -115,6 +115,12 @@ TPClient.on("Action", async (message) => {
       await DiscordClient.selectTextChannel(channelId, {timeout: 5});
     }
   }
+  else if( message.actionId === "discord_toggle_camera" )  {
+    await DiscordClient.toggleVideo();
+  }
+  else if( message.actionId == "discord_toggle_screenshare" ) {
+    await DiscordClient.toggleScreenshare();
+  }
   else if( message.actionId === "discord_dm_voice_select" ) {
     let channelId = message.data[0].value;
     await DiscordClient.selectVoiceChannel(channelId,{timeout: 5, force: true});

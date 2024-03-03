@@ -339,6 +339,22 @@
                            "default":""
                        }
                    ]
+                },
+                {
+                    "id": "discord_toggle_camera",
+                    "prefix": "Discord:",
+                    "name": "Discord Toggle Camera",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Toggle Camera On/Off"
+                },
+                {
+                    "id": "discord_toggle_screenshare",
+                    "prefix": "Discord:",
+                    "name": "Discord Toggle Screen Share",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Toggle Screen Share On/Off"
                 }
             ],
             "states": [
