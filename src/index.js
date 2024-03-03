@@ -667,6 +667,8 @@ const connectToDiscord = function () {
     await DiscordClient.subscribe("CHANNEL_CREATE").catch((err) => {logIt("ERROR",err)});
     await DiscordClient.subscribe("VOICE_CHANNEL_SELECT").catch((err) => {logIt("ERROR",err)});
     await DiscordClient.subscribe("VOICE_CONNECTION_STATUS").catch((err) => {logIt("ERROR",err)});
+    await DiscordClient.subscribe("VIDEO_STATE_UPDATE").catch((err) => {logIt("ERROR",err)});
+    await DiscordClient.subscribe("SCREENSHARE_STATE_UPDATE").catch((err) => {logIt("ERROR",err)});
 
     DiscordClient.on("VOICE_STATE_CREATE", (data) => {voiceState('create',data);})
     DiscordClient.on("VOICE_STATE_UPDATE", (data) => {voiceState('update',data);})
@@ -715,6 +717,12 @@ const connectToDiscord = function () {
   })
   DiscordClient.on('VOICE_CONNECTION_STATUS', (data) => {
     voiceConnectionStatus(data);
+  })
+  DiscordClient.on('VIDEO_STATE_UPDATE', (data) => {
+    TPClient.stateUpdate("discord_camera_status",data.active? "On" : "Off")
+  })
+  DiscordClient.on('SCREENSHARE_STATE_UPDATE', (data) => {
+    TPClient.stateUpdate("discord_screenshare_status",data.active? "On" : "Off")
   })
 
   DiscordClient.on("disconnected", () => {

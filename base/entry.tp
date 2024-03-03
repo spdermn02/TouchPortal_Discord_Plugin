@@ -379,6 +379,28 @@
                     ]
                 },
                 {
+                    "id": "discord_camera_status",
+                    "type":"choice",
+                    "desc":" Discord Camera",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+
+                },
+                {
+                    "id": "discord_screenshare_status",
+                    "type":"choice",
+                    "desc":" Discord Screen Share",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+
+                },
+                {
                     "id": "discord_voice_channel_connected",
                     "type": "choice",
                     "desc": "Discord Voice Channel Connected",
