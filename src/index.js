@@ -1,4 +1,4 @@
-const RPC = require("discord-rpc");
+const RPC = require("../discord-rpc");
 const TP = require("touchportal-api");
 const { open } = require("out-url");
 const path = require("path");
@@ -6,6 +6,7 @@ const discordKeyMap = require("./discordkeys");
 const ProcessWatcher = require(path.join(__dirname,"/process_watcher"));
 const platform = require('process').platform;
 const Config = require('./config');
+const { log } = require("console");
 
 const PLUGIN_CONNECTED_SETTING = 'Plugin Connected';
 
@@ -13,7 +14,7 @@ let discordRunning = false;
 let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Discord Debug Mode':'Off' };
 let accessToken = undefined;
 let connecting = false;
-const scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write" ];
+const scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write", "rpc.video.read","rpc.video.write", "rpc.screenshare.read","rpc.screenshare.write" ];
 
 const redirectUri = "http://localhost";
 
@@ -290,12 +291,27 @@ TPClient.on("Info", (data) => {
 
 TPClient.on("Settings", (data) => {
   logIt("DEBUG","Settings: New Settings from Touch-Portal ");
+  let reconnect = false;
   data.forEach( (setting) => {
     let key = Object.keys(setting)[0];
+    if( (pluginSettings[key] == undefined || pluginSettings[key] != setting[key] ) && ["Discord Client Id","Discord Client Secret"].find( ele => ele == key) ) {
+      reconnect = true;
+    }
     pluginSettings[key] = setting[key];
-
-    logIt("DEBUG","Settings: Setting received for |"+key+"|");
+      logIt("DEBUG","Settings: Setting received for |"+key+"|");
   });
+  if( accessToken != undefined ) {
+    if( reconnect) {
+      logIt("INFO","Settings: Reconnecting to Discord due to settings change");
+      DiscordClient.removeAllListeners();
+      DiscordClient.destroy();
+      DiscordClient = null;
+      return;
+    }
+    else {
+      return;
+    }
+  }
   if( platform != 'win32' || pluginSettings['Skip Process Watcher'].toLowerCase() == 'yes') {
     TPClient.stateUpdate('discord_running','Unknown');
     procWatcher.stopWatch();
@@ -345,10 +361,11 @@ const convertVolumeToPercentage = ( value ) => {
 }
 
 const connectToDiscord = function () {
+  try{
   DiscordClient = new RPC.Client({ transport: "ipc" });
   let prevVoiceActivityData = {}
   const voiceActivity = function (newData) {
-    logIt("ERROR","voiceActivity", JSON.stringify(newData));
+    logIt("DEBUG","voiceActivity", JSON.stringify(newData));
     const data = diff(prevVoiceActivityData, newData)
     prevVoiceActivityData = newData;
     const states = []
@@ -505,7 +522,7 @@ const connectToDiscord = function () {
   };
 
   const voiceState = async (event,data) => {
-      logIt("ERROR","Voice State", event, JSON.stringify(data));
+      logIt("DEBUG","Voice State", event, JSON.stringify(data));
       let ids = [];
       if( event !== "delete" ) {
         currentVoiceUsers[data.nick] = data;
@@ -525,12 +542,18 @@ const connectToDiscord = function () {
   
   };
   const voiceChannel = async (data) => {
+    logIt("DEBUG","Voice Channel join", JSON.stringify(data));
       if ( last_voice_channel_subs.length > 0 ) {
+        logIt("DEBUG","START- Unsubscribing from Voice Channel voice states");
         for( let i  = 0; i < last_voice_channel_subs.length ; i++ ) {
-          await last_voice_channel_subs[i].unsubscribe();
+          
+          await last_voice_channel_subs[i].unsubscribe()
         }
+        await wait(.25)
+        logIt("DEBUG","COMPLETE - Unsubscribing from Voice Channel voice states");
         last_voice_channel_subs = []
         currentVoiceUsers= {}
+        
       }
       if( data.channel_id == null ) {
         discord_voice_channel_name = '<None>'
@@ -545,9 +568,9 @@ const connectToDiscord = function () {
         discord_voice_channel_name = 'Personal';
         discord_voice_channel_server_id = 'Personal';
         discord_voice_channel_server_name = 'Personal';
-        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
-        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
-        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}); 
+        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
+        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
+        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)}); 
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       }
       else {
@@ -556,12 +579,13 @@ const connectToDiscord = function () {
         discord_voice_channel_id = data.channel_id;
         discord_voice_channel_server_id = data.guild_id;
         discord_voice_channel_server_name = guilds.idx[data.guild_id];
-        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id});
-        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id});
-        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id});
+        logIt("DEBUG","Subscribing to Voice Channel [", discord_voice_channel_name, "] with ID [", discord_voice_channel_id, "] on Server [", discord_voice_channel_server_name, "] with ID [", discord_voice_channel_server_id,"]");
+        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
+        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
+        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
+        logIt("DEBUG","COMPLETE - Subscribing to Voice Channel")
         last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
       }
-      
       if(discord_voice_channel_id !== '<None>' ) {
         let ids = [];
         const channel = await DiscordClient.getChannel(discord_voice_channel_id)
@@ -632,19 +656,24 @@ const connectToDiscord = function () {
 
     TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Connected");
 
-    await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE");
-    await DiscordClient.subscribe("GUILD_CREATE");
-    await DiscordClient.subscribe("CHANNEL_CREATE");
-    await DiscordClient.subscribe("VOICE_CHANNEL_SELECT");
-    await DiscordClient.subscribe("VOICE_CONNECTION_STATUS");
+    await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE").catch((err) => {logIt("ERROR",err)});
+    await DiscordClient.subscribe("GUILD_CREATE").catch((err) => {logIt("ERROR",err)});
+    await DiscordClient.subscribe("CHANNEL_CREATE").catch((err) => {logIt("ERROR",err)});
+    await DiscordClient.subscribe("VOICE_CHANNEL_SELECT").catch((err) => {logIt("ERROR",err)});
+    await DiscordClient.subscribe("VOICE_CONNECTION_STATUS").catch((err) => {logIt("ERROR",err)});
 
     DiscordClient.on("VOICE_STATE_CREATE", (data) => {voiceState('create',data);})
     DiscordClient.on("VOICE_STATE_UPDATE", (data) => {voiceState('update',data);})
     DiscordClient.on("VOICE_STATE_DELETE", (data) => {voiceState('delete',data);})
     //DiscordClient.on("MESSAGE_CREATE", (data) => {logIt("DEBUG", JSON.stringify(data))}) 
-    const voiceSettings = await DiscordClient.getVoiceSettings();
+    const voiceSettings = await DiscordClient.getVoiceSettings().catch((err) => {logIt("ERROR",err)});
     voiceActivity(voiceSettings);
     getGuilds();
+    // DiscordClient.getSoundboardSounds();
+
+    // DiscordClient.playSoundboardSound();
+    // DiscordClient.toggleVideo();
+    // DiscordClient.toggleScreenshare();
     
     // TODO: Testing with SetActivity
     // DiscordClient.setActivity({
@@ -708,6 +737,10 @@ const connectToDiscord = function () {
       doLogin();
     }
   });
+}
+catch(e) {
+  logIt("ERROR","Error in connectToDiscord",e);
+}
 };
 // - END - Discord
 
@@ -793,6 +826,11 @@ procWatcher.on('processTerminated', (processName) => {
 function isEmpty(val) {
   return val === undefined || val === null || val === '';
 }
+
+const wait = (seconds) => 
+           new Promise(resolve => 
+             setTimeout(() => 
+                 resolve(true), seconds * 1000))
 
 function logIt() {
   const curTime = new Date().toISOString();
