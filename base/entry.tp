@@ -107,6 +107,63 @@
                     ]
                 },
                 {
+                    "id": "discord_push_to_talk",
+                    "prefix": "Discord:",
+                    "name": "Discord Push To Talk",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "hasHoldFunctionality": "true",
+                    "format": "Discord: Push To Talk",
+                    "data": []
+                },
+                {
+                    "id": "discord_push_to_mute",
+                    "prefix": "Discord:",
+                    "name": "Discord Push To Mute",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "hasHoldFunctionality": "true",
+                    "format": "Discord: Push To Mute",
+                    "data": []
+                },
+                {
+                    "id": "discord_voice_volume_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Voice Volume",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Voice Volume {$discordVoiceVolume$}",
+                    "data": [
+                        {
+                            "id": "discordVoiceVolume",
+                            "type": "text",
+                            "label": "Voice Volume",
+                            "default": "0.00"
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_automatic_gain_control_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Automatic Gain Control",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Automatic Gain Control {$discordAutomaticGainControlAction$}",
+                    "data": [
+                        {
+                            "id": "discordAutomaticGainControlAction",
+                            "type": "choice",
+                            "label": "Automatic Gain Control Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
                     "id": "discord_echo_cancellation_action",
                     "prefix": "Discord:",
                     "name": "Discord Echo Cancellation",

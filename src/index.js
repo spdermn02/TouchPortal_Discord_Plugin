@@ -97,7 +97,7 @@ const convertPercentageToVolume = ( value ) => {
   return 100 * Math.pow(10, translation / 20)
 }
 
-TPClient.on("Action", async (message) => {
+TPClient.on("Action", async (message, isHeld) => {
   logIt("DEBUG",JSON.stringify(message));
   if( message.actionId === "discord_select_channel" ) {
     let server = message.data[0].value;
@@ -165,6 +165,23 @@ TPClient.on("Action", async (message) => {
         modeType = discord_voice_mode_type == "VOICE_ACTIVITY" ? "PUSH_TO_TALK": "VOICE_ACTIVITY";
       }
       DiscordClient.setVoiceSettings({'mode':{'type':modeType}});
+    }
+  }
+  else if( message.actionId === "discord_push_to_talk") {
+    if( isHeld ) {
+      DiscordClient.setVoiceSettings({ deaf: false, mute: false });
+    }
+    else {
+      DiscordClient.setVoiceSettings({ deaf: false, mute: true });
+    }
+  }
+  else if( message.actionId === "discord_push_to_mute")
+  {
+    if( isHeld ) {
+      DiscordClient.setVoiceSettings({ deaf: true });
+    }
+    else {
+      DiscordClient.setVoiceSettings({ deaf: false, mute: false });
     }
   }
   else if (message.data && message.data.length > 0) {
@@ -483,7 +500,7 @@ const connectToDiscord = function () {
 
   const getSoundboardSounds = async () => {
     let sounds = await DiscordClient.getSoundboardSounds();
-    logIt("INFO","Soundboard Sounds",JSON.stringify(sounds,undefined,"  "));
+    
     if( sounds != null ) {
       soundBoard = {
         array: [],
@@ -499,8 +516,8 @@ const connectToDiscord = function () {
         soundBoard.idx[sound.sound_id] = sound;
       }
 
+      // Sort by Discord Guild name - seems to make the most sense to collect them into grouped areas.
       soundBoard.array.sort();
-      logIt("DEBUG","Soundboard Sounds",JSON.stringify(soundBoard,undefined,"  "));
 
       TPClient.choiceUpdate('discordSound',soundBoard.array);
     }
