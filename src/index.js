@@ -730,31 +730,6 @@ const connectToDiscord = function () {
     voiceActivity(voiceSettings);
     await getGuilds();
     await getSoundboardSounds();
-    // DiscordClient.getSoundboardSounds();
-
-    // DiscordClient.playSoundboardSound();
-    // DiscordClient.toggleVideo();
-    // DiscordClient.toggleScreenshare();
-    
-    // TODO: Testing with SetActivity
-    // DiscordClient.setActivity({
-    //   // 'name': 'Touch Portal Plugin Development',
-    //   // 'type': 2,
-    //   // 'url': 'https://twitch.tv/spdermn02',
-    //   // 'state':'Touch Portal', 
-    //   // 'details':'Working on testing update to Touch Portal Discord Plugin'
-    //   "state": "In a Group",
-    //   "details": "Competitive | In a Match",
-    //   "assets": {
-    //     "large_image": "numbani_map",
-    //     "large_text": "Numbani",
-    //     "small_image": "pharah_profile",
-    //     "small_text": "Pharah"
-    //   },
-    //   "instance": true
-    // })
-    //setInterval(() => { DiscordClient.clearActivity() }, 10000)
-    
   });
   DiscordClient.on('VOICE_SETTINGS_UPDATE', (data) => {
     voiceActivity(data);

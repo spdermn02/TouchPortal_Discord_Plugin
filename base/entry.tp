@@ -1,7 +1,7 @@
 {
     "sdk": 6,
     "version": 4400,
-    "TPDiscord_Version":"4.4.0-alpha-1",
+    "TPDiscord_Version":"4.4.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe\"",
@@ -455,7 +455,7 @@
                 {
                     "id": "discord_camera_status",
                     "type":"choice",
-                    "desc":" Discord Camera",
+                    "desc":"Discord Camera",
                     "default": "Off",
                     "valueChoices": [
                         "Off",
@@ -466,7 +466,7 @@
                 {
                     "id": "discord_screenshare_status",
                     "type":"choice",
-                    "desc":" Discord Screen Share",
+                    "desc":"Discord Screen Share",
                     "default": "Off",
                     "valueChoices": [
                         "Off",

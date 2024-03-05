@@ -1,4 +1,4 @@
-# Touch Portal Plugin to Interact with Discord
+<h1> Touch Portal Plugin to Interact with Discord </h1>
 ![](https://img.shields.io/github/downloads/spdermn02/TouchPortal_Discord_Plugin/total)
 
 - [Touch Portal Plugin to Interact with Discord](#touch-portal-plugin-to-interact-with-discord)
@@ -34,95 +34,15 @@ Hangup voice calls<br>
 See Voice Connection Stats (server, ping)<br>
 Toggle/Set Push To Talk or Voice Activity Modes <br>
 Set Push To Talk Hotkey Combinations<br>
+Change Voice Settings<br>
+Control Microphone/Speaker Volume via Sliders<br>
+Open DM Text by ID<br>
+Open DM Voice Call by ID<br>
+Play Soundboard Sounds<br>
+Push to Mute<br>
+Push to Talk
 
-## ChangeLog
-```
-pre-v4.0.0
-  - Mute yourself in Discord
-  - Deafen yourself in Discord
-  - Worked on fixing connection issues
-v4.0.0
-  Additions:
-    - Action for Voice Mode Changes - PTT to Voice Activity (and back again)
-    - Action for Push-To-Talk Hotkey Changing
-    - Action to Go to specific Voice or Text channel within a Discord server you belong to
-    - If in a Voice Channel allow you to hang up the call
-    - Voice Connection Statistics
-        Voice Server
-        Ping Average
-    - State for Voice Channel Connected to
-    - State for Voice Mode Type
-    - Watch for Discord.exe to be running before attempting to connect, polls every 10 seconds so could cause slight delay in connection if start up is slow (Win Only, still working Mac)
-  Updates:
-    - Reworked to with Touch Portal v2.3 plugin api enhancement/changes
-    - Settings moved from custom built config to inside Touch Portal (will require reconfiguration using discord dev app you already have setup)
-      - Will now request authorization EACH time Touch Portal (or the plug-in) starts, this way guaranteeing your Access Token is fresh
-        - *Note*: May be reworked in the future to store Access Token but found issues with this implementation during development. 
-  Bug Fixes:
-    - Added bug fix from pre-v4.0.0 here as well - longer wait times between attempted reconnect
-v4.0.1
-  - Can't remember.. brain fried
-v4.0.2
-  Updates:
-    - Setting to tell you if Discord was successfully connected to - Valid values are 'Disconnected' or 'Connected'
-    - (Windows Only) Setting to disable the Process Watcher if for some reason your system isn't recongizing the application properly.
-      - *Note*: This could require a stop/start of TPDiscord if Discord closes while authenticated, this can be done inside Touch Portal Settings -> Plug-Ins -> Select "Touch Portal Discord Plugin" and clicking the Stop button, wait a few seconds, click the Start button
-v4.0.3
-   Bug Fix:
-    - Fixing Voice Activity and PTT switching
-v4.0.4
-   Bug Fix:
-    - Fixes ProcessWatcher for those who experienced issues, it now forces onto the environment path the directories needed for this to work (Windows only)
-v4.0.5
-   Package Update:
-    - Update find-process npm module to 1.4.7 - to pick up bug fix for #32
-v4.1.0
-   Package Update:
-    - Update discord-rpc npm module to 4.0.1 - to pick up bug fix for #41 and ehancement #20
-   Updates:
-    - No More Re-Auhtorization prompt if you have already authorized your developer app, so restarts will be clean and connect without issue
-    - Refactored the event subscription process due to discord-rpc npm module update. Verified all events still fire as expected.
-v4.2.0
-   Updates:
-    - 3 New States - Discord Voice Channel ID, Discord Voice Channel Server, Discord Voice Channel Server ID
-v4.2.1
-   Updates:
-    - pull in latest version  3.1.2 of touchportal-api module (fixes update check failing and killing process)
-v4.2.2
-   Bug Fix:
-    - Mute and Deafen state value correction from `0ff` to `Off`
-    - removed uneeded scope `messages.read` from discord scope list
-v4.3.0
-   Updates:
-    - New State - Discord Process Running, will be `Yes`, `No`, `Unknown` (starts out as Unknown)
-      - Notes: Windows Only will have all 3 values, MacOS will always be Unknown until a process watcher is implemented for MacOS
-    - New State - Discord Connected, will be `Connected` or `Disconnected`
-v4.3.1
-   Updates:
-    - Improved Startup time of plugin by correctly loading Guild and Channel information
-    - Modified Channel Create and Guild Create events to only handle their particular channel and/or guild so faster load times here too
-      - Notes: this mostly went unoticed if you weren't looking at Logs, but it was a problem and can cause issues
-    - Updated to touchportal-api 3.2.0
-    - Refactored entry.tp to a single file to support both windows and mac
-   Added:
-    - Setting to enable Debug Mode or not 
-      - Valid Values: Off or On
-      - Purpose: Stop spam of messages to log unless needed for debugging purposes
-    - Added in update notification process to actually utilize Touch Portal's notification system
-v4.4.0
-   Updates:
-    - New States -
-       - Discord Voice Channel Participants - will be a pipe delimited list of nicknames for users in your current voice channel you have joined. Will continually update as users join and leave.
-       - All new states related to Voice Settings and Voice/Speaker Volume
-    - New Actions - 
-       - A bunch of new Audio based actions to control the different voice settings
-       - New action to join DM based Text or Voice Channel by ID (voice does NOT ring the person, just joins voice channel)
-    - New Connectors - Sliders to control input and output volumes
-   Refactor:
-    - Using a new build process utilizing scripts/build.js instead of hard coding the build process in package.json, making it more generic as well.
-    - improved Voice Settings changes to only send back relevant changes and not everything time.
-
-```
+## [ChangeLog](CHANGELOG.md)
 
 ## Plugin Capabilities
 ### Actions
@@ -141,6 +61,11 @@ v4.4.0
  - Discord Silence Warning - Toggle/Enable/Disable Silence Warning (not exactly sure what this does due to not much documentation around this)
  - Discord DM Voice Channel - Join a Personal or Group DM Voice Channel by Channel ID (Note: Does not ring the other person, it just forces you into the voice channel)
  - Discord DM Text Channel - Join a Personal or Group DM Text Channel by Channel ID
+ - Discord Push To Talk - (only works in Voice Activity mode) - Un-Mutes/Deafens on hold, re-Mutes on release
+ - Discord Push To Mute - (only works in Voice Activity mode) - Mutes/Deafens on hold, un-Mutes/Deafens on release
+ - Discord Play Sound - Trigger Discord Soundboard sounds from Touch Portal
+ - Discord Toggle Camera - Toggle the Camera on/off in Voice Chat
+ - Discord Toggle Screenshare - Toggle the Screenshare on/off - when turned on will prompt to select what thing to screenshare.
 
 ### Connectors
  - Adjust Input Volume
@@ -187,48 +112,54 @@ v4.4.0
    - Valid Values: On, Off
  - Discord Voice Channel Participants
    - Value: Will be a string of all participants in the current voice channel separated by a `|` character (for now)
+ - Discord Voice Channel Participants IDs
+   - Value: Will be a string of all participant IDs in the current voice channel separated by a `|` character (for now)
  - Discord Voice Volume
    - Value: Number indicating your current Voice Volume
  - Discord Speaker Volume
    - Value: Number indicating your current Speaker Volume
+ - Discord Camera 
+   - Value: `On` or `Off` indicating camera status in voice call
+ - Discord Screenshare
+   - Value: `On` or `Off` indicating screen sharing status in voice call
 
 ### Events
 This plugin does not use any hardcoded events, you will just want to use `When Plug-in state Changes` Event that is built into Touch Portal if you want to trigger things based on state changes from this plugin
 
 ## Installation and Configuration
 1. Make sure Discord app is open on your PC or Mac
-1. Download the .tpp file the installer for your OS [Windows](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/Installers/TPDiscord-Win.tpp) OR [MacOS](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/Installers/TPDiscord-Mac.tpp):
-1. Go to Touch Portal Settings (the gear icon)
-1. Go To Plug-ins
-1. Click the Import Plug-in button
-1. Navigate to the downloaded tpp file, select it and press Open
-1. A popup should tell you Successfully Imported plugin
+2. Download the .tpp file the installer for your OS from here: [Releases](https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases/latest)
+3. Go to Touch Portal Settings (the gear icon)
+4. Go To Plug-ins
+5. Click the Import Plug-in button
+6. Navigate to the downloaded tpp file, select it and press Open
+7. A popup should tell you Successfully Imported plugin
    1. If this is your first time importing, you will be asked To Trust the Plugin, to prevent this from popping up each time you start Touch Portal, click Trust Always
-1. Now Select Touch Portal Discord Plugin in the dropdown on the Plug-ins settings page
-1. The Discord Application page should have auto opened on your PC in your browser
+8. Now Select Touch Portal Discord Plugin in the dropdown on the Plug-ins settings page
+9. The Discord Application page should have auto opened on your PC in your browser
    1. if not Visit: <a target="_blank" href="https://discord.com/developers/applications" > Discord Developer Portal </a>
-1. Login with your Discord Credentials
-1. **If you already have an application from previous plugin usage, skip to Step 20.**
-1. Go to "Applications" on the left side of the portal
-1. Click "New Application" in the top right of the Applications page
-1. Name your Application "Touch Portal Plugin" (or whatever you want to call it), and click "Create"
-1. Go to "OAuth2" on the left side of the Site
-1. Click the "Add Redirect" button
-1. Enter in: `http://localhost` exactly, not trailing slash, and not https://
-1. Click "Save Changes"
-2. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
-3. Go back to the developer portal website
-4. Locate the Client Secret and click the "Reset Secret" button, If you have 2FA enabled it will ask for a Token
+10. Login with your Discord Credentials
+11. **If you already have an application from previous plugin usage, click "OAuth2" and skip to Step 19.**
+12. Go to "Applications" on the left side of the portal
+13. Click "New Application" in the top right of the Applications page
+14. Name your Application "Touch Portal Plugin" (or whatever you want to call it), and click "Create"
+15. Go to "OAuth2" on the left side of the Site
+16. Click the "Add Redirect" button
+17. Enter in: `http://localhost` exactly, not trailing slash, and not https://
+18. Click "Save Changes"
+19. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
+20. Go back to the developer portal website
+21. Locate the Client Secret and click the "Reset Secret" button, If you have 2FA enabled it will ask for a Token
    1. Once the secret displays, click "Copy", go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
    2. Example: <br> ![Discord Settings](resources/images/TP-Discord-Plugin-Config.png)
-5. Click "Save" 
-6. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
-   1. Example: I do NOT have the plugin reading all your messages but in order to use this plugin, it needs that scope<br>
+22. Click "Save" 
+23. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
+    1.  These scopes are needed in order for my plugin to interact with your Discord app.
     ![TP Authorize](resources/images/Discord-Auth-Popup.png)
-7. If for some reason, you mis-clicked and the authorize window went away
+24. If for some reason, you mis-clicked and the authorize window went away
    1. Click the Stop button on the Touch Portal Discord Plugin settings page
    2. Then Click Start button and it should then re-ask you to authorize
-8. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
+25. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
 
 ## Known Issues & Solutions
 1. **My Buttons no longer work**
