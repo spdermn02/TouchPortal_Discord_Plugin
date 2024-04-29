@@ -22,6 +22,7 @@
     - Using a new build process utilizing scripts/build.js instead of hard coding the build process in package.json, making it more generic as well.
     - improved Voice Settings changes to only send back relevant changes and not everything time.
     - New Scopes needed to handle some of the new functionality
+    - Using now customized version of discord-rpc in my own repo: https://github.com/spdermn02/RPC
 
 ### v4.3.1
   - Updates:

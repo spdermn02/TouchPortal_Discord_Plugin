@@ -400,6 +400,9 @@ const connectToDiscord = function () {
   const voiceActivity = function (newData) {
     logIt("DEBUG","voiceActivity", JSON.stringify(newData));
     const data = diff(prevVoiceActivityData, newData)
+    //We always need these
+    data.mute = newData.mute
+    data.deaf = newData.deaf
     prevVoiceActivityData = newData;
     const states = []
     const connectors = []
@@ -410,6 +413,8 @@ const connectToDiscord = function () {
       } else {
         muteState = 0;
       }
+      
+      logIt("ERROR","1-discord mute is "+muteState)
       states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
     }
     if( data.hasOwnProperty('deaf')) {
@@ -420,6 +425,8 @@ const connectToDiscord = function () {
         deafState = 0;
       }
       states.push({ id: "discord_deafen", value: deafState ? "On" : "Off" })
+      states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
+      logIt("ERROR","2-discord mute is "+muteState)
     }
 
     if( data.hasOwnProperty('input') && data.input.hasOwnProperty('volume') && data.input.volume > -1) {
