@@ -8,13 +8,21 @@ const platform = require('process').platform;
 const Config = require('./config');
 const { log } = require("console");
 
+// weird stuff happening with user avatars.. think its caused by default touchportal action setIcon from url...
+// some people sharing same avatar and when we manually fetch it.. it changes.. then when we fetch the other which matched it.. it causes the OTHER to change again???
+
+// Stopped the user from appearing in 'voice states', this is causing user0 to be 'blank' and doesnt update as expected.. 
+// Do we manually set user0 data to the current user?? or find out why its not updating as expected
+
+
+
 const PLUGIN_CONNECTED_SETTING = 'Plugin Connected';
 
 let discordRunning = false;
 let pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Discord Debug Mode':'Off' };
 let accessToken = undefined;
 let connecting = false;
-const scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write", "rpc.video.read","rpc.video.write", "rpc.screenshare.read","rpc.screenshare.write" ];
+const scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write", "rpc.video.read","rpc.video.write", "rpc.screenshare.read","rpc.screenshare.write", "rpc.notifications.read" ];
 
 const redirectUri = "http://localhost";
 
@@ -65,37 +73,6 @@ let pttKeyStateId = 'discordPTTKeyboardKey';
 let instanceIds = {};
 
 
-// Pulled from: https://stackoverflow.com/questions/8431651/getting-a-diff-of-two-json-objects
-// BSD License
-// Author: Gabriel Gartz
-// link: https://stackoverflow.com/users/583049/gabriel-gartz
-function diff(obj1, obj2) {
-  const result = {};
-  if (Object.is(obj1, obj2)) {
-      return undefined;
-  }
-  if (!obj2 || typeof obj2 !== 'object') {
-      return obj2;
-  }
-  Object.keys(obj1 || {}).concat(Object.keys(obj2 || {})).forEach(key => {
-      if(obj2[key] !== obj1[key] && !Object.is(obj1[key], obj2[key])) {
-          result[key] = obj2[key];
-      }
-      if(typeof obj2[key] === 'object' && typeof obj1[key] === 'object') {
-          const value = diff(obj1[key], obj2[key]);
-          if (value !== undefined) {
-              result[key] = value;
-          }
-      }
-  });
-  return result;
-}
-
-const convertPercentageToVolume = ( value ) => {
-  if( value === 0 ) { return 0; }
-  const translation = value > 100 ? ( value - 100 ) / 100 * 6 : value / 100 * 50 - 50
-  return 100 * Math.pow(10, translation / 20)
-}
 
 TPClient.on("Action", async (message, isHeld) => {
   logIt("DEBUG",JSON.stringify(message));
@@ -184,75 +161,58 @@ TPClient.on("Action", async (message, isHeld) => {
       DiscordClient.setVoiceSettings({ deaf: false, mute: false });
     }
   }
+  else if (message.actionId === "discord_voice_volume_action") {
+    discord_voice_volume = parseInt(message.data[0].value,10);
+    const userId = getUserIdFromIndex(message.data[1].value, currentVoiceUsers);
+    DiscordClient.setUserVoiceSettings(userId, { volume: convertPercentageToVolume(discord_voice_volume) });
+  }
+
+
   else if (message.data && message.data.length > 0) {
     if (message.data[0].id === "discordDeafenAction") {
-      if (message.data[0].value === "Toggle") {
-        deafState = 1 - deafState;
-      } else if (message.data[0].value === "Off") {
-        deafState = 0;
-      } else if (message.data[0].value === "On") {
-        deafState = 1;
+      // maintaining backwards compatibility if message.data[1] doesn't exist, for old discord pages with deafen buttons..
+      if (!message.data[1] || message.data[1].value === "Self") {
+        deafState = setStateBasedOnValue(message.data[0].value, deafState);
+        DiscordClient.setVoiceSettings({ deaf: 1 === deafState });
+        logIt("DEBUG","Deafen State set to ",deafState, " for self");
+      } else {
+        const userId = getUserIdFromIndex(message.data[1].value, currentVoiceUsers);
+        deafState = setStateBasedOnValue(message.data[0].value, deafState);
+        DiscordClient.setUserVoiceSettings(userId, { deaf: 1 === deafState });
+        logIt("DEBUG","Deafen State set to ",deafState, " for user ", userId);
       }
-      DiscordClient.setVoiceSettings({ deaf: 1 === deafState });
     }
     else if (message.data[0].id === "discordMuteAction") {
-      if (message.data[0].value === "Toggle") {
-        muteState = 1 - muteState;
-      } else if (message.data[0].value === "Off") {
-        muteState = 0;
-      } else if (message.data[0].value === "On") {
-        muteState = 1;
+      // maintaing backwards compatible if message.data[1] doesnt exist, for old discord pages with mute buttons..
+      if (!message.data[1] || message.data[1].value === "Self") {
+        muteState = setStateBasedOnValue(message.data[0].value, muteState);
+        DiscordClient.setVoiceSettings({ mute: 1 === muteState });
+        logIt("DEBUG","Mute State set to ",muteState, " for self");
+      } else {
+        const userId = getUserIdFromIndex(message.data[1].value, currentVoiceUsers);
+        muteState = setStateBasedOnValue(message.data[0].value, muteState);
+        DiscordClient.setUserVoiceSettings(userId, { mute: 1 === muteState });
+        logIt("DEBUG","Mute State set to ",muteState, " for user ", userId);
       }
-      DiscordClient.setVoiceSettings({ mute: 1 === muteState });
     }
     else if (message.data[0].id === "discordEchoCancellationAction") {
-      if (message.data[0].value === "Toggle") {
-        discord_echo_cancellation = 1 - discord_echo_cancellation;
-      } else if (message.data[0].value === "Off") {
-        discord_echo_cancellation = 0;
-      } else if (message.data[0].value === "On") {
-        discord_echo_cancellation = 1;
-      }
+      discord_echo_cancellation = setStateBasedOnValue(message.data[0].value, discord_echo_cancellation);
       DiscordClient.setVoiceSettings({ echoCancellation: 1 === discord_echo_cancellation });
     }
     else if (message.data[0].id === "discordNoiseSuppressionAction") {
-      if (message.data[0].value === "Toggle") {
-        discord_noise_suppression = 1 - discord_noise_suppression;
-      } else if (message.data[0].value === "Off") {
-        discord_noise_suppression = 0;
-      } else if (message.data[0].value === "On") {
-        discord_noise_suppression = 1;
-      }
+      discord_noise_suppression = setStateBasedOnValue(message.data[0].value, discord_noise_suppression);
       DiscordClient.setVoiceSettings({ noiseSuppression: 1 === discord_noise_suppression });
     }
-    else if (message.data[0].id === "discordAutoGainControlAction") {
-      if (message.data[0].value === "Toggle") {
-        discord_automatic_gain_control = 1 - discord_automatic_gain_control;
-      } else if (message.data[0].value === "Off") {
-        discord_automatic_gain_control = 0;
-      } else if (message.data[0].value === "On") {
-        discord_automatic_gain_control = 1;
-      }
+    else if (message.data[0].id === "discordAutomaticGainControlAction") {
+      discord_automatic_gain_control = setStateBasedOnValue(message.data[0].value, discord_automatic_gain_control);
       DiscordClient.setVoiceSettings({ automaticGainControl: 1 === discord_automatic_gain_control });
     }
     else if (message.data[0].id === "discordQOSHighPacketPriorityAction") {
-      if (message.data[0].value === "Toggle") {
-        discord_qos_priority = 1 - discord_qos_priority;
-      } else if (message.data[0].value === "Off") {
-        discord_qos_priority = 0;
-      } else if (message.data[0].value === "On") {
-        discord_qos_priority = 1;
-      }
+      discord_qos_priority = setStateBasedOnValue(message.data[0].value, discord_qos_priority);
       DiscordClient.setVoiceSettings({ qos: 1 === discord_qos_priority });
     }
     else if (message.data[0].id === "discordSilenceWarningAction") {
-      if (message.data[0].value === "Toggle") {
-        discord_silence_warning = 1 - discord_silence_warning;
-      } else if (message.data[0].value === "Off") {
-        discord_silence_warning = 0;
-      } else if (message.data[0].value === "On") {
-        discord_silence_warning = 1;
-      }
+      discord_silence_warning = setStateBasedOnValue(message.data[0].value, discord_silence_warning);
       DiscordClient.setVoiceSettings({ silenceWarning: 1 === discord_silence_warning });
     }
 
@@ -307,10 +267,23 @@ TPClient.on("ConnectorChange",(message) => {
     newVol = newVol < 0 ? 0 : newVol * 2 ;
     DiscordClient.setVoiceSettings({'output':{'volume':convertPercentageToVolume(newVol)}})
   }
+  else if (action == 'discord_voice_volume_action_connector') {
+      let newVol = parseInt(message.value,10);
+      //Double volume as percentage is actually double what it should be since Discord goes to 200%
+      newVol = newVol > 100 ? 100 : newVol;
+      newVol = newVol < 0 ? 0 : newVol * 2 ;
+
+      const userId = getUserIdFromIndex(message.data[0].value, currentVoiceUsers);
+      console.log("Setting Voice Volume for ", userId, " to ", newVol);
+      DiscordClient.setUserVoiceSettings(userId, { volume: convertPercentageToVolume(newVol) });
+    
+  }
   else {
     console.log(pluginId, ": ERROR : ",`Unknown action called ${action}`);
   }
 });
+
+
 
 TPClient.on("Info", (data) => {
   logIt("DEBUG","Info : We received info from Touch-Portal");
@@ -318,6 +291,26 @@ TPClient.on("Info", (data) => {
   TPClient.choiceUpdate(pttKeyStateId,Object.keys(discordKeyMap.keyboard.keyMap));
   TPClient.stateUpdate('discord_running','Unknown');
   TPClient.stateUpdate("discord_connected","Disconnected");
+
+  function createDefaultUserStates() {
+    for (let i = 0; i < 10; i++) {
+        
+        for (let j = 0; j < Config.USERSTATES.length; j++) {
+          const state = Config.USERSTATES[j];
+          TPClient.createState(
+            `user_${i}_${state.id}`,
+            `VC | User ${i} ${state.title}`,
+            state.value,
+            `VC | User_${i}`
+          );
+        }
+  
+      
+    }
+  }
+  
+  // Call the function to create the default user states
+  createDefaultUserStates();
   
 
 });
@@ -387,6 +380,25 @@ let channelCreate = () => { /* Empty as it will be assigned later */ }
 let voiceConnectionStatus = () => { /* Empty as it will be assigned later */ }
 let currentVoiceUsers = {}
 
+function setStateBasedOnValue(value, currentState) {
+  // used for various sections of plugin where we need to toggle or choose on/off
+  if (value === "Toggle") {
+    return 1 - currentState;
+  } else if (value === "Off") {
+    return 0;
+  } else if (value === "On") {
+    return 1;
+  }
+  return currentState;
+}
+
+function getUserIdFromIndex(userIndex, currentVoiceUsers) {
+  const userIds = Object.keys(currentVoiceUsers);
+  return userIds[userIndex];
+}
+
+
+
 const convertVolumeToPercentage = ( value ) => {
   if( value === 0 ){ return 0; }
   const translation = 20 * Math.log10(value / 100)
@@ -395,82 +407,82 @@ const convertVolumeToPercentage = ( value ) => {
 
 const connectToDiscord = function () {
   try{
-  DiscordClient = new RPC.Client({ transport: "ipc" });
-  let prevVoiceActivityData = {}
-  const voiceActivity = function (newData) {
-    logIt("DEBUG","voiceActivity", JSON.stringify(newData));
-    const data = diff(prevVoiceActivityData, newData)
-    //We always need these
-    data.mute = newData.mute
-    data.deaf = newData.deaf
-    prevVoiceActivityData = newData;
-    const states = []
-    const connectors = []
-
-    if( data.hasOwnProperty('mute')) {
-      if (data.mute) {
-        muteState = 1;
-      } else {
-        muteState = 0;
-      }
+      DiscordClient = new RPC.Client({ transport: "ipc" });
+      let prevVoiceActivityData = {}
+      const voiceActivity = function (newData) {
+        logIt("DEBUG","voiceActivity", JSON.stringify(newData));
+        const data = diff(prevVoiceActivityData, newData)
+        //We always need these
+        data.mute = newData.mute
+        data.deaf = newData.deaf
+        prevVoiceActivityData = newData;
+        const states = []
+        const connectors = []
       
-      logIt("ERROR","1-discord mute is "+muteState)
-      states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
-    }
-    if( data.hasOwnProperty('deaf')) {
-      if (data.deaf) {
-        deafState = 1;
-        muteState = 1;
-      } else {
-        deafState = 0;
+        if( data.hasOwnProperty('mute')) {
+          if (data.mute) {
+            muteState = 1;
+          } else {
+            muteState = 0;
+          }
+
+          logIt("discord mute is "+muteState)
+          states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
       }
-      states.push({ id: "discord_deafen", value: deafState ? "On" : "Off" })
-      states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
-      logIt("ERROR","2-discord mute is "+muteState)
-    }
+      if( data.hasOwnProperty('deaf')) {
+        if (data.deaf) {
+          deafState = 1;
+          muteState = 1;
+        } else {
+          deafState = 0;
+        }
+        states.push({ id: "discord_deafen", value: deafState ? "On" : "Off" })
+        states.push({ id: "discord_mute", value: muteState ? "On" : "Off" })
+        logIt("discord deafen is "+deafState)
+      }
 
-    if( data.hasOwnProperty('input') && data.input.hasOwnProperty('volume') && data.input.volume > -1) {
-      discord_voice_volume = convertVolumeToPercentage(data.input.volume);
-      states.push({ id: "discord_voice_volume", value: discord_voice_volume })
-      connectors.push({ id: "discord_voice_volume_connector", value: discord_voice_volume })
-    }
-    if( data.hasOwnProperty('output') && data.output.hasOwnProperty('volume') && data.output.volume > -1) {
-      discord_speaker_volume = convertVolumeToPercentage(data.output.volume);
-      discord_speaker_volume_connector = Math.round(convertVolumeToPercentage(data.output.volume)/2);
-      states.push({ id: "discord_speaker_volume", value: discord_speaker_volume })
-      connectors.push({ id: "discord_speaker_volume_connector", value: discord_speaker_volume_connector })
-    }
-    if( data.hasOwnProperty('mode') && data.mode.hasOwnProperty('type') && data.mode.type != '') {
-      discord_voice_mode_type = data.mode.type;
-      states.push( { id: "discord_voice_mode_type", value: discord_voice_mode_type })
-    }
-    if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
-      discord_automatic_gain_control = data.automatic_gain_control || data.automaticGainControl ? 1 : 0;
-      states.push({ id: "discord_automatic_gain_control", value: discord_automatic_gain_control ? "On" : "Off" })
-    }
-    if( data.hasOwnProperty('noise_suppression') || data.hasOwnProperty('noise_suppression')) {
-      discord_noise_suppression = data.noise_suppression || data.noiseSuppression ? 1 : 0;
-      states.push({ id: "discord_noise_suppression", value: discord_noise_suppression ? "On" : "Off" })
-    }
-    if( data.hasOwnProperty('echo_cancellation') || data.hasOwnProperty('echo_cancellation')) {
-      discord_echo_cancellation = data.echo_cancellation || data.echoCancellation ? 1 : 0;
-      states.push({ id: "discord_echo_cancellation", value: discord_echo_cancellation ? "On" : "Off" })
-    }
-    if( data.hasOwnProperty('silence_warning') || data.hasOwnProperty('silence_warning')) {
-      discord_silence_warning = data.silence_warning || data.silenceWarning ? 1 : 0;
-      states.push({ id: "discord_silence_warning", value: discord_silence_warning ? "On" : "Off" })
-    }
-    if( data.hasOwnProperty('qos') || data.hasOwnProperty('qos')) {
-      discord_qos_priority = data.qos ? 1 : 0;
-      states.push({ id: "discord_qos_priority", value: discord_qos_priority ? "On" : "Off" })
-    }
+      if( data.hasOwnProperty('input') && data.input.hasOwnProperty('volume') && data.input.volume > -1) {
+        discord_voice_volume = convertVolumeToPercentage(data.input.volume);
+        states.push({ id: "discord_voice_volume", value: discord_voice_volume })
+        connectors.push({ id: "discord_voice_volume_connector", value: discord_voice_volume })
+      }
+      if( data.hasOwnProperty('output') && data.output.hasOwnProperty('volume') && data.output.volume > -1) {
+        discord_speaker_volume = convertVolumeToPercentage(data.output.volume);
+        discord_speaker_volume_connector = Math.round(convertVolumeToPercentage(data.output.volume)/2);
+        states.push({ id: "discord_speaker_volume", value: discord_speaker_volume })
+        connectors.push({ id: "discord_speaker_volume_connector", value: discord_speaker_volume_connector })
+      }
+      if( data.hasOwnProperty('mode') && data.mode.hasOwnProperty('type') && data.mode.type != '') {
+        discord_voice_mode_type = data.mode.type;
+        states.push( { id: "discord_voice_mode_type", value: discord_voice_mode_type })
+      }
+      if( data.hasOwnProperty('automatic_gain_control') || data.hasOwnProperty('automaticGainControl')) {
+        discord_automatic_gain_control = data.automatic_gain_control || data.automaticGainControl ? 1 : 0;
+        states.push({ id: "discord_automatic_gain_control", value: discord_automatic_gain_control ? "On" : "Off" })
+      }
+      if( data.hasOwnProperty('noise_suppression') || data.hasOwnProperty('noiseSuppression')) {
+        discord_noise_suppression = data.noise_suppression || data.noiseSuppression ? 1 : 0;
+        states.push({ id: "discord_noise_suppression", value: discord_noise_suppression ? "On" : "Off" })
+      }
+      if( data.hasOwnProperty('echo_cancellation') || data.hasOwnProperty('echoCancellation')) {
+        discord_echo_cancellation = data.echo_cancellation || data.echoCancellation ? 1 : 0;
+        states.push({ id: "discord_echo_cancellation", value: discord_echo_cancellation ? "On" : "Off" })
+      }
+      if( data.hasOwnProperty('silence_warning') || data.hasOwnProperty('silenceWarning')) {
+        discord_silence_warning = data.silence_warning || data.silenceWarning ? 1 : 0;
+        states.push({ id: "discord_silence_warning", value: discord_silence_warning ? "On" : "Off" })
+      }
+      if( data.hasOwnProperty('qos') || data.hasOwnProperty('qos')) {
+        discord_qos_priority = data.qos ? 1 : 0;
+        states.push({ id: "discord_qos_priority", value: discord_qos_priority ? "On" : "Off" })
+      }
 
-    if( states.length > 0 ) {
-      TPClient.stateUpdateMany(states);
-    }
-    if( connectors.length > 0 ) {
-      TPClient.connectorUpdateMany(connectors);
-    }
+      if( states.length > 0 ) {
+        TPClient.stateUpdateMany(states);
+      }
+      if( connectors.length > 0 ) {
+        TPClient.connectorUpdateMany(connectors);
+      }
   };
 
   getGuildChannels = async (guildId ) => {
@@ -586,95 +598,243 @@ const connectToDiscord = function () {
     assignChannelIndex(channel.guild_id,channel);
   };
 
+
+  // For Voice Channel Stuff
+  const deleteUserStates = async (data) => {
+    let userId = Object.keys(currentVoiceUsers).indexOf(data.user.id);
+
+    // Using the "default userstates" to reset the user states
+    let stateUpdates = Config.USERSTATES.map(state => {
+      return { id: `user_${userId}_${state.id}`, value: state.value };
+    });
+
+    TPClient.stateUpdateMany(stateUpdates);
+    delete currentVoiceUsers[data.user.id];
+  };
+
+  const updateUserStates = async (data) => {
+    const userIndex = Object.keys(currentVoiceUsers).indexOf(data.user.id);
+
+    for (let key in data.voice_state) {
+      if (key === 'suppress') continue;
+      const stateValue = data.voice_state[key] ? "On" : "Off";
+      // console.log("User updated", data.user.id, key, stateValue);
+      TPClient.stateUpdate(`user_${userIndex}_${key}`, stateValue);
+    }
+    TPClient.stateUpdate(`user_${userIndex}_id`, data.user.id);
+    TPClient.stateUpdate(`user_${userIndex}_nick`, data.nick);
+    TPClient.stateUpdate(`user_${userIndex}_volume`, Math.round(data.volume));
+    TPClient.stateUpdate(`user_${userIndex}_avatar`, data.user.avatar);
+    TPClient.stateUpdate(`user_${userIndex}_deaf`, data.deaf ? "On" : "Off");
+    TPClient.stateUpdate(`user_${userIndex}_mute`, data.mute ? "On" : "Off");
+
+    // Divide by 2 to convert range from 0-200 to 0-100
+    let discord_voice_volume = convertVolumeToPercentage(data.volume) / 2;
+    TPClient.connectorUpdate(`discord_voice_volume_action_connector|voiceUserList_connector=${userIndex}`, discord_voice_volume);
+  };
+
+  function handleSpeakingEvent(event, data) {
+    if (currentVoiceUsers.hasOwnProperty(data.user_id)) {
+      const isSpeaking = event === "speaking";
+      currentVoiceUsers[data.user_id].speaking = isSpeaking;
+      const userIndex = Object.keys(currentVoiceUsers).indexOf(data.user_id);
+      TPClient.stateUpdate(`user_${userIndex}_Speaking`, isSpeaking ? "On" : "Off");
+  
+      console.log(currentVoiceUsers[data.user_id].nick, isSpeaking ? "started speaking" : "stopped speaking");
+    }
+  }
+
   const voiceState = async (event,data) => {
       logIt("DEBUG","Voice State", event, JSON.stringify(data));
       let ids = [];
-      if( event !== "delete" ) {
-        currentVoiceUsers[data.nick] = data;
+
+      if (event !== "delete" && event !== "speaking" && event !== "stop_speaking") {
+        currentVoiceUsers[data.user.id] = data;
       }
-      else {
-        delete currentVoiceUsers[data.nick]
+
+      if (event === "delete") {
+        deleteUserStates(data);
       }
-      discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
-      Object.keys(currentVoiceUsers).forEach((key,i) => {
-        ids.push(currentVoiceUsers[key].user.id);
-      })
-      discord_voice_channel_participant_ids = ids.join("|");
+
+      if (event === "speaking" || event === "stop_speaking") {
+        handleSpeakingEvent(event, data);
+      }
+      
+      if (event === "update") {
+        if (data.user.id !== DiscordClient.user.id) {
+          console.log("The userid is ", data.user.id, " and the discord user id is ", DiscordClient.user.id);
+          updateUserStates(data);
+        }
+      }
+
+      const userKeys = Object.keys(currentVoiceUsers);
+      discord_voice_channel_participants = userKeys.length > 0 ? userKeys.join("|") : '<None>';
+
+      const participant_ids = userKeys
+        .filter(key => currentVoiceUsers[key].user)
+        .map(key => currentVoiceUsers[key].user.id);
+      
+      discord_voice_channel_participant_ids = participant_ids.join("|");
+      
       TPClient.stateUpdateMany([
         { 'id': 'discord_voice_channel_participants', 'value': discord_voice_channel_participants },
         { 'id': 'discord_voice_channel_participant_ids', 'value': discord_voice_channel_participant_ids}
-      ])
+      ]);
   
   };
-  const voiceChannel = async (data) => {
-    logIt("DEBUG","Voice Channel join", JSON.stringify(data));
-      if ( last_voice_channel_subs.length > 0 ) {
-        logIt("DEBUG","START- Unsubscribing from Voice Channel voice states");
-        for( let i  = 0; i < last_voice_channel_subs.length ; i++ ) {
-          
-          await last_voice_channel_subs[i].unsubscribe()
+
+
+  
+async function subscribeToEvents(channelId) {
+  const events = [
+    { name: "VOICE_STATE_CREATE", description: "Voice State Create" },
+    { name: "VOICE_STATE_UPDATE", description: "Voice State Update" },
+    { name: "VOICE_STATE_DELETE", description: "Voice State Delete" },
+    { name: "SPEAKING_START", description: "Speaking Start" },
+    { name: "SPEAKING_STOP", description: "Speaking Stop" },
+  ];
+
+  for (let event of events) {
+    const subscription = await DiscordClient.subscribe(event.name, { channel_id: channelId }).catch((err) => { logIt("ERROR", err) });
+    console.log(`Subscribed to ${event.description}`);
+    last_voice_channel_subs.push(subscription);
+    await wait(0.1);
+  }
+}
+
+async function unsubscribeFromEvents() {
+  if (last_voice_channel_subs.length > 0) {
+    logIt("DEBUG","START- Unsubscribing from Voice Channel voice states");
+    for(let i = 0; i < last_voice_channel_subs.length; i++) {
+      console.log("Unsubscribing from subscription ",i);
+      await last_voice_channel_subs[i].unsubscribe();
+      await wait(0.1);
+    }
+
+    logIt("DEBUG","COMPLETE - Unsubscribing from Voice Channel voice states");
+    last_voice_channel_subs = []
+    currentVoiceUsers= {}
+    await wait(0.1)
+  }
+}
+
+async function clearUserStates() {
+  // Iterate over all users in currentVoiceUsers
+  Object.keys(currentVoiceUsers).forEach((userId, index) => {
+    // Using the "default userstates" to reset the user states
+    let stateUpdates = Config.USERSTATES.map(state => {
+      return { id: `user_${index}_${state.id}`, value: state.value };
+    });
+    TPClient.stateUpdateMany(stateUpdates);
+  });
+    // Clear currentVoiceUsers
+    currentVoiceUsers = {};
+}
+
+
+const voiceChannel = async (data) => {
+  logIt("DEBUG","Voice Channel join", JSON.stringify(data));
+  //  await DiscordClient.subscribe("MESSAGE_CREATE", { channel_id: "1125087354969915464"}).catch((err) => {logIt("ERROR",err)});
+  await clearUserStates();
+  await unsubscribeFromEvents();
+
+  if ( data.channel_id == null ) {
+    discord_voice_channel_name = '<None>'
+    discord_voice_channel_id = '<None>'
+    discord_voice_channel_server_id = '<None>'
+    discord_voice_channel_server_name = '<None>'
+    discord_voice_channel_participants = '<None>'
+    discord_voice_channel_participant_ids = '<None>'
+  }
+  else if ( data.guild_id == null ) {
+
+    discord_voice_channel_id = data.channel_id;
+    discord_voice_channel_name = 'Personal';
+    discord_voice_channel_server_id = 'Personal';
+    discord_voice_channel_server_name = 'Personal';
+
+    // Subscribe to voice channel events
+    await subscribeToEvents(data.channel_id);
+
+  }
+  else {
+    // Lookup Voice Channel Name
+    if (!channels[data.guild_id] || !channels[data.guild_id].voice) {
+      getGuildChannels(data.guild_id).then(() => {
+        if (channels[data.guild_id] && channels[data.guild_id].voice) {
+          discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
         }
-        await wait(.25)
-        logIt("DEBUG","COMPLETE - Unsubscribing from Voice Channel voice states");
-        last_voice_channel_subs = []
-        currentVoiceUsers= {}
-        
-      }
-      if( data.channel_id == null ) {
-        discord_voice_channel_name = '<None>'
-        discord_voice_channel_id = '<None>'
-        discord_voice_channel_server_id = '<None>'
-        discord_voice_channel_server_name = '<None>'
-        discord_voice_channel_participants = '<None>'
-        discord_voice_channel_participant_ids = '<None>'
-      }
-      else if( data.guild_id == null ) {
-        discord_voice_channel_id = data.channel_id;
-        discord_voice_channel_name = 'Personal';
-        discord_voice_channel_server_id = 'Personal';
-        discord_voice_channel_server_name = 'Personal';
-        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
-        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
-        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)}); 
-        last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
-      }
-      else {
-        // Lookup Voice Channel Name
-        discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
-        discord_voice_channel_id = data.channel_id;
-        discord_voice_channel_server_id = data.guild_id;
-        discord_voice_channel_server_name = guilds.idx[data.guild_id];
-        logIt("DEBUG","Subscribing to Voice Channel [", discord_voice_channel_name, "] with ID [", discord_voice_channel_id, "] on Server [", discord_voice_channel_server_name, "] with ID [", discord_voice_channel_server_id,"]");
-        const vsCreate = await DiscordClient.subscribe("VOICE_STATE_CREATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
-        const vsUpdate = await DiscordClient.subscribe("VOICE_STATE_UPDATE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
-        const vsDelete = await DiscordClient.subscribe("VOICE_STATE_DELETE",{channel_id: data.channel_id}).catch((err) => {logIt("ERROR",err)});
-        logIt("DEBUG","COMPLETE - Subscribing to Voice Channel")
-        last_voice_channel_subs = [ vsCreate, vsUpdate, vsDelete ];
-      }
-      if(discord_voice_channel_id !== '<None>' ) {
-        let ids = [];
-        const channel = await DiscordClient.getChannel(discord_voice_channel_id)
-        channel.voice_states.forEach((vs,i) => {
-          currentVoiceUsers[vs.nick] = vs;
-        })
-        discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
-        Object.keys(currentVoiceUsers).forEach((key,i) => {
+      });
+    } else {
+      discord_voice_channel_name = channels[data.guild_id].voice.names[data.channel_id];
+    }
+    
+    discord_voice_channel_id = data.channel_id;
+    discord_voice_channel_server_id = data.guild_id;
+
+    try {
+      // was getting times where the guilds.idx was not available on a fresh boot
+      discord_voice_channel_server_name = guilds.idx[data.guild_id];
+    } catch (error) {
+      // Call getGuilds function to initialize guilds in case it's not available
+      guilds = await getGuilds();
+      discord_voice_channel_server_name = guilds.idx[data.guild_id];
+    } 
+
+    logIt("DEBUG","Subscribing to Voice Channel [", discord_voice_channel_name, "] with ID [", discord_voice_channel_id, "] on Server [", discord_voice_channel_server_name, "] with ID [", discord_voice_channel_server_id,"]");
+
+    // Subscribe to voice channel events
+    await subscribeToEvents(data.channel_id);
+
+    logIt("DEBUG","COMPLETE - Subscribing to Voice Channel")
+    console.log("We subscribed to new subs ", last_voice_channel_subs.length);
+  }
+      
+    if(discord_voice_channel_id !== '<None>' ) {
+      let ids = [];
+      const channel = await DiscordClient.getChannel(discord_voice_channel_id)
+      channel.voice_states.forEach((vs,i) => {
+        if (vs.user.id !== DiscordClient.user.id) {
+        vs.speaking = false // adding speaking to the object to track speaking status
+        currentVoiceUsers[vs.user.id] = vs;
+        }
+
+      })
+
+      discord_voice_channel_participants = Object.keys(currentVoiceUsers).length > 0 ? Object.keys(currentVoiceUsers).join("|") : '<None>'
+      Object.keys(currentVoiceUsers).forEach((key,i) => {
+
+        // Making sure not to add Client User to the list as it's not needed and would likely cause issues being in the flow of things for certain actions that cant be used on the client user
+        if (currentVoiceUsers[key].user.id !== DiscordClient.user.id) {
           ids.push(currentVoiceUsers[key].user.id);
-        })
+
+          // For Each user, update the states when joining
+          TPClient.stateUpdateMany([
+            {id: [`user_${i}_Speaking`], value: "Off"},
+            {id: [`user_${i}_id`], value: currentVoiceUsers[key].user.id},
+            {id: [`user_${i}_nick`], value: currentVoiceUsers[key].nick},
+            {id: [`user_${i}_mute`], value: currentVoiceUsers[key].voice_state.mute ? "On" : "Off"},
+            {id: [`user_${i}_deaf`], value: currentVoiceUsers[key].voice_state.deaf ? "On" : "Off"},
+            {id: [`user_${i}_avatar`], value: currentVoiceUsers[key].user.avatar},
+            {id: [`user_${i}_volume`], value: currentVoiceUsers[key].volume}
+          ]);
+        }  
+      })
         discord_voice_channel_participant_ids = ids.length > 0 ? ids.join("|") : '<None>'
-      }
+    }
 
-      let states = [
-        { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
-        { id: 'discord_voice_channel_id', value: discord_voice_channel_id},
-        { id: 'discord_voice_channel_server_name', value: discord_voice_channel_server_name},
-        { id: 'discord_voice_channel_server_id', value: discord_voice_channel_server_id},
-        { id: 'discord_voice_channel_participants', value: discord_voice_channel_participants},
-        { id: 'discord_voice_channel_participant_ids', value: discord_voice_channel_participant_ids}
-      ];
+    let states = [
+      { id: 'discord_voice_channel_name', value: discord_voice_channel_name},
+      { id: 'discord_voice_channel_id', value: discord_voice_channel_id},
+      { id: 'discord_voice_channel_server_name', value: discord_voice_channel_server_name},
+      { id: 'discord_voice_channel_server_id', value: discord_voice_channel_server_id},
+      { id: 'discord_voice_channel_participants', value: discord_voice_channel_participants},
+      { id: 'discord_voice_channel_participant_ids', value: discord_voice_channel_participant_ids}
+    ];
 
-      TPClient.stateUpdateMany(states);
-  };
+    TPClient.stateUpdateMany(states);
+};
+  
   const guildCreate = async (data) => {
       logIt("DEBUG",'Guild Create:',JSON.stringify(data));
       getGuild(data);
@@ -712,13 +872,15 @@ const connectToDiscord = function () {
       TPClient.stateUpdateMany(states);
   };
 
+
+  // Discord Events
+
   DiscordClient.on("ready", async () => {
     if (!accessToken || ( DiscordClient.accessToken != undefined && accessToken != DiscordClient.accessToken )) {
       accessToken = DiscordClient.accessToken;
     }
 
     TPClient.stateUpdate("discord_connected","Connected");
-
     TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Connected");
 
     await DiscordClient.subscribe("VOICE_SETTINGS_UPDATE").catch((err) => {logIt("ERROR",err)});
@@ -729,18 +891,37 @@ const connectToDiscord = function () {
     await DiscordClient.subscribe("VIDEO_STATE_UPDATE").catch((err) => {logIt("ERROR",err)});
     await DiscordClient.subscribe("SCREENSHARE_STATE_UPDATE").catch((err) => {logIt("ERROR",err)});
 
+    await DiscordClient.subscribe("NOTIFICATION_CREATE").catch((err) => {logIt("ERROR",err)});
+
     DiscordClient.on("VOICE_STATE_CREATE", (data) => {voiceState('create',data);})
     DiscordClient.on("VOICE_STATE_UPDATE", (data) => {voiceState('update',data);})
     DiscordClient.on("VOICE_STATE_DELETE", (data) => {voiceState('delete',data);})
-    //DiscordClient.on("MESSAGE_CREATE", (data) => {logIt("DEBUG", JSON.stringify(data))}) 
+    // DiscordClient.on("MESSAGE_CREATE", (data) => {console.log("DEBUG", JSON.stringify(data))}) 
+
     const voiceSettings = await DiscordClient.getVoiceSettings().catch((err) => {logIt("ERROR",err)});
     voiceActivity(voiceSettings);
     await getGuilds();
     await getSoundboardSounds();
   });
+
+  DiscordClient.on("NOTIFICATION_CREATE", (data) => {
+    // Need to create some state to store the last X notifications?  
+    // Maybe make an event for if DM, vs if normal message?
+    console.log("DEBUG","Notification Create", JSON.stringify(data));
+  })
+
+  DiscordClient.on("SPEAKING_START", (data) => {
+    voiceState('speaking',data);
+  })
+
+  DiscordClient.on("SPEAKING_STOP", (data) => {
+    voiceState('stop_speaking',data);
+  })
+
   DiscordClient.on('VOICE_SETTINGS_UPDATE', (data) => {
     voiceActivity(data);
   })
+  
   DiscordClient.on('GUILD_CREATE', (data) => {
     guildCreate(data);
   })
@@ -750,12 +931,15 @@ const connectToDiscord = function () {
   DiscordClient.on('VOICE_CHANNEL_SELECT', (data) => {
     voiceChannel(data);
   })
+  
   DiscordClient.on('VOICE_CONNECTION_STATUS', (data) => {
     voiceConnectionStatus(data);
   })
+  
   DiscordClient.on('VIDEO_STATE_UPDATE', (data) => {
     TPClient.stateUpdate("discord_camera_status",data.active? "On" : "Off")
   })
+
   DiscordClient.on('SCREENSHARE_STATE_UPDATE', (data) => {
     TPClient.stateUpdate("discord_screenshare_status",data.active? "On" : "Off")
   })
@@ -793,6 +977,8 @@ catch(e) {
 };
 // - END - Discord
 
+
+// Discord Login 
 const waitForClientId = (timeoutms) =>
   new Promise((r, j) => {
     const check = () => {
@@ -870,6 +1056,41 @@ procWatcher.on('processTerminated', (processName) => {
   }
 });
 // End Process Watcher
+
+
+// HELPER FUNCTIONS
+
+// Pulled from: https://stackoverflow.com/questions/8431651/getting-a-diff-of-two-json-objects
+// BSD License
+// Author: Gabriel Gartz
+// link: https://stackoverflow.com/users/583049/gabriel-gartz
+function diff(obj1, obj2) {
+  const result = {};
+  if (Object.is(obj1, obj2)) {
+      return undefined;
+  }
+  if (!obj2 || typeof obj2 !== 'object') {
+      return obj2;
+  }
+  Object.keys(obj1 || {}).concat(Object.keys(obj2 || {})).forEach(key => {
+      if(obj2[key] !== obj1[key] && !Object.is(obj1[key], obj2[key])) {
+          result[key] = obj2[key];
+      }
+      if(typeof obj2[key] === 'object' && typeof obj1[key] === 'object') {
+          const value = diff(obj1[key], obj2[key]);
+          if (value !== undefined) {
+              result[key] = value;
+          }
+      }
+  });
+  return result;
+}
+
+const convertPercentageToVolume = ( value ) => {
+  if( value === 0 ) { return 0; }
+  const translation = value > 100 ? ( value - 100 ) / 100 * 6 : value / 100 * 50 - 50
+  return 100 * Math.pow(10, translation / 20)
+}
 
 
 function isEmpty(val) {
