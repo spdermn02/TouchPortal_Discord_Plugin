@@ -61,7 +61,23 @@
                     "prefix": "Discord:",
                     "name":"Adjust Output Volume",
                     "format":"Discord: Adjust Output Volume"
+                },
+                {
+                    "id": "discord_voice_volume_action_connector",
+                    "prefix": "Discord:",
+                    "name":"Set Voice Volume",
+                    "format":"Discord: Set Voice Volume for user {$voiceUserList_connector$}",
+                    "data": [
+                        {
+                            "id": "voiceUserList_connector",
+                            "type": "choice",
+                            "label": "Voice User List",
+                            "default": "0",
+                            "valueChoices": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                        }
+                    ]
                 }
+
             ],
             "actions": [
                 {
@@ -70,7 +86,7 @@
                     "name": "Discord Deafen",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Set Deafen {$discordDeafenAction$}",
+                    "format": "Discord: Set Deafen {$discordDeafenAction$} for user {$voiceUserList$}",
                     "data": [
                         {
                             "id": "discordDeafenAction",
@@ -82,6 +98,13 @@
                                 "Off",
                                 "On"
                             ]
+                        },
+                        {
+                            "id": "voiceUserList",
+                            "type": "choice",
+                            "label": "Voice User List",
+                            "default": "",
+                            "valueChoices": ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
                         }
                     ]
                 },
@@ -91,7 +114,7 @@
                     "name": "Discord Mute",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Set Mute {$discordMuteAction$}",
+                    "format": "Discord: Set Mute {$discordMuteAction$}, for user {$voiceUserList$}",
                     "data": [
                         {
                             "id": "discordMuteAction",
@@ -103,6 +126,13 @@
                                 "Off",
                                 "On"
                             ]
+                        },
+                        {
+                            "id": "voiceUserList",
+                            "type": "choice",
+                            "label": "Voice User List",
+                            "default": "",
+                            "valueChoices": ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
                         }
                     ]
                 },
@@ -132,16 +162,26 @@
                     "name": "Discord Voice Volume",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Set Voice Volume {$discordVoiceVolume$}",
+                    "format": "Discord: Set Voice Volume {$discordVoiceVolume$} for user {$voiceUserList$}",
                     "data": [
                         {
                             "id": "discordVoiceVolume",
                             "type": "text",
                             "label": "Voice Volume",
-                            "default": "0.00"
+                            "default": "0.00"    
+                        },
+                        {
+                            "id": "voiceUserList",
+                            "type": "choice",
+                            "label": "Voice User List",
+                            "default": "",
+                            "valueChoices": ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
                         }
                     ]
                 },
+
+
                 {
                     "id": "discord_automatic_gain_control_action",
                     "prefix": "Discord:",
@@ -196,27 +236,6 @@
                             "id": "discordNoiseSuppressionAction",
                             "type": "choice",
                             "label": "Noise Suppression Action",
-                            "default": "",
-                            "valueChoices": [
-                                "Toggle",
-                                "Off",
-                                "On"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_auto_gain_control_action",
-                    "prefix": "Discord:",
-                    "name": "Discord Auto Gain Control",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Set Auto Gain Control {$discordAutoGainControlAction$}",
-                    "data": [
-                        {
-                            "id": "discordAutoGainControlAction",
-                            "type": "choice",
-                            "label": "Auto Gain Control Action",
                             "default": "",
                             "valueChoices": [
                                 "Toggle",
