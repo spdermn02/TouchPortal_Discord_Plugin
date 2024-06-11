@@ -63,5 +63,6 @@ class ProcessReady extends EventEmitter {
         }
     }
 }
-
+// const procWatcher = new ProcessReady();
 module.exports = ProcessReady;
+// module.exports = procWatcher;
