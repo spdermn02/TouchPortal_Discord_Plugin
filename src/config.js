@@ -3,6 +3,16 @@ const procWatcher = require('./process_watcher');
 class DiscordG {
     constructor() {
 
+      // This will be a list the user can define in plugin settings to have custom 'listeners' for certain people...
+      // In a broadcast situation, if i want a certain person have an overlay attached, if their index changes then it would be hard to coordinate properly.
+      // With this, we check the list, if user is speaking then we update their custom states.
+      // user will just define userIDs seperated by commas.. we will then assign them the proper ID of 'Custom1' etc.. OR we let user decide on name but that could cause issues 
+      this.customVoiceAcivityUsers = { 
+        "855126542370603108": "Custom1",
+        "855126542370603109": "Custom2",
+        "855126542370603110": "Custom3"
+      }
+      
         this.DEFAULTUSERSTATES = [
         { id: 'Speaking', title: 'Status: isSpeaking', value: 'Off' },
         { id: 'id', title: 'ID', value: '' },

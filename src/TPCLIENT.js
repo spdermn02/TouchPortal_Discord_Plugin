@@ -1,7 +1,6 @@
 // TPCLIENT.js
 
 const { logIt,  platform, app_monitor } = require('./helpers');
-// const {convertPercentageToVolume, updateUrl,  getUserIdFromIndex} = require('./helpers');
 const setupConnectorChangeListener = require('./connectors');
 
 
@@ -14,6 +13,24 @@ const { DG } = require('./config.js');
 
 TPClient.on("Info", (data) => {
     logIt("DEBUG","Info : We received info from Touch-Portal");
+
+    // Making sttes for Custom Voice Activity Users - allows users to have custom states for particular people
+    const states = ["id", "Speaking", "mute", "deaf", "avatar", "nick", "volume", "self_mute", "self_deaf"];
+    for (let userId in DG.customVoiceAcivityUsers) {
+      for (let state of states) {
+        let customID = DG.customVoiceAcivityUsers[userId];
+        let stateId = `${customID}_${state}`;
+        let stateDesc = `${customID} ${state}`;
+        TPClient.createState(stateId, stateDesc, "", `${customID} - States`);
+      }
+    }
+
+      // Adding custom states for the users if present
+      let predefinedList = ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+      let combinedList = predefinedList.concat(Object.values(DG.customVoiceAcivityUsers));
+      TPClient.choiceUpdate('voiceUserList', combinedList);
+
+
 
     // Setup TP Connector Listener
     setupConnectorChangeListener(TPClient);

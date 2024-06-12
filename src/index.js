@@ -17,6 +17,12 @@ const { logIt, isEmpty, wait, diff, convertPercentageToVolume, convertVolumeToPe
 // I broke something with the process watcher.. I initiate it inside of process_watcher first, this way it can be exported/imported into index.js and TPClient.js
 // It seems to keep on wanting to try to connect? - or two instances of it are running...
 
+// const customVoiceAcivityUsers = { 
+//   Custom1: "855126542370603108",
+//   Custom2: "855126542370603108",
+//   Custom3: "855126542370603108"
+// }
+
 
 
 TPClient.on("Action", async (message, isHeld) => {
@@ -100,18 +106,41 @@ TPClient.on("Action", async (message, isHeld) => {
   else if( message.actionId === "discord_push_to_mute")
   {
     if( isHeld ) {
-      DG.Client.setVoiceSettings({ deaf: true });
+      DG.Client.setVoiceSettings({ deaf: false, mute: true});
     }
     else {
       DG.Client.setVoiceSettings({ deaf: false, mute: false });
     }
   }
   else if (message.actionId === "discord_voice_volume_action") {
-    DG.voice_volume  = parseInt(message.data[0].value,10);
-    const userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
-    if (userId !== undefined) {
-      DG.Client.setUserVoiceSettings(userId, { volume: convertPercentageToVolume(DG.voice_volume ) });
+    let userId;
+
+    // Is user in our custom list of users?
+    if (Object.values(DG.customVoiceAcivityUsers).includes(message.data[1].value)) {
+      userId = Object.keys(DG.customVoiceAcivityUsers).find(key => DG.customVoiceAcivityUsers[key] === message.data[1].value);
+    } else {
+      userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
     }
+
+    // If isHeld is undefined or null, set the volume directly
+    if (isHeld === undefined || isHeld === null) {
+      DG.voice_volume = parseInt(message.data[0].value, 10);
+      DG.Client.setUserVoiceSettings(userId, { volume: convertPercentageToVolume(DG.voice_volume) });
+    }
+    // If isHeld is true, start an interval to increase the volume
+    if (isHeld) {
+      intervalId = setInterval(() => {
+        DG.voice_volume += parseInt(message.data[0].value, 10) * 2;
+        DG.voice_volume = Math.max(0, Math.min(DG.voice_volume, 200)); 
+      
+        DG.Client.setUserVoiceSettings(userId, { volume: convertPercentageToVolume(DG.voice_volume) });
+      }, 100);
+    }
+    // If isHeld is false, clear the interval
+    if (isHeld === false) {
+      clearInterval(intervalId);
+    }
+
   }
 
 
@@ -122,13 +151,15 @@ TPClient.on("Action", async (message, isHeld) => {
         DG.deafState = setStateBasedOnValue(message.data[0].value, DG.deafState);
         DG.Client.setVoiceSettings({ deaf: 1 === DG.deafState });
         logIt("DEBUG","Deafen State set to ",DG.deafState, " for self");
-      } else {
-        const userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
-        if (userId !== undefined) {
-          DG.deafState = setStateBasedOnValue(message.data[0].value, DG.deafState);
-          DG.Client.setUserVoiceSettings(userId, { deaf: 1 === DG.deafState });
-          logIt("DEBUG","Deafen State set to ",DG.deafState, " for user ", userId);
-        }
+
+        // we cant deafen other users. only our self..
+      // } else {
+        // const userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
+        // if (userId !== undefined) {
+          // DG.deafState = setStateBasedOnValue(message.data[0].value, DG.deafState);
+          // DG.Client.setUserVoiceSettings(userId, { deaf: 1 === DG.deafState });
+          // logIt("DEBUG","Deafen State set to ",DG.deafState, " for user ", userId);
+        // }
       }
     }
     else if (message.data[0].id === "discordMuteAction") {
@@ -138,13 +169,19 @@ TPClient.on("Action", async (message, isHeld) => {
         DG.Client.setVoiceSettings({ mute: 1 === DG.muteState });
         logIt("DEBUG","Mute State set to ",DG.muteState, " for self");
       } else {
-        const userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
-
+        let userId;
+        // Is user in our custom list of users?
+        if (Object.values(DG.customVoiceAcivityUsers).includes(message.data[1].value)) {
+          userId = Object.keys(DG.customVoiceAcivityUsers).find(key => DG.customVoiceAcivityUsers[key] === message.data[1].value);
+        } else {
+          userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
+        }
         if (userId !== undefined) {
           DG.muteState = setStateBasedOnValue(message.data[0].value, DG.muteState);
           DG.Client.setUserVoiceSettings(userId, { mute: 1 === DG.muteState });
           logIt("DEBUG","Mute State set to ",DG.muteState, " for user ", userId);
         }
+      
       }
     }
     else if (message.data[0].id === "discordEchoCancellationAction") {
@@ -204,7 +241,7 @@ TPClient.on("ListChange", async (data) => {
 
 
 
-// - START - Discord
+// - START - Discord   --- This really should be a class?
 const connectToDiscord = function () {
   try{
       DG.Client = new RPC.Client({ transport: "ipc" });
@@ -225,12 +262,11 @@ const connectToDiscord = function () {
         await DG.Client.subscribe("VOICE_CONNECTION_STATUS").catch((err) => {logIt("ERROR",err)});
         await DG.Client.subscribe("VIDEO_STATE_UPDATE").catch((err) => {logIt("ERROR",err)});
         await DG.Client.subscribe("SCREENSHARE_STATE_UPDATE").catch((err) => {logIt("ERROR",err)});
-      
         await DG.Client.subscribe("NOTIFICATION_CREATE").catch((err) => {logIt("ERROR",err)});
       
-        DG.Client.on("VOICE_STATE_CREATE", (data) => {voiceState('create',data);})
-        DG.Client.on("VOICE_STATE_UPDATE", (data) => {voiceState('update',data);})
-        DG.Client.on("VOICE_STATE_DELETE", (data) => {voiceState('delete',data);})
+        // DG.Client.on("VOICE_STATE_CREATE", (data) => {voiceState('create',data);})
+        // DG.Client.on("VOICE_STATE_UPDATE", (data) => {voiceState('update',data);})
+        // DG.Client.on("VOICE_STATE_DELETE", (data) => {voiceState('delete',data);})
         // DiscordClient.on("MESSAGE_CREATE", (data) => {console.log("DEBUG", JSON.stringify(data))}) 
       
         // this triggers automatically when we connect to discord rpc.. dont thnk this is needed
@@ -240,12 +276,27 @@ const connectToDiscord = function () {
         await getSoundboardSounds();
       });
     
-        // Need to create some state to store the last X notifications?  
-        // Maybe make an event for if DM, vs if normal message?
+
+      // Need to create some state to store the last X notifications?  
+      // Maybe make an event for if DM, vs if normal message?
       DG.Client.on("NOTIFICATION_CREATE", (data) => {
+        // When getting DMs, or Tagged in a message.. can give  you details as to where.. so could set up a button to take to channel where tagged technically..
+        // Select channel action would need a custom input for channel ID
         logIt("INFO","Notification Create", JSON.stringify(data));
       })
-    
+      
+      DG.Client.on("VOICE_STATE_CREATE", (data) => {
+        voiceState('create',data);
+      })
+
+      DG.Client.on("VOICE_STATE_UPDATE", (data) => {
+        voiceState('update',data);
+      })
+
+      DG.Client.on("VOICE_STATE_DELETE", (data) => {
+        voiceState('delete',data);
+      })
+
       DG.Client.on("SPEAKING_START", (data) => {
         voiceState('speaking',data);
       })
@@ -289,12 +340,12 @@ const connectToDiscord = function () {
         }
       });
 
+  discordLogin()
 
-discordLogin()
-}
-catch(e) {
-  logIt("ERROR","Error in connectToDiscord",e);
-}
+  }
+  catch(e) {
+    logIt("ERROR","Error in connectToDiscord",e);
+  }
 };
 // - END - Discord
 
@@ -718,12 +769,29 @@ const deleteUserStates = async (data) => {
     TPClient.stateUpdate(`user_${userIndex}_nick`, data.nick);
     TPClient.stateUpdate(`user_${userIndex}_volume`, Math.round(data.volume));
     TPClient.stateUpdate(`user_${userIndex}_avatar`, data.user.avatar);
-    TPClient.stateUpdate(`user_${userIndex}_deaf`, data.deaf ? "On" : "Off");
     TPClient.stateUpdate(`user_${userIndex}_mute`, data.mute ? "On" : "Off");
 
     // Divide by 2 to convert range from 0-200 to 0-100
     let volume = convertVolumeToPercentage(data.volume) / 2;
     TPClient.connectorUpdate(`discord_voice_volume_action_connector|voiceUserList_connector=${userIndex}`, volume);
+
+
+    if (DG.customVoiceAcivityUsers.hasOwnProperty(data.user.id)) {
+
+      let userId = DG.customVoiceAcivityUsers[data.user.id];
+      let updates = [
+        { id: `${userId}_id`, value: data.user.id },
+        { id: `${userId}_nick`, value: data.nick },
+        { id: `${userId}_avatar`, value: data.user.avatar },
+        { id: `${userId}_mute`, value: data.mute ? "On" : "Off" },
+        { id: `${userId}_deaf`, value: data.voice_state.deaf ? "On" : "Off" },
+        { id: `${userId}_self_deaf`, value: data.voice_state.self_deaf ? "On" : "Off" },
+        { id: `${userId}_self_mute`, value: data.voice_state.self_mute ? "On" : "Off" },
+        { id: `${userId}_volume`, value: Math.round(data.volume) }
+      ];
+      TPClient.stateUpdateMany(updates);
+
+    } 
   };
 
 function handleSpeakingEvent(event, data) {
@@ -732,6 +800,14 @@ function handleSpeakingEvent(event, data) {
       DG.currentVoiceUsers[data.user_id].speaking = isSpeaking;
       const userIndex = Object.keys(DG.currentVoiceUsers).indexOf(data.user_id);
       TPClient.stateUpdate(`user_${userIndex}_Speaking`, isSpeaking ? "On" : "Off");
+
+
+      // Check if user in custom watch list..
+      let userId = data.user_id;
+      if (DG.customVoiceAcivityUsers.hasOwnProperty(userId)) {
+        // console.log("User exists");
+        TPClient.stateUpdate(`${DG.customVoiceAcivityUsers[userId]}_Speaking`, isSpeaking ? "On" : "Off");
+      }
   
       logIt("INFO", DG.currentVoiceUsers[data.user_id].nick, isSpeaking ? "started speaking" : "stopped speaking");
     }
@@ -881,7 +957,6 @@ if( connectors.length > 0 ) {
 };
 
 
-// module.exports = DiscordClient;
 // We are going to connect to TP first, then Discord
 // That way if TP shuts down the plugin will be shutdown too
 TPClient.connect({ pluginId: DG.pluginId, updateUrl:DG.updateUrl });
