@@ -62,6 +62,9 @@ class ProcessReady extends EventEmitter {
             this.emit('processTerminated',processName);
         }
     }
+
+
+    
 }
 // const procWatcher = new ProcessReady();
 module.exports = ProcessReady;

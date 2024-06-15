@@ -1,17 +1,17 @@
-// Connectors.js
-// moved from index.js to prove to myself that it works..
+// TPClient onConnectorChange
 
-const { logIt, convertPercentageToVolume, pluginId, getUserIdFromIndex } = require('./helpers');
-const { DG } = require('./config.js');
+const TPClient = require('../../core/TPCLIENT.js');
+const { DG } = require('../../config.js');
+const { logIt, convertPercentageToVolume, getUserIdFromIndex , pluginId} = require('../../utils/helpers.js');
 
 
-function setupConnectorChangeListener(TPClient) {
+
+// function setupConnectorChangeListener(TPClient) {
 
 
   TPClient.on("ConnectorChange", (message) => {
     logIt("DEBUG", `Connector change event fired ` + JSON.stringify(message));
     const action = message.connectorId;
-    // console.log(pluginId, ": DEBUG : ", `calling action ${action}`);
     
     if (action === 'discord_voice_volume_connector') {
       let newVol = parseInt(message.value, 10);
@@ -39,6 +39,6 @@ function setupConnectorChangeListener(TPClient) {
   });
 
   
-}
+// }
 
-module.exports = setupConnectorChangeListener;
+// module.exports = setupConnectorChangeListener;

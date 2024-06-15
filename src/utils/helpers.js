@@ -1,8 +1,6 @@
 // HELPER FUNCTIONS
-
 const platform = require('process').platform;
-
-const { DG } = require('./config.js');
+const { DG } = require('../config.js');
 
 
 const app_monitor = {
@@ -88,8 +86,20 @@ function diff(obj1, obj2) {
     return userIds[userIndex];
   }
   
+  const imageToBase64 = async (imageUrl) => {
+    try {
+      const response = await fetch(imageUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      
+      return base64;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
 module.exports = { 
-    logIt, isEmpty, wait, convertPercentageToVolume, diff, convertVolumeToPercentage, setStateBasedOnValue, getUserIdFromIndex,
+    logIt, isEmpty, wait, convertPercentageToVolume, diff, convertVolumeToPercentage, setStateBasedOnValue, getUserIdFromIndex, imageToBase64,
    platform, app_monitor
 };
