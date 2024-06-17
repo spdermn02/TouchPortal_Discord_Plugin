@@ -1,94 +1,101 @@
-const procWatcher = require('./core/process_watcher');
+const procWatcher = require("./core/process_watcher");
+const DEFAULT_BASE64_AVATAR = require("./DEFAULT_BASE64_AVATAR.js");
 
 class DiscordG {
-    constructor() {
+  constructor() {
+    this.pluginId = "TPDiscord";
+    this.pluginSettings = {
+      "Plugin Connected": "No",
+      "Skip Process Watcher": "No",
+      "Discord Debug Mode": "Off",
+      "VoiceActivity Tracker - Seperate each ID by commas": "",
+    };
 
-      // This will be a list the user can define in plugin settings to have custom 'listeners' for certain people...
-      // In a broadcast situation, if i want a certain person have an overlay attached, if their index changes then it would be hard to coordinate properly.
-      // With this, we check the list, if user is speaking then we update their custom states.
-      // user will just define userIDs seperated by commas.. we will then assign them the proper ID of 'Custom1' etc.. OR we let user decide on name but that could cause issues 
-      this.customVoiceAcivityUsers = { 
-        "855126542370603108": "Custom1",
-        "855126542370603109": "Custom2",
-        "855126542370603110": "Custom3"
-      }
-      
-        this.DEFAULTUSERSTATES = [
-        { id: 'Speaking', title: 'Status: isSpeaking', value: 'Off' },
-        { id: 'id', title: 'ID', value: '' },
-        { id: 'nick', title: 'Nickname', value: '' },
-        { id: 'mute', title: 'Status: Mute', value: 'Off' },
-        { id: 'self_mute', title: 'Status: Self Mute', value: 'Off' },
-        { id: 'self_deaf', title: 'Status: Self Deaf', value: 'Off' },
-        { id: 'deaf', title: 'Status: Deafen', value: 'Off' },
-        { id: 'volume', title: 'Volume', value: '0' },
-        { id: 'avatar', title: 'Avatar', value: '' },
-        { id: 'avatarID', title: 'Avatar ID', value: '' },
-        { id: 'server_mute', title: 'Status: Server Mute', value: 'Off' }
-      ];
+    this.updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
+    this.releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
 
-        this.pluginId = "TPDiscord";
-        this.pluginSettings = { 'Plugin Connected' : 'No', 'Skip Process Watcher':'No', 'Discord Debug Mode':'Off'};
+    this.scopes = [
+      "identify",
+      "rpc",
+      "guilds",
+      "rpc.activities.write",
+      "rpc.voice.read",
+      "rpc.voice.write",
+      "rpc.video.read",
+      "rpc.video.write",
+      "rpc.screenshare.read",
+      "rpc.screenshare.write",
+      "rpc.notifications.read",
+    ];
+    this.connecting = false;
+    this.redirectUri = "http://localhost"; // same here..
 
-        
-        this.updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
-        this.releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
+    this.customVoiceAcivityUsers = {};
 
+    this.DEFAULT_USER_STATES = [
+      {id: "Speaking", title: "Status: isSpeaking", value: "Off"},
+      {id: "id", title: "ID", value: ""},
+      {id: "nick", title: "Nickname", value: ""},
+      {id: "mute", title: "Status: Mute", value: "Off"},
+      {id: "self_mute", title: "Status: Self Mute", value: "Off"},
+      {id: "self_deaf", title: "Status: Self Deaf", value: "Off"},
+      {id: "deaf", title: "Status: Deafen", value: "Off"},
+      {id: "volume", title: "Volume", value: "0"},
+      {id: "avatar", title: "Avatar", value: ""},
+      {id: "avatarID", title: "Avatar ID", value: ""},
+      {id: "server_mute", title: "Status: Server Mute", value: "Off"},
+    ];
 
-        this.scopes = ["identify", "rpc",  "guilds", "rpc.activities.write", "rpc.voice.read", "rpc.voice.write", "rpc.video.read", "rpc.video.write", "rpc.screenshare.read","rpc.screenshare.write", "rpc.notifications.read" ];
-        this.connecting = false;
-        this.redirectUri = "http://localhost";  // same here..
-      //  this.discordWin32 = "Discord.exe"; // not sure why this was defined in config.js before when it could be used directly where it needed as its only used one place
- 
-
-        this.isRunning = false;
-        this.muteState = 0; 
-        this.deafState = 0; 
-        this.automatic_gain_control = 0;  
-        this.noise_suppression = 0; 
-        this.echo_cancellation = 0; 
-        this.silence_warning = 0; 
-        this.qos_priority = 0; 
-        this.last_voice_channel_subs = []; 
-        this.voice_channel_connected = 'No'; 
-        this.voice_channel_name = '<None>'; 
-        this.voice_channel_id = '<None>'; 
-        this.voice_channel_server_name = '<None>'; 
-        this.voice_channel_server_id = '<None>'; 
-        this.voice_average_ping = '0.00'; 
-        this.voice_hostname = '<None>'; 
-        this.voice_volume = '0'; 
-        this.speaker_volume = '0'; 
-        this.speaker_volume_connector = '0'; 
-        this.voice_mode_type = 'UNKNOWN'; 
-        this.voice_channel_participants = '<None>'; 
-        this.voice_channel_participant_ids = '<None>';  
-        this.guilds = {}; 
-        this.channels = {}; 
-        this.PTTKeys = []; 
-        this.soundBoard = {}; 
-        this.pttKeyStateId = 'discordPTTKeyboardKey'; 
-        this.instanceIds = {}; 
   
-  
+    this.voiceSettings = {
+      automatic_gain_control: 0,
+      noise_suppression: 0,
+      echo_cancellation: 0,
+      silence_warning: 0,
+      qos_priority: 0,
+      muteState: 0,
+      deafState: 0,
+      voice_mode_type: "UNKNOWN",
+      prevVoiceActivityData: {}  // keeping track of end user voice settings data
+    };
 
-        this.currentVoiceUsers = {};
-        this.Client = null;
-        this.accessToken = undefined;
-  
-        this.procWatcher = new procWatcher();
-        this.prevVoiceActivityData = {}
+    this.voiceChannelInfo = {
+      last_voice_channel_subs: [],
+      voice_channel_connected: "No",
+      voice_channel_name: "<None>",
+      voice_channel_id: "<None>",
+      voice_channel_server_name: "<None>",
+      voice_channel_server_id: "<None>",
+      voice_average_ping: "0.00",
+      voice_hostname: "<None>",
+      voice_channel_participants: "<None>",
+      voice_channel_participant_ids: "<None>",
+      voice_volume: "0",
+      speaker_volume: "0",
+      speaker_volume_connector: "0",
+    };
+    this.currentVoiceUsers = {}; // The Current People in Voice Chat
 
 
-        this.DEFAULTBASE64_AVATAR = "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"
-          
-      }
-  }
+    this.Client = null; // Discord Client
+    this.accessToken = undefined; // Discord Access Token
+    this.procWatcher = new procWatcher(); // Process Watcher
 
+    this.guilds = {};
+    this.channels = {};
 
+    this.PTTKeys = [];
+    this.soundBoard = {};
+    this.pttKeyStateId = "discordPTTKeyboardKey";
 
-  module.exports = {
-      DG: new DiscordG() 
-   
-  };
-  
+    this.instanceIds = {};
+
+    // this.prevVoiceActivityData = {}; // Used for Self States
+
+    this.DEFAULT_BASE64_AVATAR = DEFAULT_BASE64_AVATAR;
+  } 
+}
+
+module.exports = {
+  DG: new DiscordG(),
+};
