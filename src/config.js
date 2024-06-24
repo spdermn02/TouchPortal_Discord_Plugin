@@ -1,5 +1,5 @@
 const procWatcher = require("./core/process_watcher");
-const DEFAULT_BASE64_AVATAR = require("./DEFAULT_BASE64_AVATAR.js");
+const DEFAULT_BASE64_AVATAR = require("./utils/DEFAULT_BASE64_AVATAR.js");
 
 class DiscordG {
   constructor() {
@@ -13,6 +13,12 @@ class DiscordG {
 
     this.updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
     this.releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
+    this.redirectUri = "http://localhost"; // same here..
+
+    this.Client = null; // Discord Client
+    this.accessToken = undefined; // Discord Access Token
+    this.procWatcher = new procWatcher(); // Process Watcher
+    this.connecting = false;
 
     this.scopes = [
       "identify",
@@ -27,12 +33,10 @@ class DiscordG {
       "rpc.screenshare.write",
       "rpc.notifications.read",
     ];
-    this.connecting = false;
-    this.redirectUri = "http://localhost"; // same here..
+   
+    this.DEFAULT_BASE64_AVATAR = DEFAULT_BASE64_AVATAR;
 
-    this.customVoiceAcivityUsers = {};
-
-    this.DEFAULT_USER_STATES = [
+    this.DEFAULT_USER_STATES = [ // used on creation of states for each user when plugin first boots
       {id: "Speaking", title: "Status: isSpeaking", value: "Off"},
       {id: "id", title: "ID", value: ""},
       {id: "nick", title: "Nickname", value: ""},
@@ -74,12 +78,10 @@ class DiscordG {
       speaker_volume: "0",
       speaker_volume_connector: "0",
     };
+
     this.currentVoiceUsers = {}; // The Current People in Voice Chat
+    this.customVoiceAcivityUsers = {};
 
-
-    this.Client = null; // Discord Client
-    this.accessToken = undefined; // Discord Access Token
-    this.procWatcher = new procWatcher(); // Process Watcher
 
     this.guilds = {};
     this.channels = {};
@@ -92,7 +94,6 @@ class DiscordG {
 
     // this.prevVoiceActivityData = {}; // Used for Self States
 
-    this.DEFAULT_BASE64_AVATAR = DEFAULT_BASE64_AVATAR;
   } 
 }
 

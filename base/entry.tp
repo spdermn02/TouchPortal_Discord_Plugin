@@ -42,7 +42,12 @@
             "type": "text",
             "default": "Off",
             "maxLength": 3
-        }
+        },
+        {
+            "name" :"VoiceActivity Tracker - Seperate each ID by commas",
+            "type" : "text",
+            "default" : "",
+        },
     ],
     "categories": [
         {
@@ -162,6 +167,7 @@
                     "name": "Discord Voice Volume",
                     "type": "communicate",
                     "tryInline": "true",
+                    "hasHoldFunctionality": "true",
                     "format": "Discord: Set Voice Volume {$discordVoiceVolume$} for user {$voiceUserList$}",
                     "data": [
                         {
