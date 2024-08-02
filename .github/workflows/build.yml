@@ -10,8 +10,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
-
+      uses: actions/checkout@v3
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
@@ -23,9 +22,8 @@ jobs:
     - name: Set npm registry
       run: npm config set registry https://registry.npmjs.org/
 
-    - name: Install dependencies with retry
-      run: |
-        for i in {1..3}; do npm install && break || sleep 15; done
+    - name: Install dependencies
+      run: npm install
 
     - name: Run build script
       run: node scripts/build.js
