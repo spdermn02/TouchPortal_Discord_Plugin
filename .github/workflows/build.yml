@@ -1,0 +1,30 @@
+name: Build and Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run build script
+      run: node scripts/build.js
+
+    - name: Upload release assets
+      uses: actions/upload-artifact@v3
+      with:
+        name: installers
+        path: ./Installers/*.tpp
