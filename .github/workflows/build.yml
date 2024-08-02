@@ -26,8 +26,8 @@ jobs:
     - name: Clean npm cache
       run: npm cache clean --force
 
-    - name: Install dependencies
-      run: npm ci
+    - name: Install dependencies with verbose logging
+      run: npm ci --verbose
 
     - name: Run build script
       run: node scripts/build.js
