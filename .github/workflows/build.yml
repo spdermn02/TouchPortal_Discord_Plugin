@@ -1,6 +1,8 @@
 name: Node.js CI
 
-on: [push]
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -23,3 +25,11 @@ jobs:
             ${{ runner.os }}-node-
       - run: npm ci --loglevel verbose
       - run: npm run pkg-all
+      
+      - name: Upload artifacts to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "installers/*.tpp"  # Adjust the path if your files are in a different location or have different extensions
+          overwrite: true
+          file_glob: true
