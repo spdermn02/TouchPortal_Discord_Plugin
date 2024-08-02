@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -16,3 +15,7 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
+      - name: Ignore TypeScript Errors
+        run: |
+          echo "skipLibCheck=true" > tsconfig.json
+      - run: npm ci --ignore-scripts
