@@ -18,7 +18,7 @@ jobs:
         node-version: '20'
 
     - name: Check Node.js version
-    run: node --version
+      run: node --version
 
     - name: Set npm registry
       run: npm config set registry https://registry.npmjs.org/
