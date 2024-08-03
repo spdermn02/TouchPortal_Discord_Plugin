@@ -1,4 +1,4 @@
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const {logIt} = require("../../utils/helpers.js");
 
 class notificationHandler {

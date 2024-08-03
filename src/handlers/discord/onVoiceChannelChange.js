@@ -1,4 +1,4 @@
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const TPClient = require("../../core/TPClient.js");
 const {logIt, wait, imageToBase64} = require("../../utils/helpers.js");
 const userStateHandler = require("./userStateHandler.js");

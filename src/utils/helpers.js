@@ -1,6 +1,6 @@
 // HELPER FUNCTIONS
 const platform = require("process").platform;
-const {DG} = require("../config.js");
+const {DG} = require("../discord_config.js");
 
 const app_monitor = {
   darwin: "/Applications/Discord.app/Contents/MacOS/Discord",

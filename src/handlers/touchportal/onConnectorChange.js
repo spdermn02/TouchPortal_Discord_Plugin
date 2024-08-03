@@ -1,7 +1,7 @@
 // TPClient onConnectorChange
 
 const TPClient = require("../../core/TPClient.js");
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const {
   logIt,
   convertPercentageToVolume,

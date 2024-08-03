@@ -1,5 +1,5 @@
 const RPC = require("../../../discord-rpc/src/index.js");
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const TPClient = require("../../core/TPClient.js");
 const {convertVolumeToPercentage, imageToBase64, logIt} = require("../../utils/helpers.js");
 

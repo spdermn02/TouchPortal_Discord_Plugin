@@ -1,7 +1,7 @@
 // TPClient onAction
 
 const discordKeyMap = require("../../utils/discordKeys.js");
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const {
   logIt,
   getUserIdFromIndex,

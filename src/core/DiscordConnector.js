@@ -2,7 +2,7 @@
 
 const RPC = require("../../discord-rpc/src/index.js");
 const {open} = require("out-url");
-const {DG} = require("../config.js");
+const {DG} = require("../discord_config.js");
 const {logIt, isEmpty} = require("../utils/helpers.js");
 const TPClient = require("./TPClient.js");
 

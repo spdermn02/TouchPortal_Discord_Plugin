@@ -1,6 +1,6 @@
 // voiceStateHandler
 
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const TPClient = require("../../core/TPClient.js");
 const {logIt, diff, convertVolumeToPercentage, platform} = require("../../utils/helpers.js");
 const {voiceChannel} = require("./onVoiceChannelChange.js");

@@ -7,7 +7,7 @@ const {onConnectorChange} = require("../handlers/touchportal/onConnectorChange.j
 const {onAction} = require("../handlers/touchportal/onAction.js");
 
 const discordKeyMap = require("../utils/discordKeys.js");
-const {DG} = require("../config.js");
+const {DG} = require("../discord_config.js");
 const {logIt, platform, app_monitor} = require("../utils/helpers.js");
 
 // ON ACTION is in onAction.js

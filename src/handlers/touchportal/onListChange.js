@@ -1,6 +1,6 @@
 //onListChange
 
-const {DG} = require("../../config.js");
+const {DG} = require("../../discord_config.js");
 const TPClient = require("../../core/TPClient.js");
 const {logIt, isEmpty} = require("../../utils/helpers.js");
 
