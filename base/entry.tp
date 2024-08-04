@@ -1,7 +1,7 @@
 {
     "sdk": 6,
-    "version": 4400,
-    "TPDiscord_Version":"4.4.0",
+    "version": 5000,
+    "TPDiscord_Version":"5.0.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe\"",
@@ -46,10 +46,63 @@
         {
             "name" :"VoiceActivity Tracker - Seperate each ID by commas",
             "type" : "text",
-            "default" : "",
-        },
+            "default" : ""
+        }
     ],
     "categories": [
+        {
+            "id": "TPDiscord_DirectMessage",
+            "name": "DirectMessage",
+            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
+            "connectors":[],
+            "actions":[],
+            "events":[],
+            "states":[   
+                {
+                    "id": "discord_DM_user",
+                    "type": "text",
+                    "desc": "DM: UserName",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_userID",
+                    "type": "text",
+                    "desc": "DM: UserID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_channelID",
+                    "type": "text",
+                    "desc": "DM: ChannelID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_content",
+                    "type": "text",
+                    "desc": "DM: Content",
+                    "default": ""
+                },
+                {
+                    "id": "discord_newDM_eventState",
+                    "type": "text",
+                    "desc": "Discord New DM Event",
+                    "default": "False"
+                },
+                {
+                    "id": "discord_DM_timestamp",
+                    "type": "text",
+                    "desc": "DM: Timestamp",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_avatar",
+                    "type": "text",
+                    "desc": "DM: Avatar",
+                    "default": ""
+                }
+
+            ]
+        },
         {
             "id": "TPDiscord",
             "name": "Discord",
@@ -651,7 +704,20 @@
                     "default": "<None>"
                 }
             ],
-            "events": []
+            "events": [
+                {
+                    "id": "discord_newDM",
+                    "name": "Discord | New Direct Message (DM)",
+                    "format": "When receiving a new Direct Message $val",
+                    "type": "communicate",
+                    "valueChoices": [
+                      "True"
+                    ],
+                    "default": "False",
+                    "valueType": "choice",
+                    "valueStateId": "discord_newDM_eventState"
+                  }
+            ]
         }
     ]
 }

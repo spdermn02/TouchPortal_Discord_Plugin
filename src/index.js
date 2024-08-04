@@ -250,7 +250,7 @@ function createStates(prefix, states, group = `${prefix} - States`) {
 
 
 
-const notificationHandler = new NotificationHandler(DG);
+const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
 const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
 const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler);
