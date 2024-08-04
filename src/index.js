@@ -4,14 +4,17 @@ const {logIt} = require("./utils/helpers.js");
 const RPC = require("../discord-rpc/src/index.js");
 
 const {DiscordConnector} = require("./core/DiscordConnector.js");
-
 const {UserStateHandler} = require("./handlers/discord/userStateHandler.js");
 const {VoiceStateHandler} = require("./handlers/discord/voiceStateHandler.js");
 const {NotificationHandler} = require("./handlers/discord/notificationHandler.js");
+const {VoiceChannelHandler}= require("./handlers/discord/voiceChannelHandler.js");
 
-const userStateHandler = new UserStateHandler(TPClient, DG );
+
+
 const notificationHandler = new NotificationHandler(DG);
-const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler);
+const userStateHandler = new UserStateHandler(TPClient, DG );
+const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
+const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler);
 // voiceStateHandler.registerEvents(); - happens inside of DiscordConnector
 
 const Discord = new DiscordConnector(TPClient, DG, RPC, userStateHandler, notificationHandler, voiceStateHandler);

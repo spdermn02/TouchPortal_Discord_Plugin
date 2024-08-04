@@ -2,13 +2,16 @@
 
 
 const {logIt, diff, convertVolumeToPercentage, platform} = require("../../utils/helpers.js");
-const {voiceChannel} = require("./onVoiceChannelChange.js");
+// const {voiceChannel} = require("./onVoiceChannelChange.js");
+const {VoiceChannelHandler} = require("./voiceChannelHandler.js");
 
 class VoiceStateHandler {
-  constructor(DG,  TPClient, userStateHandler, notificationHandler) {
+  constructor(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler) {
     this.TPClient = TPClient;
     this.DG = DG
     this.userStateHandler = userStateHandler;
+
+    this.voiceChannelHandler = voiceChannelHandler;
 
     // this.addUserData = this.userStateHandler.addUserData;
     // this.updateUserStates = this.userStateHandler.updateUserStates;
@@ -105,7 +108,7 @@ class VoiceStateHandler {
     });
 
     this.DG.Client.on("VOICE_CHANNEL_SELECT", (data) => {
-      voiceChannel(data, this.userStateHandler);
+      this.voiceChannelHandler.voiceChannel(data, this.userStateHandler);
     });
 
     this.DG.Client.on("VOICE_CONNECTION_STATUS", (data) => {
@@ -388,7 +391,7 @@ class VoiceStateHandler {
     const voiceChannelData = await this.DG.Client.getSelectedVoiceChannel();
     if (voiceChannelData != null) {
       voiceChannelData.channel_id = voiceChannelData.id;
-      voiceChannel(voiceChannelData, this.userStateHandler);
+      this.voiceChannelHandler.voiceChannel(voiceChannelData, this.userStateHandler);
     }
   };
 
