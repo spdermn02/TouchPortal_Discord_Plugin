@@ -3,8 +3,9 @@ const TPClient = new TP.Client();
 const RPC = require("../discord-rpc/src/index.js");
 
 const {DG} = require("./discord_config.js");
+const {pluginId} = require("./discord_config.js");
 const discordKeyMap = require("./utils/discordKeys.js");
-const {logIt, convertPercentageToVolume, getUserIdFromIndex, pluginId, platform, app_monitor} = require("./utils/helpers.js");
+const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode} = require("./utils/helpers.js");
 const {DiscordConnector} = require("./core/DiscordConnector.js");
 const {UserStateHandler} = require("./handlers/discord/userStateHandler.js");
 const {VoiceStateHandler} = require("./handlers/discord/voiceStateHandler.js");
@@ -13,10 +14,11 @@ const {VoiceChannelHandler}= require("./handlers/discord/voiceChannelHandler.js"
 const {onAction} = require("./handlers/touchportal/onAction.js");
 
 
-// ON ACTION is in onAction.js
-// ON CONNECTOR CHANGE is in onConnectorChange.js
-// ON LIST CHANGE is in onListChange.js
 
+
+// ----------------------------------------------------
+// On Info
+// ----------------------------------------------------
 TPClient.on("Info", (data) => {
   console.log("Info Triggered.. creating default user states");
   logIt("DEBUG", "Info : We received info from Touch-Portal");
@@ -32,6 +34,13 @@ TPClient.on("Info", (data) => {
   }
 });
 
+
+
+
+
+// ----------------------------------------------------
+// On Settings
+// ----------------------------------------------------
 TPClient.on("Settings", (data) => {
   console.log("Settings triggered.. creating custom user states");
 
@@ -46,8 +55,12 @@ TPClient.on("Settings", (data) => {
       reconnect = true;
     }
     DG.pluginSettings[key] = setting[key];
+   
     logIt("DEBUG", "Settings: Setting received for |" + key + "|");
   });
+
+  setDebugMode(DG.pluginSettings["Discord Debug Mode"]);
+  // console.log("Debug mode: ", DG.pluginSettings["Discord Debug Mode"]);
 
   if (DG.pluginSettings["VoiceActivity Tracker - Seperate each ID by commas"].length > 0) {
     let customUsers =
@@ -89,38 +102,68 @@ TPClient.on("Settings", (data) => {
   }
 });
 
+
+
+
+// ----------------------------------------------------
+// On Update
+// ----------------------------------------------------
 TPClient.on("Update", (curVersion, newVersion) => {
   console.log("DEBUG", "Update: current version:" + curVersion + " new version:" + newVersion);
   TPClient.sendNotification(
-    `${DG.pluginId}_update_notification`,
+    `${pluginId}_update_notification`,
     `Discord Plugin Update Available (${newVersion})`,
     `\nPlease updated to get the latest bug fixes and new features\n\nCurrent Installed Version: ${curVersion}`,
     [
       {
-        id: `${DG.pluginId}_update_notification_go_to_download`,
+        id: `${pluginId}_update_notification_go_to_download`,
         title: "Go To Download Location",
       },
     ]
   );
 });
 
+
+
+
+// ----------------------------------------------------
+// On Notification Clicked
+// ----------------------------------------------------
 TPClient.on("NotificationClicked", (data) => {
   logIt("DEBUG", JSON.stringify(data));
-  if (data.optionId === `${DG.pluginId}_update_notification_go_to_download`) {
+  if (data.optionId === `${pluginId}_update_notification_go_to_download`) {
     open(DG.releaseUrl);
   }
 });
 
+
+
+
+// ----------------------------------------------------
+// On TouchPortal Close
+// ----------------------------------------------------
 TPClient.on("Close", (data) => {
   logIt("WARN", "Closing due to TouchPortal sending closePlugin message");
   TPClient.stateUpdate("discord_running", "Unknown");
   TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING, "Disconnected");
 });
 
+
+
+
+// ----------------------------------------------------
+// On Action
+// ----------------------------------------------------
 TPClient.on("Action", (data, isHeld) => {
   onAction(data, isHeld);
 });
 
+
+
+
+// ----------------------------------------------------
+// On Connector Change
+// ----------------------------------------------------
 TPClient.on("ConnectorChange", (data) => {
     logIt("DEBUG", `Connector change event fired ` + JSON.stringify(data));
     const action = data.connectorId;
@@ -148,11 +191,15 @@ TPClient.on("ConnectorChange", (data) => {
         });
       }
     } else {
-      logIt("DEBUG", pluginId, ": ERROR : ", `Unknown action called ${action}`);
+      logIt("WARN", `Unknown action called ${action}`);
     }
   
 });
 
+
+// ----------------------------------------------------
+// On List Change
+// ----------------------------------------------------
 TPClient.on("ListChange", (data) => {
   logIt("DEBUG", "ListChange :" + JSON.stringify(data));
   if (isEmpty(DG.instanceIds[data.instanceId])) {
@@ -203,9 +250,6 @@ function createStates(prefix, states, group = `${prefix} - States`) {
 
 
 
-
-
-
 const notificationHandler = new NotificationHandler(DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
 const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
@@ -246,6 +290,6 @@ Discord.DG.procWatcher.on("processTerminated", (processName) => {
 
 
 console.log("Initiating TP CLient");
-TPClient.connect({pluginId: DG.pluginId, updateUrl: DG.updateUrl});
+TPClient.connect({pluginId: pluginId, updateUrl: DG.updateUrl});
 
 

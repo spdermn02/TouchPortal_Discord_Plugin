@@ -1,21 +1,26 @@
 // HELPER FUNCTIONS
 const platform = require("process").platform;
-const {DG} = require("../discord_config.js");
+const {pluginId} = require("../discord_config.js");
 
 const app_monitor = {
   darwin: "/Applications/Discord.app/Contents/MacOS/Discord",
   win32: "Discord.exe",
 };
 
+let debugMode = "Info";
+function setDebugMode(mode) {
+  debugMode = mode;
+}
+
 function logIt() {
   const curTime = new Date().toISOString();
   const message = [...arguments];
   const type = message.shift();
-  if (type == "DEBUG" && DG.pluginSettings["Discord Debug Mode"].toLowerCase() == "off") {
+  if (type == "DEBUG" && debugMode.toLowerCase() == "off") {
     return;
   }
 
-  console.log(curTime, ":", DG.pluginId, ":" + type + ":", message.join(" "));
+  console.log(curTime, ":", pluginId, ":" + type + ":", message.join(" "));
 }
 
 function isEmpty(val) {
@@ -109,4 +114,5 @@ module.exports = {
   imageToBase64,
   platform,
   app_monitor,
+  setDebugMode,
 };

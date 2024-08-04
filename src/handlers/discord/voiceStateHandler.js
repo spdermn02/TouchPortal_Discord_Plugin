@@ -2,20 +2,14 @@
 
 
 const {logIt, diff, convertVolumeToPercentage, platform} = require("../../utils/helpers.js");
-// const {voiceChannel} = require("./onVoiceChannelChange.js");
-const {VoiceChannelHandler} = require("./voiceChannelHandler.js");
+
 
 class VoiceStateHandler {
   constructor(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler) {
     this.TPClient = TPClient;
     this.DG = DG
     this.userStateHandler = userStateHandler;
-
     this.voiceChannelHandler = voiceChannelHandler;
-
-    // this.addUserData = this.userStateHandler.addUserData;
-    // this.updateUserStates = this.userStateHandler.updateUserStates;
-    // this.deleteUserStates = this.userStateHandler.deleteUserStates;
 
     // not using?
     // this.repopulateUserStates = this.userStateHandler.repopulateUserStates;

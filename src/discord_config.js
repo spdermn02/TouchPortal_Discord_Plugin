@@ -1,9 +1,10 @@
 const procWatcher = require("./core/process_watcher");
 const DEFAULT_BASE64_AVATAR = require("./utils/DEFAULT_BASE64_AVATAR.js");
+const pluginId = "TPDiscord";
 
 class DiscordG {
   constructor() {
-    this.pluginId = "TPDiscord";
+    // this.pluginId = pluginId;
     this.pluginSettings = {
       "Plugin Connected": "No",
       "Skip Process Watcher": "No",
@@ -97,6 +98,9 @@ class DiscordG {
   } 
 }
 
+
+
 module.exports = {
   DG: new DiscordG(),
+  pluginId
 };

@@ -3,9 +3,6 @@
 const {open} = require("out-url");
 const {logIt, isEmpty} = require("../utils/helpers.js");
 
-const {VoiceStateHandler} = require("../handlers/discord/voiceStateHandler.js");
-
-
 class DiscordConnector {
   constructor(TPClient, DG, RPC, userStateHandler, notificationHandler, voiceStateHandler) {
     this.TPClient = TPClient;

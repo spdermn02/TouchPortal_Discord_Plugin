@@ -94,27 +94,31 @@ async function onAction(message, isHeld) {
       userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);
     }
 
-    // If isHeld is undefined or null, set the volume directly
-    if (isHeld === undefined || isHeld === null) {
-      DG.voiceChannelInfo.voice_volume = parseInt(message.data[0].value, 10);
-      DG.Client.setUserVoiceSettings(userId, {
-        volume: convertPercentageToVolume(DG.voiceChannelInfo.voice_volume),
-      });
-    }
-    // If isHeld is true, start an interval to increase the volume
-    if (isHeld) {
-      intervalId = setInterval(() => {
-        DG.voiceChannelInfo.voice_volume += parseInt(message.data[0].value, 10) * 2;
-        DG.voiceChannelInfo.voice_volume = Math.max(0, Math.min(DG.voiceChannelInfo.voice_volume, 200));
-
+    if (userId) {
+      // If isHeld is undefined or null, set the volume directly
+      if (isHeld === undefined || isHeld === null) {
+        DG.voiceChannelInfo.voice_volume = parseInt(message.data[0].value, 10);
         DG.Client.setUserVoiceSettings(userId, {
           volume: convertPercentageToVolume(DG.voiceChannelInfo.voice_volume),
         });
-      }, 100);
-    }
-    // If isHeld is false, clear the interval
-    if (isHeld === false) {
-      clearInterval(intervalId);
+      }
+      // If isHeld is true, start an interval to increase the volume
+      if (isHeld) {
+        intervalId = setInterval(() => {
+          DG.voiceChannelInfo.voice_volume += parseInt(message.data[0].value, 10) * 2;
+          DG.voiceChannelInfo.voice_volume = Math.max(0, Math.min(DG.voiceChannelInfo.voice_volume, 200));
+
+          DG.Client.setUserVoiceSettings(userId, {
+            volume: convertPercentageToVolume(DG.voiceChannelInfo.voice_volume),
+          });
+        }, 100);
+      }
+      // If isHeld is false, clear the interval
+      if (isHeld === false) {
+        clearInterval(intervalId);
+      }
+    } else {
+      logIt("WARN", "User not found for volume action", JSON.stringify(message));
     }
   } else if (message.data && message.data.length > 0) {
     if (message.data[0].id === "discordDeafenAction") {
