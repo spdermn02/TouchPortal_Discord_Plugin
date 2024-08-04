@@ -114,8 +114,8 @@ TPClient.on("Close", (data) => {
   TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING, "Disconnected");
 });
 
-TPClient.on("Action", (data) => {
-  onAction(data);
+TPClient.on("Action", (data, isHeld) => {
+  onAction(data, isHeld);
 });
 
 TPClient.on("ConnectorChange", (data) => {

@@ -1,8 +1,9 @@
-const {DG} = require("../../discord_config.js");
 const {logIt} = require("../../utils/helpers.js");
 
-class notificationHandler {
-  constructor() {}
+class NotificationHandler {
+  constructor(DG) {
+    this.DG = DG;
+  }
 
   async onNotification(data) {
     // When getting DMs, or Tagged in a message.. can give  you details as to where.. so could set up a button to take to channel where tagged technically..
@@ -22,14 +23,14 @@ class notificationHandler {
     let guildId;
     let guildName;
     let channelType;
-    for (const [key, value] of Object.entries(DG.channels)) {
+    for (const [key, value] of Object.entries(this.DG.channels)) {
       if (value.voice.names[channelId]) {
         guildId = key;
         channelType = "voice";
         break;
       } else if (value.text.names[channelId]) {
         guildId = key;
-        guildName = DG.guilds.idx[key];
+        guildName = this.DG.guilds.idx[key];
         channelType = "text";
         break;
       }
@@ -45,7 +46,7 @@ class notificationHandler {
 
     // Allows user to open DM and or Text channel based on notification data we have..
     if (channelType === "voice") {
-      // DG.Client.selectVoiceChannel(channelId, {timeout: 5});
+      // this.DG.Client.selectVoiceChannel(channelId, {timeout: 5});
     } else if (channelType === "text") {
       console.log(
         "TEXT CHANNEL |  Guild: ",
@@ -59,7 +60,7 @@ class notificationHandler {
         "Content:",
         content
       );
-      // DG.Client.selectTextChannel(channelId, {timeout: 5});
+      // this.DG.Client.selectTextChannel(channelId, {timeout: 5});
     } else if (channelType === undefined) {
       // seems to trigger off non DM messages ??  - need to test more
       console.log(
@@ -72,10 +73,9 @@ class notificationHandler {
         "Content:",
         content
       );
-      // DG.Client.selectTextChannel(channelId, {timeout: 5});
+      // this.DG.Client.selectTextChannel(channelId, {timeout: 5});
     }
   }
 }
 
-const NotificationHandler = new notificationHandler();
-module.exports = NotificationHandler;
+module.exports = {NotificationHandler};

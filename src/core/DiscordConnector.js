@@ -1,22 +1,29 @@
 // Discord Connector
 
-const RPC = require("../../discord-rpc/src/index.js");
 const {open} = require("out-url");
-const {DG} = require("../discord_config.js");
 const {logIt, isEmpty} = require("../utils/helpers.js");
-const TPClient = require("./TPClient.js");
 
 const {VoiceStateHandler} = require("../handlers/discord/voiceStateHandler.js");
 
+
 class DiscordConnector {
-  constructor() {}
+  constructor(TPClient, DG, RPC, userStateHandler, notificationHandler, voiceStateHandler) {
+    this.TPClient = TPClient;
+    this.DG = DG;
+    this.RPC = RPC;
+    this.userStateHandler = userStateHandler;
+    this.notificationHandler = notificationHandler;
+    this.voiceStateHandler = voiceStateHandler;
+    
+  }
 
   connectToDiscord = () => {
     try {
-      DG.Client = new RPC.Client({transport: "ipc"});
+      this.DG.Client = new this.RPC.Client({transport: "ipc"});
 
-      const voiceStateHandler = new VoiceStateHandler(ConnectDiscord.doLogin);
-      voiceStateHandler.registerEvents();
+      /// how do we initiate this outside of this class... hmm
+      // const voiceStateHandler = new VoiceStateHandler(this, this.TPClient, this.userStateHandler, this.notificationHandler);
+      this.voiceStateHandler.registerEvents();
 
       this.discordLogin();
     } catch (error) {
@@ -25,18 +32,18 @@ class DiscordConnector {
   };
 
   discordLogin = () => {
-    DG.Client.login({
-      clientId: DG.pluginSettings["Discord Client Id"],
-      clientSecret: DG.pluginSettings["Discord Client Secret"],
-      accessToken: DG.accessToken,
-      scopes: DG.scopes,
-      redirectUri: DG.redirectUri,
+    this.DG.Client.login({
+      clientId: this.DG.pluginSettings["Discord Client Id"],
+      clientSecret: this.DG.pluginSettings["Discord Client Secret"],
+      accessToken: this.DG.accessToken,
+      scopes: this.DG.scopes,
+      redirectUri: this.DG.redirectUri,
       prompt: "none",
     }).catch((error) => {
       logIt("ERROR", "login error", error);
       if (error.code == 4009) {
-        DG.connecting = false;
-        DG.accessToken = null;
+        this.DG.connecting = false;
+        this.DG.accessToken = null;
         logIt("INFO", "Attempting Login again");
         this.doLogin();
       }
@@ -48,8 +55,8 @@ class DiscordConnector {
     new Promise((r, j) => {
       const check = () => {
         if (
-          !isEmpty(DG.pluginSettings["Discord Client Id"]) &&
-          !isEmpty(DG.pluginSettings["Discord Client Secret"])
+          !isEmpty(this.DG.pluginSettings["Discord Client Id"]) &&
+          !isEmpty(this.DG.pluginSettings["Discord Client Secret"])
         ) {
           r();
         } else if ((timeoutms -= 1000) < 0) {
@@ -61,15 +68,15 @@ class DiscordConnector {
 
   waitForLogin = () =>
     new Promise((r, j) => {
-      DG.connecting = true;
+      this.DG.connecting = true;
       const check = () => {
-        if (DG.Client && DG.Client.user != null) {
-          DG.connecting = false;
+        if (this.DG.Client && this.DG.Client.user != null) {
+          this.DG.connecting = false;
           r();
         } else {
           this.connectToDiscord();
-          if (DG.Client && DG.Client.user != null) {
-            DG.connecting = false;
+          if (this.DG.Client && this.DG.Client.user != null) {
+            this.DG.connecting = false;
             r();
           } else {
             setTimeout(check, 5000);
@@ -80,18 +87,18 @@ class DiscordConnector {
     });
 
   doLogin = async () => {
-    if (DG.connecting) {
+    if (this.DG.connecting) {
       return;
     }
-    if (DG.Client) {
-      DG.Client.removeAllListeners();
-      DG.Client.destroy();
-      DG.Client = null;
+    if (this.DG.Client) {
+      this.DG.Client.removeAllListeners();
+      this.DG.Client.destroy();
+      this.DG.Client = null;
     }
 
     if (
-      isEmpty(DG.pluginSettings["Discord Client Id"]) ||
-      isEmpty(DG.pluginSettings["Discord Client Secret"])
+      isEmpty(this.DG.pluginSettings["Discord Client Id"]) ||
+      isEmpty(this.DG.pluginSettings["Discord Client Secret"])
     ) {
       open(`https://discord.com/developers/applications`);
 
@@ -102,30 +109,10 @@ class DiscordConnector {
     console.log("Waiting for Login");
     await this.waitForLogin();
   };
+
+  
 }
 
-const ConnectDiscord = new DiscordConnector();
 
-// Process Watcher
-DG.procWatcher.on("processRunning", (processName) => {
-  logIt("INFO", `${processName} detected as running`);
-  TPClient.stateUpdate("discord_running", "Yes");
-
-  // Lets shutdown the connection so we can re-establish it
-  setTimeout(function () {
-    logIt("INFO", "Discord is running, attempting to Connect");
-    ConnectDiscord.doLogin();
-  }, 1000);
-});
-
-DG.procWatcher.on("processTerminated", (processName) => {
-  logIt("WARN", `${processName} not detected as running`);
-  TPClient.stateUpdate("discord_running", "No");
-  if (DG.Client) {
-    DG.Client.removeAllListeners();
-    DG.Client.destroy();
-    DG.Client = null;
-  }
-});
 
 module.exports = {DiscordConnector};

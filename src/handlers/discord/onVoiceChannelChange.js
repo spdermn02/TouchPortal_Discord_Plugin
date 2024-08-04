@@ -1,9 +1,8 @@
 const {DG} = require("../../discord_config.js");
 const TPClient = require("../../core/TPClient.js");
 const {logIt, wait, imageToBase64} = require("../../utils/helpers.js");
-const userStateHandler = require("./userStateHandler.js");
 
-const voiceChannel = async (data) => {
+const voiceChannel = async (data, userStateHandler) => {
   logIt("DEBUG", "Voice Channel join", JSON.stringify(data));
 
   //  await DiscordClient.subscribe("MESSAGE_CREATE", { channel_id: "1125087354969915464"}).catch((err) => {logIt("ERROR",err)});
@@ -28,6 +27,9 @@ const voiceChannel = async (data) => {
   } else {
     // Lookup Voice Channel Name
     if (!DG.channels[data.guild_id] || !DG.channels[data.guild_id].voice) {
+
+
+      /// This should be referring to voicestateHandler... but its not.. so its literally doin nothing right now..
       try {
         // if user changes channels while plugin is booting, it may error/crash without this..
         getGuildChannels(data.guild_id).then(() => {
@@ -38,6 +40,7 @@ const voiceChannel = async (data) => {
       } catch (error) {
         logIt("ERROR", "Error getting Guild Channels", error);
       }
+
     } else {
       DG.voiceChannelInfo.voice_channel_name = DG.channels[data.guild_id].voice.names[data.channel_id];
     }
