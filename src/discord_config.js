@@ -4,6 +4,10 @@ const pluginId = "TPDiscord";
 
 class DiscordG {
   constructor() {
+
+    this.userPremiumType = 0;
+    this.userId = "";
+    
     // this.pluginId = pluginId;
     this.pluginSettings = {
       "Plugin Connected": "No",

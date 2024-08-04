@@ -58,8 +58,32 @@ class VoiceStateHandler {
         logIt("ERROR", err);
       });
 
+      await this.DG.Client.subscribe("CURRENT_USER_UPDATE").catch((err) => {
+        logIt("ERROR", err);
+      });
+      
+
       await this.getGuilds();
       await this.getSoundboardSounds();
+    });
+
+    // If user changes their name,a vatar, premium_type... 
+    this.DG.Client.on("CURRENT_USER_UPDATE", (data) => {
+      logIt("INFO", "Current User Update", JSON.stringify(data));
+      let userId = data.id;
+      let userName = data.username; // or global_name ?
+      let userPremiumType = data.premium_type;
+      let userAvatar = data.avatar;
+
+      this.DG.userID = data.id;
+      this.DG.userPremiumType = data.premium_type;
+      // we can decide if
+      console.log(`User ID: ${userId}, User Name: ${userName}, Premium Type: ${userPremiumType}, Avatar: ${userAvatar}`);
+      // this.TPClient.stateUpdate("discord_user_id", data.id);
+      // this.TPClient.stateUpdate("discord_user_name", data.username);
+      // this.TPClient.stateUpdate("discord_user_discriminator", data.discriminator);
+      // this.TPClient.stateUpdate("discord_user_avatar", data.avatar);
+      // this.TPClient.stateUpdate("discord_user_avatarID", data.avatarID);
     });
 
     this.DG.Client.on("NOTIFICATION_CREATE", (data) => {
@@ -93,11 +117,11 @@ class VoiceStateHandler {
       this.voiceSettings(data);
       console.log("VOICE SETTINGS CHANGE DISCORD");
 
-      this.DG.voiceSettings.inputDevices = data.input.available_devices;
-      this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
+      // this.DG.voiceSettings.inputDevices = data.input.available_devices;
+      // this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
 
-      this.DG.voiceSettings.outputDevices = data.output.available_devices;
-      this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
+      // this.DG.voiceSettings.outputDevices = data.output.available_devices;
+      // this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
 
     });
 
@@ -200,13 +224,30 @@ class VoiceStateHandler {
     const connectors = [];
 
     if (data.hasOwnProperty('input')) {
-      this.DG.inputDevice = data.input.device_id;
-      // Set the TPClient.stateupdate Default Device ID/Name here..
-    }
-    if (data.hasOwnProperty('output')) {
-      this.DG.outputDevice = data.output.device_id;
-      // Set the TPClient.stateupdate Default Device ID/Name here..
+      // updating the input devices and names as they may have changed
+      this.DG.voiceSettings.inputDevices = data.input.available_devices;
+      this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
 
+      // Setting the Default Device in config by ID
+      this.DG.voiceSettings.inputDevice = data.input.device_id;
+      
+      // Matching the Default Device to Name
+      let matchedDevice = this.DG.voiceSettings.inputDevices.find(device => device.id === this.DG.voiceSettings.inputDevice);
+      // this.TPClient.stateUpdate("discord_inputDevice", String(matchedDevice.name));
+      states.push({id: "discord_inputDevice", value: String(matchedDevice.name)});
+
+    }
+
+    if (data.hasOwnProperty('output')) {
+      this.DG.voiceSettings.outputDevices = data.output.available_devices;
+      this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
+
+      // Setting the Default Device in config by ID
+      this.DG.voiceSettings.outputDevice = data.output.device_id;
+      
+      // Matching the Default Device to Name
+      let matchedDevice = this.DG.voiceSettings.outputDevices.find(device => device.id === this.DG.voiceSettings.outputDevice);
+      states.push({id: "discord_outputDevice", value: String(matchedDevice.name)});
     }
 
     if (data.hasOwnProperty("mute")) {
@@ -479,27 +520,57 @@ class VoiceStateHandler {
 
   getSoundboardSounds = async () => {
     let sounds = await this.DG.Client.getSoundboardSounds();
-
     if (sounds != null) {
+      // Initialize soundboard structure
       this.DG.soundBoard = {
         array: [],
         idx: {},
+        default: {
+          array: [],
+          idx: {}
+        },
+        nonDefault: {
+          array: [],
+          idx: {}
+        }
       };
 
+      // Process each sound
       for (const sound of sounds) {
-        let emojiName = sound.emoji_name != null ? sound.emoji_name + " - " : "";
-        let guildName =
-          sound.guild_id === "DEFAULT" ? "Discord Sounds" : this.DG.guilds.idx[sound.guild_id];
+        let emojiName = sound.emoji_name ? sound.emoji_name + " - " : "";
+        let guildName = sound.guild_id === "DEFAULT" ? "Discord Sounds" : this.DG.guilds.idx[sound.guild_id];
         let soundName = guildName + " - " + emojiName + sound.name;
+
+        logIt("DEBUG", `Processing Sound: ${soundName}, Guild: ${guildName}`);
+
+        // Determine if the sound is default or non-default
+        // If user_id is found and it matches the user_Id then they created that sound in their server and they can use it without premium..
+        if (sound.guild_id === "DEFAULT" || sound.user_id === this.DG.userID) {
+          // Add to default sounds
+          logIt("DEBUG", `Adding to default: ${soundName}`);
+          this.DG.soundBoard.default.array.push(soundName);
+          this.DG.soundBoard.default.idx[soundName] = sound;
+        }
+
+        // Add to general soundboard
         this.DG.soundBoard.array.push(soundName);
         this.DG.soundBoard.idx[soundName] = sound;
         this.DG.soundBoard.idx[sound.sound_id] = sound;
-      }
+    }
 
-      // Sort by Discord Guild name - seems to make the most sense to collect them into grouped areas.
-      this.DG.soundBoard.array.sort();
+   // Adding a random sound feature.. 
+   this.DG.soundBoard.default.array.push("RANDOM SOUND")
+   this.DG.soundBoard.array.push("RANDOM SOUND")
 
-      this.TPClient.choiceUpdate("discordSound", this.DG.soundBoard.array);
+   this.DG.soundBoard.array.sort();
+   this.DG.soundBoard.default.array.sort();
+ 
+  if (this.DG.userPremiumType === 0) {
+    this.TPClient.choiceUpdate("discordSound", this.DG.soundBoard.default.array);
+    logIt("DEBUG", "User is not premium, default sounds only");
+  } else
+    this.TPClient.choiceUpdate("discordSound", this.DG.soundBoard.array);
+    logIt("DEBUG", "User is premium, all sounds available");
     }
   };
 }
