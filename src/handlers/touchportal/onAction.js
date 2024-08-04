@@ -1,7 +1,10 @@
 // TPClient onAction
 
 const discordKeyMap = require("../../utils/discordKeys.js");
+
+// everything in onaction COULD be moved to index.js and then DG could be initiated inside of index.js as well instead of its own file
 const {DG} = require("../../discord_config.js");
+
 const {
   logIt,
   getUserIdFromIndex,
@@ -117,9 +120,54 @@ async function onAction(message, isHeld) {
       if (isHeld === false) {
         clearInterval(intervalId);
       }
+      
     } else {
       logIt("WARN", "User not found for volume action", JSON.stringify(message));
     }
+  } else if (message.actionId === "discord_setDefaultAudioDevice") {
+    logIt("INFO", "Setting default audio device", deviceType, deviceName);
+    let deviceName = message.data[0].value;
+    let deviceType = message.data[1].value;
+    let reverseDevices; // Declare reverseDevices outside the conditional blocks
+  
+    if (deviceType === "Input") {
+      reverseDevices = DG.voiceSettings.inputDevices.reduce((acc, device) => {
+        acc[device.name] = device.id;
+        return acc;
+      }, {});
+    } else if (deviceType === "Output") {
+      reverseDevices = DG.voiceSettings.outputDevices.reduce((acc, device) => {
+        acc[device.name] = device.id;
+        return acc;
+      }, {});
+    }
+
+  const deviceID = reverseDevices[deviceName];
+  
+  if (deviceID) {
+    if (deviceType === "Input") {
+      console.log("Attempting to set output device to", deviceID);
+      DG.Client.setVoiceSettings({
+        input: { 
+          device: deviceID,
+          // volume: Math.min(transformedVol, 200)
+        }
+      })
+    } else if (deviceType === "Output") {
+      console.log("Attempting to set output device to", deviceID);
+      DG.Client.setVoiceSettings({
+        output: {
+          device: deviceID,
+          // volume: Math.min(transformedVol, 200)
+        }
+      })
+    }
+
+  } else {
+    console.error("Device ID not found for device name:", deviceName);
+  }
+  
+
   } else if (message.data && message.data.length > 0) {
     if (message.data[0].id === "discordDeafenAction") {
       // maintaining backwards compatibility if message.data[1] doesn't exist, for old discord pages with deafen buttons..

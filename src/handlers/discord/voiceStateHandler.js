@@ -91,6 +91,14 @@ class VoiceStateHandler {
 
     this.DG.Client.on("VOICE_SETTINGS_UPDATE", (data) => {
       this.voiceSettings(data);
+      console.log("VOICE SETTINGS CHANGE DISCORD");
+
+      this.DG.voiceSettings.inputDevices = data.input.available_devices;
+      this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
+
+      this.DG.voiceSettings.outputDevices = data.output.available_devices;
+      this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
+
     });
 
     this.DG.Client.on("GUILD_CREATE", (data) => {
@@ -190,6 +198,16 @@ class VoiceStateHandler {
     this.DG.voiceSettings.prevVoiceActivityData = newData;
     const states = [];
     const connectors = [];
+
+    if (data.hasOwnProperty('input')) {
+      this.DG.inputDevice = data.input.device_id;
+      // Set the TPClient.stateupdate Default Device ID/Name here..
+    }
+    if (data.hasOwnProperty('output')) {
+      this.DG.outputDevice = data.output.device_id;
+      // Set the TPClient.stateupdate Default Device ID/Name here..
+
+    }
 
     if (data.hasOwnProperty("mute")) {
       if (data.mute) {

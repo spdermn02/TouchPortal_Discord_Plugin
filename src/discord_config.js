@@ -61,7 +61,15 @@ class DiscordG {
       muteState: 0,
       deafState: 0,
       voice_mode_type: "UNKNOWN",
-      prevVoiceActivityData: {}  // keeping track of end user voice settings data
+      prevVoiceActivityData: {},  // keeping track of end user voice settings data
+      inputDevices: "",
+      outputDevices: "",
+
+      inputDevice: "",
+      outputDevice: "",
+
+      inputDeviceNames :  ["RutRoh - Connection Issue, or Device Name"],
+      outputDeviceNames : ["RutRoh - Connection Issue, or Device Name"],
     };
 
     this.voiceChannelInfo = {

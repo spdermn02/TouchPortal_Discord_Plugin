@@ -14,7 +14,10 @@ const {VoiceChannelHandler}= require("./handlers/discord/voiceChannelHandler.js"
 const {onAction} = require("./handlers/touchportal/onAction.js");
 
 
+// 190 on voicestatehandler.js - set default device names to a state after creating it in entry.tp
+// make even for when device has changed.. 
 
+// check out setActivity func in the RPC in client.js 
 
 // ----------------------------------------------------
 // On Info
@@ -201,12 +204,23 @@ TPClient.on("ConnectorChange", (data) => {
 // On List Change
 // ----------------------------------------------------
 TPClient.on("ListChange", (data) => {
-  logIt("DEBUG", "ListChange :" + JSON.stringify(data));
+  logIt("INFO", "ListChange :" + JSON.stringify(data));
   if (isEmpty(DG.instanceIds[data.instanceId])) {
     DG.instanceIds[data.instanceId] = {};
   }
   if (isEmpty(DG.instanceIds[data.instanceId][data.actionId])) {
     DG.instanceIds[data.instanceId][data.actionId] = {};
+  }
+
+  if (data.actionId === "discord_setDefaultAudioDevice") {
+    console.log("LIST CHANGED FOUND")
+    if (data.listId === "discord_DeviceType"){
+      if (data.value === "Input") {
+      TPClient.choiceUpdate("discord_SelectedDevice", DG.voiceSettings.inputDeviceNames);
+      }else if (data.value === "Output") {
+        TPClient.choiceUpdate("discord_SelectedDevice", DG.voiceSettings.outputDeviceNames);
+      }
+    }
   }
   if (data.actionId === "discord_select_channel" && data.listId !== "discordServerChannel") {
     DG.instanceIds[data.instanceId][data.actionId][data.listId] = data.value;

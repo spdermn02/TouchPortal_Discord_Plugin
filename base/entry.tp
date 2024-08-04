@@ -507,6 +507,30 @@
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Toggle Screen Share On/Off"
+                },
+                {
+                    "id": "discord_setDefaultAudioDevice",
+                    "prefix": "Discord:",
+                    "name": "Discord Set Default Audio Device (Input/Output)",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set {$discord_DeviceType$} Device to {$discord_SelectedDevice$}",
+                    "data": [
+                        {
+                            "id": "discord_SelectedDevice",
+                            "type": "choice",
+                            "label": "Discord Selected Device",
+                            "default": "",
+                            "valueChoices": []
+                        },
+                        {
+                            "id": "discord_DeviceType",
+                            "type": "choice",
+                            "label": "Discord Audio Device Type",
+                            "default": "Output",
+                            "valueChoices": ["Input", "Output"]
+                        }
+                    ]
                 }
             ],
             "states": [
