@@ -32,13 +32,38 @@ async function onAction(message, isHeld) {
     } else {
       await DG.Client.selectTextChannel(channelId, {timeout: 5});
     }
+
   } else if (message.actionId === "discord_play_sound") {
-    let sound = DG.soundBoard.idx[message.data[0].value];
+    let soundValue = message.data[0].value;
+    let sound;
+    let randomSoundName;
+    let randomIndex;
+    
+    if (soundValue === "RANDOM SOUND") {
+      // Picking a random sound based on user PremiumType
+      if (DG.userPremiumType === 0) {
+        // Filtering out the "RANDOM SOUND" choice before picking a random sound
+        availableSounds = DG.soundBoard.default.array.filter(soundName => soundName !== "RANDOM SOUND");
+        randomIndex = Math.floor(Math.random() * availableSounds.length);
+        randomSoundName = availableSounds[randomIndex];
+        sound = DG.soundBoard.default.idx[randomSoundName];
+      } else {
+        // Filtering out the "RANDOM SOUND" choice before picking a random sound
+        availableSounds = DG.soundBoard.array.filter(soundName => soundName !== "RANDOM SOUND");
+        randomIndex = Math.floor(Math.random() * availableSounds.length);
+        randomSoundName = availableSounds[randomIndex];
+        sound = DG.soundBoard.idx[randomSoundName];
+      }
+    } else {
+      // Getting sound if not random
+      sound = DG.soundBoard.idx[soundValue];
+    } 
     try {
       await DG.Client.playSoundboardSound(sound.name, sound.sound_id, sound.guild_id);
     } catch (err) {
-      logIt("ERROR", "Playing a sound failed " + err);
+      logIt("ERROR", "Playing a sound failed: " + err);
     }
+  
   } else if (message.actionId === "discord_toggle_camera") {
     await DG.Client.toggleVideo();
   } else if (message.actionId == "discord_toggle_screenshare") {
@@ -124,11 +149,48 @@ async function onAction(message, isHeld) {
     } else {
       logIt("WARN", "User not found for volume action", JSON.stringify(message));
     }
+
+  } else if (message.actionId === "discord_setDefaultAudioDevice_volume") {
+      let deviceType = message.data[0].value;
+      let volume;
+
+      if (isHeld) {
+        intervalId = setInterval(() => {
+          if (deviceType === "Input") {
+            DG.voiceSettings.inputDeviceVolume += parseInt(message.data[1].value, 10) * 2;
+            DG.voiceSettings.inputDeviceVolume = Math.max(0, Math.min(DG.voiceSettings.inputDeviceVolume, 200));
+            volume = DG.voiceSettings.inputDeviceVolume;
+
+          } else if (deviceType === "Output") {
+            DG.voiceSettings.outputDeviceVolume += parseInt(message.data[1].value, 10) * 2;
+            DG.voiceSettings.outputDeviceVolume = Math.max(0, Math.min(DG.voiceSettings.outputDeviceVolume, 200));
+            volume = DG.voiceSettings.outputDeviceVolume;
+          }
+
+          const voiceSettings = {
+            [deviceType.toLowerCase()]: { volume: convertPercentageToVolume(volume)}
+          };
+
+          try {
+            // Setting the volume
+            DG.Client.setVoiceSettings(voiceSettings);
+            console.log(`Successfully set ${deviceType} volume to`, volume );
+          } catch (error) {
+            console.error(`Error setting ${deviceType} volume:`, error);
+          }
+        }, 100);
+      }
+      // If isHeld is false, clear the interval
+      if (isHeld === false) {
+        clearInterval(intervalId);
+      }
+      
+
   } else if (message.actionId === "discord_setDefaultAudioDevice") {
-    logIt("INFO", "Setting default audio device", deviceType, deviceName);
     let deviceName = message.data[0].value;
     let deviceType = message.data[1].value;
     let reverseDevices; // Declare reverseDevices outside the conditional blocks
+    logIt("INFO", "Setting default audio device", deviceType, deviceName);
   
     if (deviceType === "Input") {
       reverseDevices = DG.voiceSettings.inputDevices.reduce((acc, device) => {
@@ -142,26 +204,26 @@ async function onAction(message, isHeld) {
       }, {});
     }
 
-  const deviceID = reverseDevices[deviceName];
-  
-  if (deviceID) {
-    if (deviceType === "Input") {
-      console.log("Attempting to set output device to", deviceID);
-      DG.Client.setVoiceSettings({
-        input: { 
-          device: deviceID,
-          // volume: Math.min(transformedVol, 200)
-        }
-      })
-    } else if (deviceType === "Output") {
-      console.log("Attempting to set output device to", deviceID);
-      DG.Client.setVoiceSettings({
-        output: {
-          device: deviceID,
-          // volume: Math.min(transformedVol, 200)
-        }
-      })
-    }
+    const deviceID = reverseDevices[deviceName];
+    
+    if (deviceID) {
+      if (deviceType === "Input") {
+        console.log("Attempting to set output device to", deviceID);
+        DG.Client.setVoiceSettings({
+          input: { 
+            device: deviceID,
+            // volume: Math.min(transformedVol, 200)
+          }
+        })
+      } else if (deviceType === "Output") {
+        console.log("Attempting to set output device to", deviceID);
+        DG.Client.setVoiceSettings({
+          output: {
+            device: deviceID,
+            // volume: Math.min(transformedVol, 200)
+          }
+        })
+      }
 
   } else {
     console.error("Device ID not found for device name:", deviceName);
@@ -175,7 +237,6 @@ async function onAction(message, isHeld) {
         DG.voiceSettings.deafState = setStateBasedOnValue(message.data[0].value, DG.voiceSettings.deafState);
         DG.Client.setVoiceSettings({deaf: 1 === DG.voiceSettings.deafState});
         logIt("DEBUG", "Deafen State set to ", DG.voiceSettings.deafState, " for self");
-
         // we cant deafen other users. only our self..
         // } else {
         // const userId = getUserIdFromIndex(message.data[1].value, DG.currentVoiceUsers);

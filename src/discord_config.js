@@ -7,7 +7,7 @@ class DiscordG {
 
     this.userPremiumType = 0;
     this.userId = "";
-    
+
     // this.pluginId = pluginId;
     this.pluginSettings = {
       "Plugin Connected": "No",
@@ -69,8 +69,10 @@ class DiscordG {
       inputDevices: "",
       outputDevices: "",
 
-      inputDevice: "",
-      outputDevice: "",
+      inputDeviceId: "",
+      outputDeviceId: "",
+      outputDeviceVolume: 0,
+      inputDeviceVolume: 0,  
 
       inputDeviceNames :  ["RutRoh - Connection Issue, or Device Name"],
       outputDeviceNames : ["RutRoh - Connection Issue, or Device Name"],

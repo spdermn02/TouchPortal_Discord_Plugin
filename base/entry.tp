@@ -682,21 +682,21 @@
                     "name": "Discord: Set Volume for Default Audio Device (Input/Output)",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Set volume for {$discord_DeviceType$} Device to {$discord_SelectedDevice$} - (-10 will lower 10%)",
+                    "hasHoldFunctionality": "true",
+                    "format": "Discord: Set volume for {$discord_DeviceType$} Device to {$discord_deviceVolume$} - (-10 will lower 10%)",
                     "data": [
-                        {
-                            "id": "discord_SelectedDevice",
-                            "type": "choice",
-                            "label": "Discord Selected Device",
-                            "default": "",
-                            "valueChoices": []
-                        },
                         {
                             "id": "discord_DeviceType",
                             "type": "choice",
                             "label": "Discord Audio Device Type",
                             "default": "Output",
                             "valueChoices": ["Input", "Output"]
+                        },
+                        {
+                            "id": "discord_deviceVolume",
+                            "type": "text",
+                            "label": "Discord Device Volume",
+                            "default": "0.00"
                         }
                     ]
                 }

@@ -1,7 +1,7 @@
 // voiceStateHandler
 
 
-const {logIt, diff, convertVolumeToPercentage, platform} = require("../../utils/helpers.js");
+const {logIt, diff, convertVolumeToPercentage, convertPercentageToVolume, platform} = require("../../utils/helpers.js");
 
 
 class VoiceStateHandler {
@@ -228,26 +228,27 @@ class VoiceStateHandler {
       this.DG.voiceSettings.inputDevices = data.input.available_devices;
       this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
 
-      // Setting the Default Device in config by ID
-      this.DG.voiceSettings.inputDevice = data.input.device_id;
+      this.DG.voiceSettings.inputDeviceVolume = data.input.volume;
+      this.DG.voiceSettings.inputDeviceId = data.input.device_id;
       
       // Matching the Default Device to Name
-      let matchedDevice = this.DG.voiceSettings.inputDevices.find(device => device.id === this.DG.voiceSettings.inputDevice);
+      let matchedDevice = this.DG.voiceSettings.inputDevices.find(device => device.id === this.DG.voiceSettings.inputDeviceId);
       // this.TPClient.stateUpdate("discord_inputDevice", String(matchedDevice.name));
       states.push({id: "discord_inputDevice", value: String(matchedDevice.name)});
-
+      logIt("DEBUG", "Input Device: ", String(matchedDevice.name));
     }
 
     if (data.hasOwnProperty('output')) {
       this.DG.voiceSettings.outputDevices = data.output.available_devices;
       this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
 
-      // Setting the Default Device in config by ID
-      this.DG.voiceSettings.outputDevice = data.output.device_id;
-      
+      this.DG.voiceSettings.outputDeviceVolume = data.output.volume;
+      this.DG.voiceSettings.outputDeviceId = data.output.device_id;
+
       // Matching the Default Device to Name
-      let matchedDevice = this.DG.voiceSettings.outputDevices.find(device => device.id === this.DG.voiceSettings.outputDevice);
+      let matchedDevice = this.DG.voiceSettings.outputDevices.find(device => device.id === this.DG.voiceSettings.outputDeviceId);
       states.push({id: "discord_outputDevice", value: String(matchedDevice.name)});
+      logIt("DEBUG", "Output Device: ", String(matchedDevice.name));
     }
 
     if (data.hasOwnProperty("mute")) {
