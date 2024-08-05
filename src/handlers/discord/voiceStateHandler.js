@@ -216,7 +216,7 @@ class VoiceStateHandler {
   voiceSettings = (newData) => {
     logIt("DEBUG", "voiceSettings", JSON.stringify(newData));
     const data = diff(this.DG.voiceSettings.prevVoiceActivityData, newData);
-    // We always need these
+    // // We always need these
     data.mute = newData.mute;
     data.deaf = newData.deaf;
     this.DG.voiceSettings.prevVoiceActivityData = newData;
@@ -225,31 +225,44 @@ class VoiceStateHandler {
 
     if (data.hasOwnProperty('input')) {
       // updating the input devices and names as they may have changed
-      this.DG.voiceSettings.inputDevices = data.input.available_devices;
-      this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
 
-      this.DG.voiceSettings.inputDeviceVolume = data.input.volume;
-      this.DG.voiceSettings.inputDeviceId = data.input.device_id;
-      
-      // Matching the Default Device to Name
-      let matchedDevice = this.DG.voiceSettings.inputDevices.find(device => device.id === this.DG.voiceSettings.inputDeviceId);
-      // this.TPClient.stateUpdate("discord_inputDevice", String(matchedDevice.name));
-      states.push({id: "discord_inputDevice", value: String(matchedDevice.name)});
-      logIt("DEBUG", "Input Device: ", String(matchedDevice.name));
+      // Making sure the data is valid..
+      if (Array.isArray(data.input.available_devices) && data.input.available_devices.some(device => device.id && device.name)) {
+        // Process the input devices
+        this.DG.voiceSettings.inputDevices = data.input.available_devices;
+        this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
+
+        this.DG.voiceSettings.inputDeviceVolume = data.input.volume;
+        this.DG.voiceSettings.inputDeviceId = data.input.device_id;
+        
+        // Matching the Default Device to Name
+        let matchedDevice = this.DG.voiceSettings.inputDevices.find(device => device.id === this.DG.voiceSettings.inputDeviceId);
+        // this.TPClient.stateUpdate("discord_inputDevice", String(matchedDevice.name));
+        states.push({id: "discord_inputDevice", value: String(matchedDevice.name)});
+        logIt("DEBUG", "Input Device: ", String(matchedDevice.name));
+      }
+    } else {
+      console.log("No valid input devices found.");
     }
+    
 
     if (data.hasOwnProperty('output')) {
-      this.DG.voiceSettings.outputDevices = data.output.available_devices;
-      this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
+      if (Array.isArray(data.output.available_devices) && data.output.available_devices.some(device => device.id && device.name)) {
 
-      this.DG.voiceSettings.outputDeviceVolume = data.output.volume;
-      this.DG.voiceSettings.outputDeviceId = data.output.device_id;
+        this.DG.voiceSettings.outputDevices = data.output.available_devices;
+        this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
 
-      // Matching the Default Device to Name
-      let matchedDevice = this.DG.voiceSettings.outputDevices.find(device => device.id === this.DG.voiceSettings.outputDeviceId);
-      states.push({id: "discord_outputDevice", value: String(matchedDevice.name)});
-      logIt("DEBUG", "Output Device: ", String(matchedDevice.name));
-    }
+        this.DG.voiceSettings.outputDeviceVolume = data.output.volume;
+        this.DG.voiceSettings.outputDeviceId = data.output.device_id;
+
+        // Matching the Default Device to Name
+        let matchedDevice = this.DG.voiceSettings.outputDevices.find(device => device.id === this.DG.voiceSettings.outputDeviceId);
+        states.push({id: "discord_outputDevice", value: String(matchedDevice.name)});
+        logIt("DEBUG", "Output Device: ", String(matchedDevice.name));
+      }
+      } else {
+        console.log("No valid input devices found.");
+      }
 
     if (data.hasOwnProperty("mute")) {
       if (data.mute) {
@@ -258,7 +271,7 @@ class VoiceStateHandler {
         this.DG.voiceSettings.muteState = 0;
       }
 
-      logIt("discord mute is " + this.DG.voiceSettings.muteState);
+      logIt("INFO", `discord mute is ${this.DG.voiceSettings.muteState} `);
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
     }
     if (data.hasOwnProperty("deaf")) {
@@ -270,7 +283,7 @@ class VoiceStateHandler {
       }
       states.push({id: "discord_deafen", value: this.DG.voiceSettings.deafState ? "On" : "Off"});
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
-      logIt("discord deafen is " + this.DG.voiceSettings.deafState);
+      logIt("INFO", `discord deafen is ${this.DG.voiceSettings.deafState}`);
     }
 
     if (

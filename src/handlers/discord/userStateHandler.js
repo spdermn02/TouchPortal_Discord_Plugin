@@ -139,7 +139,7 @@ class UserStateHandler {
         this.TPClient.stateUpdateMany(updates);
       }
     } catch (error) {
-      logIt("ERROR", "updateUserStates: " + error, "ERROR");
+      logIt("ERROR", `updateUserStates: ${error}`);
     }
   };
 

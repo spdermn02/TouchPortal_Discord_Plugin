@@ -61,7 +61,7 @@ async function onAction(message, isHeld) {
     try {
       await DG.Client.playSoundboardSound(sound.name, sound.sound_id, sound.guild_id);
     } catch (err) {
-      logIt("ERROR", "Playing a sound failed: " + err);
+      logIt("ERROR", `Playing a sound failed: ${err}`);
     }
   
   } else if (message.actionId === "discord_toggle_camera") {
@@ -208,19 +208,17 @@ async function onAction(message, isHeld) {
     
     if (deviceID) {
       if (deviceType === "Input") {
-        console.log("Attempting to set output device to", deviceID);
+        logIt("DEBUG", "Attempting to set output device to", deviceID);
         DG.Client.setVoiceSettings({
           input: { 
             device: deviceID,
-            // volume: Math.min(transformedVol, 200)
           }
         })
       } else if (deviceType === "Output") {
-        console.log("Attempting to set output device to", deviceID);
+        logIt("DEBUG", "Attempting to set output device to", deviceID);
         DG.Client.setVoiceSettings({
           output: {
             device: deviceID,
-            // volume: Math.min(transformedVol, 200)
           }
         })
       }
