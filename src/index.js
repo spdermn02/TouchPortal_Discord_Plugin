@@ -14,10 +14,19 @@ const {VoiceChannelHandler}= require("./handlers/discord/voiceChannelHandler.js"
 const {onAction} = require("./handlers/touchportal/onAction.js");
 
 
-// 190 on voicestatehandler.js - set default device names to a state after creating it in entry.tp
-// make even for when device has changed.. 
+// Issues
+// If the plugin is running and a new voice/text channel is created, the plugin does not recognize this when using the select channel action
+// Set Activity is not working properly, it is not updating the activity on discord (onAction.js)
+// possible issue with Notification for DMs etc where if channel is a announcement channel it will return as a DM as it doesnt get a proper channel type.. its not voice/text basically? i dont know
+// ^^ also doesn show for channel choice list..
 
-// check out setActivity func in the RPC in client.js 
+// To Do
+// make event for when device has changed.. 
+// line 530 in voiceStateHandler - started added option to select Forum and or Announcement channels..
+// --- need to finish the action for this and stuff...
+
+
+
 
 // ----------------------------------------------------
 // On Info
@@ -45,8 +54,6 @@ TPClient.on("Info", (data) => {
 // On Settings
 // ----------------------------------------------------
 TPClient.on("Settings", (data) => {
-  console.log("Settings triggered.. creating custom user states");
-
   logIt("DEBUG", "Settings: New Settings from Touch-Portal ");
   let reconnect = false;
   data.forEach((setting) => {
@@ -268,8 +275,6 @@ const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
 const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
 const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler);
-// voiceStateHandler.registerEvents(); - happens inside of DiscordConnector
-
 const Discord = new DiscordConnector(TPClient, DG, RPC, userStateHandler, notificationHandler, voiceStateHandler);
 
 

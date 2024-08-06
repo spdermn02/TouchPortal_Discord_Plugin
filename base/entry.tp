@@ -1,7 +1,7 @@
 {
     "sdk": 6,
     "version": 5000,
-    "TPDiscord_Version":"5.0.0",
+    "TPDiscord_Version": "5.0.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe\"",
@@ -44,242 +44,55 @@
             "maxLength": 3
         },
         {
-            "name" :"VoiceActivity Tracker - Seperate each ID by commas",
-            "type" : "text",
-            "default" : ""
+            "name": "VoiceActivity Tracker - Seperate each ID by commas",
+            "type": "text",
+            "default": ""
         }
     ],
     "categories": [
         {
-            "id": "TPDiscord_DirectMessage",
-            "name": "DirectMessage",
-            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
-            "connectors":[],
-            "actions":[],
-            "events":[],
-            "states":[   
-                {
-                    "id": "discord_DM_user",
-                    "type": "text",
-                    "desc": "DM: UserName",
-                    "default": ""
-                },
-                {
-                    "id": "discord_DM_userID",
-                    "type": "text",
-                    "desc": "DM: UserID",
-                    "default": ""
-                },
-                {
-                    "id": "discord_DM_channelID",
-                    "type": "text",
-                    "desc": "DM: ChannelID",
-                    "default": ""
-                },
-                {
-                    "id": "discord_DM_content",
-                    "type": "text",
-                    "desc": "DM: Content",
-                    "default": ""
-                },
-                {
-                    "id": "discord_newDM_eventState",
-                    "type": "text",
-                    "desc": "Discord New DM Event",
-                    "default": "False"
-                },
-                {
-                    "id": "discord_DM_timestamp",
-                    "type": "text",
-                    "desc": "DM: Timestamp",
-                    "default": ""
-                },
-                {
-                    "id": "discord_DM_avatar",
-                    "type": "text",
-                    "desc": "DM: User Avatar",
-                    "default": ""
-                }
-
-            ]
-        },
-        
-
-        {
-            "id": "TPDiscord_VoiceChannel",
-            "name": "VoiceChannel Info",
-            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
-            "connectors":[],
-            "actions":[],
-            "events":[],
-            "states":[
-                {
-                    "id": "discord_voice_channel_connected",
-                    "type": "choice",
-                    "desc": "Discord Voice Channel Connected",
-                    "default": "No",
-                    "valueChoices": [
-                        "No",
-                        "Yes"
-                    ]
-                },
-                {
-                    "id": "discord_voice_channel_server_id",
-                    "type": "text",
-                    "desc": "Discord Voice Channel Server ID",
-                    "default": ""
-                },
-                {
-                    "id": "discord_voice_channel_server_name",
-                    "type": "text",
-                    "desc": "Discord Voice Channel Server Name",
-                    "default": ""
-                },
-                {
-                    "id": "discord_voice_channel_id",
-                    "type": "text",
-                    "desc": "Discord Voice Channel ID",
-                    "default": ""
-                },
-                {
-                    "id": "discord_voice_channel_name",
-                    "type": "text",
-                    "desc": "Discord Voice Channel Name",
-                    "default": ""
-                },
-                {
-                    "id": "discord_voice_average_ping",
-                    "type": "text",
-                    "desc": "Discord Voice Average Ping",
-                    "default": "0.00"
-                },
-                {
-                    "id": "discord_voice_hostname",
-                    "type": "text",
-                    "desc": "Discord Voice Hostname",
-                    "default": ""
-                },
-                {
-                    "id": "discord_voice_channel_participants",
-                    "type": "text",
-                    "desc": "Discord Voice Channel Participants",
-                    "default": "<None>"
-                },
-                {
-                    "id": "discord_voice_channel_participant_ids",
-                    "type": "text",
-                    "desc": "Discord Voice Channel Participant IDs",
-                    "default": "<None>"
-                }
-                
-                ]
-        },
-
-        {
-            "id": "TPDiscord_Settings",
-            "name": "Discord Settings",
-            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
-            "connectors":[],
-            "actions":[],
-            "events":[],
-            "states":[
-
-                {
-                    "id": "discord_automatic_gain_control",
-                    "type": "choice",
-                    "desc": "Discord Automatic Gain Control",
-                    "default": "Off",
-                    "valueChoices": [
-                        "Off",
-                        "On"
-                    ]
-                },
-                {
-                    "id": "discord_echo_cancellation",
-                    "type": "choice",
-                    "desc": "Discord Echo Cancellation",
-                    "default": "Off",
-                    "valueChoices": [
-                        "Off",
-                        "On"
-                    ]
-                },
-                {
-                    "id": "discord_noise_suppression",
-                    "type": "choice",
-                    "desc": "Discord Noise Suppression",
-                    "default": "Off",
-                    "valueChoices": [
-                        "Off",
-                        "On"
-                    ]
-                },
-                {
-                    "id": "discord_silence_warning",
-                    "type": "choice",
-                    "desc": "Discord Silence Warning",
-                    "default": "Off",
-                    "valueChoices": [
-                        "Off",
-                        "On"
-                    ]
-                },
-                {
-                    "id": "discord_qos_priority",
-                    "type": "choice",
-                    "desc": "Discord Quality of Service Priority",
-                    "default": "Off",
-                    "valueChoices": [
-                        "Off",
-                        "On"
-                    ]
-                },
-                {
-                    "id": "discord_voice_mode_type",
-                    "type": "choice",
-                    "desc": "Discord Voice Mode Type",
-                    "default": "",
-                    "valueChoices":[
-                        "PUSH_TO_TALK",
-                        "VOICE_ACTIVITY"
-                    ]
-                }
-            ]
-        },
-
-        {
             "id": "TPDiscord",
             "name": "Discord",
-            "imagepath": "%TP_PLUGIN_FOLDER%TPDiscord/tpdiscord.png",
-            "connectors":[
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "connectors": [
                 {
                     "id": "discord_voice_volume_connector",
                     "prefix": "Discord:",
-                    "name":"Adjust Input Volume",
-                    "format":"Discord: Adjust Input Volume"
+                    "name": "Adjust Input Volume",
+                    "format": "Discord: Adjust Input Volume"
                 },
                 {
                     "id": "discord_speaker_volume_connector",
                     "prefix": "Discord:",
-                    "name":"Adjust Output Volume",
-                    "format":"Discord: Adjust Output Volume"
+                    "name": "Adjust Output Volume",
+                    "format": "Discord: Adjust Output Volume"
                 },
                 {
                     "id": "discord_voice_volume_action_connector",
                     "prefix": "Discord:",
-                    "name":"Set Voice Volume",
-                    "format":"Discord: Set Voice Volume for user {$voiceUserList_connector$}",
+                    "name": "Set Voice Volume",
+                    "format": "Discord: Set Voice Volume for user {$voiceUserList_connector$}",
                     "data": [
                         {
                             "id": "voiceUserList_connector",
                             "type": "choice",
                             "label": "Voice User List",
                             "default": "0",
-                            "valueChoices": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                            "valueChoices": [
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9"
+                            ]
                         }
                     ]
                 }
-
             ],
             "actions": [
                 {
@@ -306,7 +119,19 @@
                             "type": "choice",
                             "label": "Voice User List",
                             "default": "",
-                            "valueChoices": ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                            "valueChoices": [
+                                "Self",
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9"
+                            ]
                         }
                     ]
                 },
@@ -334,7 +159,19 @@
                             "type": "choice",
                             "label": "Voice User List",
                             "default": "",
-                            "valueChoices": ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                            "valueChoices": [
+                                "Self",
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9"
+                            ]
                         }
                     ]
                 },
@@ -371,20 +208,29 @@
                             "id": "discordVoiceVolume",
                             "type": "text",
                             "label": "Voice Volume",
-                            "default": "0.00"    
+                            "default": "0.00"
                         },
                         {
                             "id": "voiceUserList",
                             "type": "choice",
                             "label": "Voice User List",
                             "default": "",
-                            "valueChoices": ["Self", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
+                            "valueChoices": [
+                                "Self",
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9"
+                            ]
                         }
                     ]
                 },
-
-
                 {
                     "id": "discord_automatic_gain_control_action",
                     "prefix": "Discord:",
@@ -491,12 +337,12 @@
                     ]
                 },
                 {
-                   "id": "discord_hangup_voice",
-                   "prefix": "Discord:",
-                   "name":"Discord Hang Up",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Hang Up Voice Channel"
+                    "id": "discord_hangup_voice",
+                    "prefix": "Discord:",
+                    "name": "Discord Hang Up",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Hang Up Voice Channel"
                 },
                 {
                     "id": "discord_play_sound",
@@ -516,125 +362,125 @@
                     ]
                 },
                 {
-                   "id": "discord_select_channel",
-                   "prefix": "Discord:",
-                   "name":"Discord Select Channel",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: On Server {$discordServerList$} go to {$discordChannelType$} channel {$discordServerChannel$}",
-                   "data":[
-                       {
-                           "id":"discordServerList",
-                           "type":"choice",
-                           "label":"Discord Server List",
-                           "default":"",
-                           "valueChoices":[]
-                       },
-                       {
-                           "id":"discordChannelType",
-                           "type":"choice",
-                           "label":"Discord Channel Type",
-                           "default":"",
-                           "valueChoices":[
-                              "Text",
-                              "Voice"
-                           ]
-                       },
-                       {
-                           "id":"discordServerChannel",
-                           "type":"choice",
-                           "label":"Discord Server Channel List",
-                           "default":"",
-                           "valueChoices":[]
-                       }
-                   ]
-                },
-                {
-                   "id": "discord_voice_mode_change",
-                   "prefix": "Discord:",
-                   "name":"Discord Voice Mode",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Set Voice Type to {$discordVoiceMode$}",
-                   "data":[
-                       {
-                           "id":"discordVoiceMode",
-                           "type":"choice",
-                           "label":"Discord Voice Mode",
-                           "default":"Toggle",
-                           "valueChoices":[
-                               "Voice Activity",
-                               "Push To Talk",
-                               "Toggle"
-                           ]
-                       }
-                   ]
-                },
-                {
-                   "id": "discord_reset_push_to_talk_key",
-                   "prefix": "Discord:",
-                   "name":"Discord Store Reset Push To Talk Keys",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Reset Push To Talk Keys"
-                },
-                {
-                   "id": "discord_push_to_talk_key",
-                   "prefix": "Discord:",
-                   "name":"Discord Push To Talk Key",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
-                   "data":[
-                       {
-                           "id":"discordPTTKeyboardKey",
-                           "type":"choice",
-                           "label":"Discord Push To Talk Keyboard Key",
-                           "default":"",
-                           "valueChoices":[
-                           ]
-                       }
-                   ]
-                },
-                {
-                   "id": "discord_set_push_to_talk_key",
-                   "prefix": "Discord:",
-                   "name":"Discord Store Push To Talk Keys",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Store Push To Talk Keys"
-                },
-                {
-                   "id": "discord_dm_voice_select",
-                   "prefix": "Discord:",
-                   "name":"Discord DM Voice Channel",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Go to DM Voice Channel with id: {$discordDMVoiceChannelId$}",
-                   "data":[
+                    "id": "discord_select_channel",
+                    "prefix": "Discord:",
+                    "name": "Discord Select Channel",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: On Server {$discordServerList$} go to {$discordChannelType$} channel {$discordServerChannel$}",
+                    "data": [
                         {
-                           "id":"discordDMVoiceChannelId",
-                           "type":"text",
-                           "label":"Discord DM Voice Channel Id",
-                           "default":""
-                       }
-                   ]
+                            "id": "discordServerList",
+                            "type": "choice",
+                            "label": "Discord Server List",
+                            "default": "",
+                            "valueChoices": []
+                        },
+                        {
+                            "id": "discordChannelType",
+                            "type": "choice",
+                            "label": "Discord Channel Type",
+                            "default": "",
+                            "valueChoices": [
+                                "Text",
+                                "Voice",
+                                "Announcement"
+                            ]
+                        },
+                        {
+                            "id": "discordServerChannel",
+                            "type": "choice",
+                            "label": "Discord Server Channel List",
+                            "default": "",
+                            "valueChoices": []
+                        }
+                    ]
                 },
                 {
-                   "id": "discord_dm_text_select",
-                   "prefix": "Discord:",
-                   "name":"Discord DM Text Channel",
-                   "type":"communicate",
-                   "tryInline":"true",
-                   "format":"Discord: Go to DM Text Channel with id: {$discordDMTextChannelId$}",
-                   "data":[
+                    "id": "discord_voice_mode_change",
+                    "prefix": "Discord:",
+                    "name": "Discord Voice Mode",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Voice Type to {$discordVoiceMode$}",
+                    "data": [
                         {
-                           "id":"discordDMTextChannelId",
-                           "type":"text",
-                           "label":"Discord DM Text Channel Id",
-                           "default":""
-                       }
-                   ]
+                            "id": "discordVoiceMode",
+                            "type": "choice",
+                            "label": "Discord Voice Mode",
+                            "default": "Toggle",
+                            "valueChoices": [
+                                "Voice Activity",
+                                "Push To Talk",
+                                "Toggle"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_reset_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Store Reset Push To Talk Keys",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Reset Push To Talk Keys"
+                },
+                {
+                    "id": "discord_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Push To Talk Key",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
+                    "data": [
+                        {
+                            "id": "discordPTTKeyboardKey",
+                            "type": "choice",
+                            "label": "Discord Push To Talk Keyboard Key",
+                            "default": "",
+                            "valueChoices": []
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_set_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Store Push To Talk Keys",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Store Push To Talk Keys"
+                },
+                {
+                    "id": "discord_dm_voice_select",
+                    "prefix": "Discord:",
+                    "name": "Discord DM Voice Channel",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Go to DM Voice Channel with id: {$discordDMVoiceChannelId$}",
+                    "data": [
+                        {
+                            "id": "discordDMVoiceChannelId",
+                            "type": "text",
+                            "label": "Discord DM Voice Channel Id",
+                            "default": ""
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_dm_text_select",
+                    "prefix": "Discord:",
+                    "name": "Discord DM Text Channel",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Go to DM Text Channel with id: {$discordDMTextChannelId$}",
+                    "data": [
+                        {
+                            "id": "discordDMTextChannelId",
+                            "type": "text",
+                            "label": "Discord DM Text Channel Id",
+                            "default": ""
+                        }
+                    ]
                 },
                 {
                     "id": "discord_toggle_camera",
@@ -672,7 +518,10 @@
                             "type": "choice",
                             "label": "Discord Audio Device Type",
                             "default": "Output",
-                            "valueChoices": ["Input", "Output"]
+                            "valueChoices": [
+                                "Input",
+                                "Output"
+                            ]
                         }
                     ]
                 },
@@ -690,7 +539,10 @@
                             "type": "choice",
                             "label": "Discord Audio Device Type",
                             "default": "Output",
-                            "valueChoices": ["Input", "Output"]
+                            "valueChoices": [
+                                "Input",
+                                "Output"
+                            ]
                         },
                         {
                             "id": "discord_deviceVolume",
@@ -699,8 +551,18 @@
                             "default": "0.00"
                         }
                     ]
+                },
+                {
+                    "id": "discord_leave_channel",
+                    "prefix": "Discord:",
+                    "name": "Discord Leave Voice Channel",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Disconnect from Voice Channel",
+                    "data": []
                 }
             ],
+            "events": [],
             "states": [
                 {
                     "id": "discord_inputDevice",
@@ -736,19 +598,18 @@
                 },
                 {
                     "id": "discord_camera_status",
-                    "type":"choice",
-                    "desc":"Discord Camera",
+                    "type": "choice",
+                    "desc": "Discord Camera",
                     "default": "Off",
                     "valueChoices": [
                         "Off",
                         "On"
                     ]
-
                 },
                 {
                     "id": "discord_screenshare_status",
-                    "type":"choice",
-                    "desc":"Discord Screen Share",
+                    "type": "choice",
+                    "desc": "Discord Screen Share",
                     "default": "Off",
                     "valueChoices": [
                         "Off",
@@ -772,7 +633,7 @@
                     "type": "choice",
                     "desc": "Discord Process Running",
                     "default": "",
-                    "valueChoices":[
+                    "valueChoices": [
                         "Yes",
                         "No",
                         "Unknown"
@@ -783,12 +644,157 @@
                     "type": "choice",
                     "desc": "Discord Connected",
                     "default": "",
-                    "valueChoices":[
+                    "valueChoices": [
                         "Connected",
                         "Disconnected"
                     ]
                 }
-            ],
+            ]
+        },
+        {
+            "id": "TPDiscord_VoiceChannel",
+            "name": "VoiceChannel Info",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "connectors": [],
+            "actions": [],
+            "events": [],
+            "states": [
+                {
+                    "id": "discord_voice_channel_connected",
+                    "type": "choice",
+                    "desc": "Discord Voice Channel Connected",
+                    "default": "No",
+                    "valueChoices": [
+                        "No",
+                        "Yes"
+                    ]
+                },
+                {
+                    "id": "discord_voice_channel_server_id",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Server ID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_channel_server_name",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Server Name",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_channel_id",
+                    "type": "text",
+                    "desc": "Discord Voice Channel ID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_channel_name",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Name",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_average_ping",
+                    "type": "text",
+                    "desc": "Discord Voice Average Ping",
+                    "default": "0.00"
+                },
+                {
+                    "id": "discord_voice_hostname",
+                    "type": "text",
+                    "desc": "Discord Voice Hostname",
+                    "default": ""
+                },
+                {
+                    "id": "discord_voice_channel_participants",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Participants",
+                    "default": "<None>"
+                },
+                {
+                    "id": "discord_voice_channel_participant_ids",
+                    "type": "text",
+                    "desc": "Discord Voice Channel Participant IDs",
+                    "default": "<None>"
+                }
+            ]
+        },
+        {
+            "id": "TPDiscord_Settings",
+            "name": "Discord Settings",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "connectors": [],
+            "actions": [],
+            "events": [],
+            "states": [
+                {
+                    "id": "discord_automatic_gain_control",
+                    "type": "choice",
+                    "desc": "Discord Automatic Gain Control",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_echo_cancellation",
+                    "type": "choice",
+                    "desc": "Discord Echo Cancellation",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_noise_suppression",
+                    "type": "choice",
+                    "desc": "Discord Noise Suppression",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_silence_warning",
+                    "type": "choice",
+                    "desc": "Discord Silence Warning",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_qos_priority",
+                    "type": "choice",
+                    "desc": "Discord Quality of Service Priority",
+                    "default": "Off",
+                    "valueChoices": [
+                        "Off",
+                        "On"
+                    ]
+                },
+                {
+                    "id": "discord_voice_mode_type",
+                    "type": "choice",
+                    "desc": "Discord Voice Mode Type",
+                    "default": "",
+                    "valueChoices": [
+                        "PUSH_TO_TALK",
+                        "VOICE_ACTIVITY"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "TPDiscord_DirectMessage",
+            "name": "Direct Message",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "connectors": [],
+            "actions": [],
             "events": [
                 {
                     "id": "discord_newDM",
@@ -796,12 +802,56 @@
                     "format": "When receiving a new Direct Message $val",
                     "type": "communicate",
                     "valueChoices": [
-                      "True"
+                        "True"
                     ],
                     "default": "False",
                     "valueType": "choice",
                     "valueStateId": "discord_newDM_eventState"
-                  }
+                }
+            ],
+            "states": [
+                {
+                    "id": "discord_DM_user",
+                    "type": "text",
+                    "desc": "DM: UserName",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_userID",
+                    "type": "text",
+                    "desc": "DM: UserID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_channelID",
+                    "type": "text",
+                    "desc": "DM: ChannelID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_content",
+                    "type": "text",
+                    "desc": "DM: Content",
+                    "default": ""
+                },
+                {
+                    "id": "discord_newDM_eventState",
+                    "type": "text",
+                    "desc": "Discord New DM Event",
+                    "default": "False"
+                },
+                {
+                    "id": "discord_DM_timestamp",
+                    "type": "text",
+                    "desc": "DM: Timestamp",
+                    "default": ""
+                },
+                {
+                    "id": "discord_DM_avatar",
+                    "type": "text",
+                    "desc": "DM: User Avatar",
+                    "default": ""
+                }
             ]
         }
     ]

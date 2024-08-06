@@ -1,5 +1,28 @@
 // TPClient onAction
 
+// const {ActivityType} = require("../../../discord-rpc/src/constants.js");
+
+
+// // https://github.com/discordjs/RPC/issues/146
+// // Setting to custom doesnt seem to work yet.. research why?  
+// // Error: child "activity" fails because [child "type" fails because ["type" must be one of [0, 2, 3, 5]]]
+// //  at RPCClient._onRpcMessage (C:\Users\GitPC\Documents\GitHub\TouchPortal_Discord_Plugin\discord-rpc\src\client.js:178:19)
+// DG.Client.setActivity({
+//   name: "Gitago's a Genius",
+//   type: ActivityType.Listening,
+// //  emoji: {name: ":fire:", animated: false},
+//   state: "Playing with TouchPortal",
+//   details:"hmmmmm",
+//   // did not get assets/image to work yet
+//   assets: {largeImageKey: "https://www.touch-portal.com/images/teaser_main.png",
+//   largeImageText: "TouchPortal"},
+//     // havent gotten this to work eyt 
+//     // in milieconds
+//   timestamps : {start: 1722917028},
+//     // also have not gotten buttons to work yet..
+//   buttons: [{label: "TouchPortal", url: "https://www.touch-portal.com"}]
+// });
+
 const discordKeyMap = require("../../utils/discordKeys.js");
 
 // everything in onaction COULD be moved to index.js and then DG could be initiated inside of index.js as well instead of its own file
@@ -24,6 +47,9 @@ async function onAction(message, isHeld) {
 
     let channelId = DG.channels[guildId][type.toLowerCase()].idx[channelName];
 
+    console.log("Channel ID", channelId);
+
+
     if (type === "Voice") {
       await DG.Client.selectVoiceChannel(channelId, {
         timeout: 5,
@@ -32,7 +58,9 @@ async function onAction(message, isHeld) {
     } else {
       await DG.Client.selectTextChannel(channelId, {timeout: 5});
     }
-
+  } else if (message.actionId === "discord_leave_channel") {
+    await DG.Client.selectVoiceChannel(null, {timeout: 5});
+    
   } else if (message.actionId === "discord_play_sound") {
     let soundValue = message.data[0].value;
     let sound;
