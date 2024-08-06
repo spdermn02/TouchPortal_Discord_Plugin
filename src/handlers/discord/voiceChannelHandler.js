@@ -93,7 +93,7 @@ class VoiceChannelHandler {
       await Promise.all(
         channel.voice_states.map(async (vs) => {
           if (vs.user.id !== this.DG.Client.user.id) {
-            console.log("User ID: ", vs.user.id, "User: ", vs.user.username);
+            logIt("INFO", "User ID: ", vs.user.id, "User: ", vs.user.username);
   
             vs.speaking = false; // adding speaking to the object to track speaking status
             if (vs.user.avatar === null) {
@@ -207,7 +207,7 @@ class VoiceChannelHandler {
 
   unsubscribeFromEvents = async () => {
     if (this.DG.voiceChannelInfo.last_voice_channel_subs.length > 0) {
-      logIt("DEBUG", "START- Unsubscribing from Voice Channel voice states");
+      logIt("DEBUG", "START - Unsubscribing from Voice Channel voice states");
       for (let i = 0; i < this.DG.voiceChannelInfo.last_voice_channel_subs.length; i++) {
         logIt("INFO", `Unsubscribing from ${this.DG.voiceChannelInfo.last_voice_channel_subs[i].description}`);
         // await this.DG.voiceChannelInfo.last_voice_channel_subs[i].unsubscribe();
@@ -217,7 +217,7 @@ class VoiceChannelHandler {
         await wait(0.15);
       }
   
-      logIt("DEBUG", "COMPLETE - Unsubscribing from Voice Channel voice states");
+      logIt("INFO", "COMPLETE - Unsubscribing from Voice Channel voice states");
       this.DG.voiceChannelInfo.last_voice_channel_subs = [];
       this.DG.currentVoiceUsers = {};
       await wait(0.15);

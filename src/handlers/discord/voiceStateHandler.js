@@ -65,11 +65,11 @@ class VoiceStateHandler {
 
       await this.getGuilds();
       await this.getSoundboardSounds();
-    });
+    }); 
 
     // If user changes their name,a vatar, premium_type... 
     this.DG.Client.on("CURRENT_USER_UPDATE", (data) => {
-      logIt("INFO", "Current User Update", JSON.stringify(data));
+      logIt("DEBUG", "Current User Update", JSON.stringify(data));
       let userId = data.id;
       let userName = data.username; // or global_name ?
       let userPremiumType = data.premium_type;
@@ -115,14 +115,6 @@ class VoiceStateHandler {
 
     this.DG.Client.on("VOICE_SETTINGS_UPDATE", (data) => {
       this.voiceSettings(data);
-      console.log("VOICE SETTINGS CHANGE DISCORD");
-
-      // this.DG.voiceSettings.inputDevices = data.input.available_devices;
-      // this.DG.voiceSettings.inputDeviceNames = Object.keys(this.DG.voiceSettings.inputDevices).map(key => this.DG.voiceSettings.inputDevices[key].name);
-
-      // this.DG.voiceSettings.outputDevices = data.output.available_devices;
-      // this.DG.voiceSettings.outputDeviceNames = Object.keys(this.DG.voiceSettings.outputDevices).map(key => this.DG.voiceSettings.outputDevices[key].name);
-
     });
 
     this.DG.Client.on("GUILD_CREATE", (data) => {
@@ -506,6 +498,16 @@ class VoiceStateHandler {
         idx: {},
         names: {},
       },
+      forum: {
+        array: [],
+        idx: {},
+        names: {},
+      },
+      announcement: {
+        array: [],
+        idx: {},
+        names: {},
+      },
     };
 
     await Promise.all(
@@ -520,8 +522,9 @@ class VoiceStateHandler {
       console.error(`Guild ID ${guildId} does not exist in this.DG.channels`);
       return;
     }
-    // Type 0 is Text channel, 2 is Voice channel
-    if (channel.type == 0) {
+
+    // Type 0 is Text channel, 2 is Voice channel, 5 is Announcement Channels
+    if (channel.type == 0 ) {
       this.DG.channels[guildId].text.array.push(channel.name);
       this.DG.channels[guildId].text.idx[channel.name] = channel.id;
       this.DG.channels[guildId].text.names[channel.id] = channel.name;
@@ -529,6 +532,15 @@ class VoiceStateHandler {
       this.DG.channels[guildId].voice.array.push(channel.name);
       this.DG.channels[guildId].voice.idx[channel.name] = channel.id;
       this.DG.channels[guildId].voice.names[channel.id] = channel.name;
+    } else if (channel.type == 5) {
+      this.DG.channels[guildId].announcement.array.push(channel.name);
+      this.DG.channels[guildId].announcement.idx[channel.name] = channel.id;
+      this.DG.channels[guildId].announcement.names[channel.id] = channel.name;
+    } else if (channel.type == 15) {
+      // doesnt seem possible to select this type of channel with select_text_channel ?
+      this.DG.channels[guildId].forum.array.push(channel.name);
+      this.DG.channels[guildId].forum.idx[channel.name] = channel.id;
+      this.DG.channels[guildId].forum.names[channel.id] = channel.name;
     }
   };
 
