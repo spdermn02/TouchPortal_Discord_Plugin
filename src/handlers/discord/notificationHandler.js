@@ -52,6 +52,7 @@ class NotificationHandler {
     }
     
     // Doing stuff based on the channel type
+    let states = []
     switch (channelType) {
       case "voice":
         console.log("Looks like you just got tagged in a voice channel.. not sure what we can do with that yet..");
@@ -61,20 +62,20 @@ class NotificationHandler {
       case "text":
         content = data.body;
         userAvatarBase64 = await imageToBase64(avatarUrl);
-
-        this.TPClient.stateUpdate("discord_newMention_eventState", "true");
+        
+        states.push(
+           { id: "discord_newMention_eventState", value: "true" },
+           { id: "discord_Mention_user", value: userName },
+           { id: "discord_Mention_userID", value: userId },
+           { id: "discord_Mention_channelID", value: channelId },
+           { id: "discord_Mention_content", value: content },
+           { id: "discord_Mention_timestamp", value: timeStamp },
+           { id: "discord_Mention_avatar", value: userAvatarBase64 }
+          );
+          
+        this.TPClient.stateUpdateMany(states);
         this.TPClient.stateUpdate("discord_newMention_eventState", "false");
-        this.TPClient.stateUpdate("discord_Mention_user", userName);
-        this.TPClient.stateUpdate("discord_Mention_userID", userId);
-        this.TPClient.stateUpdate("discord_Mention_channelID", channelId);
-        this.TPClient.stateUpdate("discord_Mention_content", content);
-        this.TPClient.stateUpdate("discord_Mention_timestamp", timeStamp);
-        this.TPClient.stateUpdate("discord_Mention_avatar", userAvatarBase64);
-
         logIt("INFO", "TEXT CHANNEL |  Guild:", guildName, "Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
-        // should we make a category for 'new notification' and use it for text notification, 
-        // and then keep the one we have for DMs as such.. sure its a notification but people recognize it as a 'DM' solely..
-        break;
       
       case "dm":
         content = data.message.body;
@@ -86,16 +87,19 @@ class NotificationHandler {
         // this.TPClient.createState("discord_DM_content", "DM: Content:", content, "DirectMessage");
         // const userAvatarBase64 = await imageToBase64(avatarUrl);
         // this.TPClient.createState("discord_DM_avatar", "avatarIcon", userAvatarBase64, "DirectMessage");
-  
-        this.TPClient.stateUpdate("discord_newDM_eventState", "true");
+        
+        states.push(
+          { id: "discord_newDM_eventState", value: "true" },
+          { id: "discord_DM_user", value: userName },
+          { id: "discord_DM_userID", value: userId },
+          { id: "discord_DM_channelID", value: channelId },
+          { id: "discord_DM_content", value: content },
+          { id: "discord_DM_timestamp", value: timeStamp },
+          { id: "discord_DM_avatar", value: userAvatarBase64 }
+        );
+
+        this.TPClient.stateUpdateMany(states);
         this.TPClient.stateUpdate("discord_newDM_eventState", "false");
-        this.TPClient.stateUpdate("discord_DM_user", userName);
-        this.TPClient.stateUpdate("discord_DM_userID", userId);
-        this.TPClient.stateUpdate("discord_DM_channelID", channelId);
-        this.TPClient.stateUpdate("discord_DM_content", content);
-        this.TPClient.stateUpdate("discord_DM_timestamp", timeStamp);
-        this.TPClient.stateUpdate("discord_DM_avatar", userAvatarBase64);
-  
         logIt("INFO", "DIRECT MESSAGE | Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
 
       default:
