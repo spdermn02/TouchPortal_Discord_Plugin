@@ -79,22 +79,22 @@ let TP_PLUGIN_CATEGORIES = {
     "VoiceChannel Info": {
         id: "TPDiscord_VoiceChannel",
         name: "VoiceChannel Info",
-        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
+        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}`,
     },
     "Discord Settings": {
         id: "TPDiscord_Settings",
         name: "Discord Settings",
-        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
+        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}`,
     },
     "Direct Message": {
         id: "TPDiscord_DirectMessage",
         name: "Direct Message",
-        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
+        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}`,
     },
     "Mentions": {
         id: "TPDiscord_Mentions",
         name: "Mentions",
-        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
+        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}`,
     }
 
 }

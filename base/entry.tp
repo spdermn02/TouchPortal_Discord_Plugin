@@ -654,7 +654,7 @@
         {
             "id": "TPDiscord_VoiceChannel",
             "name": "VoiceChannel Info",
-            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [],
             "actions": [],
             "events": [],
@@ -722,7 +722,7 @@
         {
             "id": "TPDiscord_Settings",
             "name": "Discord Settings",
-            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [],
             "actions": [],
             "events": [],
@@ -792,7 +792,7 @@
         {
             "id": "TPDiscord_DirectMessage",
             "name": "Direct Message",
-            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [],
             "actions": [],
             "events": [
@@ -867,7 +867,7 @@
         {
             "id": "TPDiscord_Mentions",
             "name": "Mentions",
-            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [],
             "actions": [],
             "events": [],
