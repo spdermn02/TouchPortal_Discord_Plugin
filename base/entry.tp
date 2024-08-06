@@ -456,7 +456,7 @@
                     "name": "Discord DM Voice Channel",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Go to DM Voice Channel with id: {$discordDMVoiceChannelId$}",
+                    "format": "Discord: Go to Voice Channel with id: {$discordDMVoiceChannelId$}",
                     "data": [
                         {
                             "id": "discordDMVoiceChannelId",
@@ -472,7 +472,7 @@
                     "name": "Discord DM Text Channel",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Go to DM Text Channel with id: {$discordDMTextChannelId$}",
+                    "format": "Discord: Go to Text Channel with id: {$discordDMTextChannelId$}",
                     "data": [
                         {
                             "id": "discordDMTextChannelId",
@@ -804,9 +804,19 @@
                     "valueChoices": [
                         "True"
                     ],
-                    "default": "False",
                     "valueType": "choice",
                     "valueStateId": "discord_newDM_eventState"
+                },
+                {
+                    "id": "discord_newMention",
+                    "name": "Discord | New Mention",
+                    "format": "When receiving a new Mention $val",
+                    "type": "communicate",
+                    "valueChoices": [
+                        "True"
+                    ],
+                    "valueType": "choice",
+                    "valueStateId": "discord_newMention_eventState"
                 }
             ],
             "states": [
@@ -850,6 +860,58 @@
                     "id": "discord_DM_avatar",
                     "type": "text",
                     "desc": "DM: User Avatar",
+                    "default": ""
+                }
+            ]
+        },
+        {
+            "id": "TPDiscord_Mentions",
+            "name": "Mentions",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "connectors": [],
+            "actions": [],
+            "events": [],
+            "states": [
+                {
+                    "id": "discord_Mention_user",
+                    "type": "text",
+                    "desc": "Mention: UserName",
+                    "default": ""
+                },
+                {
+                    "id": "discord_Mention_userID",
+                    "type": "text",
+                    "desc": "Mention: UserID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_Mention_channelID",
+                    "type": "text",
+                    "desc": "Mention: ChannelID",
+                    "default": ""
+                },
+                {
+                    "id": "discord_Mention_content",
+                    "type": "text",
+                    "desc": "Mention: Content",
+                    "default": ""
+                },
+                {
+                    "id": "discord_newMention_eventState",
+                    "type": "text",
+                    "desc": "Discord New Mention Event",
+                    "default": "False"
+                },
+                {
+                    "id": "discord_Mention_timestamp",
+                    "type": "text",
+                    "desc": "Mention: Timestamp",
+                    "default": ""
+                },
+                {
+                    "id": "discord_Mention_avatar",
+                    "type": "text",
+                    "desc": "Mention: User Avatar",
                     "default": ""
                 }
             ]

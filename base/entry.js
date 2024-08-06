@@ -91,6 +91,11 @@ let TP_PLUGIN_CATEGORIES = {
         name: "Direct Message",
         imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
     },
+    "Mentions": {
+        id: "TPDiscord_Mentions",
+        name: "Mentions",
+        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
+    }
 
 }
 
@@ -152,6 +157,63 @@ Object.assign(states, {
     }
 })
 
+
+// ----------------------------------------------------
+// Adding states for New Mention Category
+// ----------------------------------------------------
+
+Object.assign(states, {
+    "Mention1":{
+        id: "discord_Mention_user",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: UserName",
+        default: ""
+    },
+    "Mention2":{
+        id: "discord_Mention_userID",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: UserID",
+        default: ""
+    },
+    "Mention3":{
+        id: "discord_Mention_channelID",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: ChannelID",
+        default: ""
+    },
+    "Mention4":{
+        id: "discord_Mention_content",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: Content",
+        default: ""
+    },
+    "Mention5": {
+        id: "discord_newMention_eventState",
+        category: "Mentions",
+        type: "text",
+        desc: "Discord New Mention Event",
+        default: "False"
+    },
+    "Mention6":{
+        id: "discord_Mention_timestamp",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: Timestamp",
+        default: ""
+    },
+   "Mention7": {
+        id: "discord_Mention_avatar",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: User Avatar",
+        default: ""
+    },
+
+})
 
 // ----------------------------------------------------
 // Adding states for Discord Settings Category
@@ -764,7 +826,7 @@ Object.assign(actions, {
        name:"Discord DM Voice Channel",
        type:"communicate",
        tryInline:"true",
-       format:"Discord: Go to DM Voice Channel with id: {$discordDMVoiceChannelId$}",
+       format:"Discord: Go to Voice Channel with id: {$discordDMVoiceChannelId$}",
        data:[
             {
                id:"discordDMVoiceChannelId",
@@ -781,7 +843,7 @@ Object.assign(actions, {
        name:"Discord DM Text Channel",
        type:"communicate",
        tryInline:"true",
-       format:"Discord: Go to DM Text Channel with id: {$discordDMTextChannelId$}",
+       format:"Discord: Go to Text Channel with id: {$discordDMTextChannelId$}",
        data:[
             {
                id:"discordDMTextChannelId",
@@ -912,10 +974,21 @@ Object.assign(events, {
     valueChoices: [
       "True"
         ],
-    default: "False",
     valueType: "choice",
     valueStateId: "discord_newDM_eventState"
-  }
+  },
+  "2": {
+    id: "discord_newMention",
+    category: "Direct Message",
+    name: "Discord | New Mention",
+    format: "When receiving a new Mention $val",
+    type: "communicate",
+    valueChoices: [
+      "True"
+    ],
+    valueType: "choice",
+    valueStateId: "discord_newMention_eventState"
+    }
 })
 
 

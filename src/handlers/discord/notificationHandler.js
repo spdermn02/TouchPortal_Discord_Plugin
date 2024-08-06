@@ -60,6 +60,17 @@ class NotificationHandler {
       
       case "text":
         content = data.body;
+        userAvatarBase64 = await imageToBase64(avatarUrl);
+
+        this.TPClient.stateUpdate("discord_newMention_eventState", "true");
+        this.TPClient.stateUpdate("discord_newMention_eventState", "false");
+        this.TPClient.stateUpdate("discord_Mention_user", userName);
+        this.TPClient.stateUpdate("discord_Mention_userID", userId);
+        this.TPClient.stateUpdate("discord_Mention_channelID", channelId);
+        this.TPClient.stateUpdate("discord_Mention_content", content);
+        this.TPClient.stateUpdate("discord_Mention_timestamp", timeStamp);
+        this.TPClient.stateUpdate("discord_Mention_avatar", userAvatarBase64);
+
         logIt("INFO", "TEXT CHANNEL |  Guild:", guildName, "Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
         // should we make a category for 'new notification' and use it for text notification, 
         // and then keep the one we have for DMs as such.. sure its a notification but people recognize it as a 'DM' solely..
