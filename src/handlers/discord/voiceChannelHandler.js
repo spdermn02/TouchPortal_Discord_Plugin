@@ -196,11 +196,14 @@ class VoiceChannelHandler {
       }).catch((err) => {
         logIt("ERROR", err);
       });
-      logIt("INFO", `Subscribed to ${event.description}`);
+      logIt("DEBUG", `Subscribed to ${event.description}`);
       this.DG.voiceChannelInfo.last_voice_channel_subs.push({
         subscription,
         description: event.description,
       });
+
+      let eventKeys = Object.keys(events);
+      logIt("Info", "Subscribed to Voice Channel Events", eventKeys);
       await wait(0.15);
     }
   }
