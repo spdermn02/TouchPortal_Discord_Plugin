@@ -11,7 +11,7 @@
     - [Events](#events)
   - [Installation and Configuration](#installation-and-configuration)
   - [Troubleshooting Plugin](#troubleshooting-plugin)
-  - [Example Buttons](#example-buttons)
+- [Sample Buttons](#sample-buttons)
 - [Sample Page](#sample-page)
 - [Cleanup pre-v4.0.0 config](#cleanup-pre-v400-config)
 - [Dependencies](#dependencies)
@@ -184,7 +184,7 @@ This plugin simplifies your Discord interactions, bringing essential controls to
   </ol>
 </details>
 
-## Example Buttons
+## Sample Buttons
 
 ### Discord Mute: 
 [Sample Mute Button](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/DiscordMute.tpb)
