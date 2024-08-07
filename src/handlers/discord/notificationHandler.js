@@ -80,7 +80,7 @@ class NotificationHandler {
       
       case "dm":
         logIt("INFO", `DM Info: ${JSON.stringify(data)}`);
-        content = data.message.body;
+        content = data.body;
         userAvatarBase64 = await imageToBase64(avatarUrl);
         //// Save this for if we need to captrue the last X dms
         // this.TPClient.createState("discord_DM_user", "DM: UserName",  userName, "DirectMessage");
