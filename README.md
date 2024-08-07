@@ -109,40 +109,66 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **Discord DM**         | Triggered when a Direct Message is received         |
 | **Discord Notification** | Triggered when a Notification is received          |
 
+
 ## Installation and Configuration
-1. Make sure Discord app is open on your PC or Mac
-2. Download the .tpp file the installer for your OS from here: [Releases](https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases/latest)
-3. Go to Touch Portal Settings (the gear icon)
-4. Go To Plug-ins
-5. Click the Import Plug-in button
-6. Navigate to the downloaded tpp file, select it and press Open
-7. A popup should tell you Successfully Imported plugin
-   1. If this is your first time importing, you will be asked To Trust the Plugin, to prevent this from popping up each time you start Touch Portal, click Trust Always
-8. Now Select Touch Portal Discord Plugin in the dropdown on the Plug-ins settings page
-9. The Discord Application page should have auto opened on your PC in your browser
-   1. if not Visit: <a target="_blank" href="https://discord.com/developers/applications" > Discord Developer Portal </a>
-10. Login with your Discord Credentials
-11. **If you already have an application from previous plugin usage, click "OAuth2" and skip to Step 19.**
-12. Go to "Applications" on the left side of the portal
-13. Click "New Application" in the top right of the Applications page
-14. Name your Application "Touch Portal Plugin" (or whatever you want to call it), and click "Create"
-15. Go to "OAuth2" on the left side of the Site
-16. Click the "Add Redirect" button
-17. Enter in: `http://localhost` exactly, not trailing slash, and not https://
-18. Click "Save Changes"
-19. Locate the Client Id and click the "Copy" button, go to the Touch Portal Settings Window and paste in the client id into the "Discord Client Id" field
-20. Go back to the developer portal website
-21. Locate the Client Secret and click the "Reset Secret" button, If you have 2FA enabled it will ask for a Token
-   1. Once the secret displays, click "Copy", go to Touch Portal Settings window and paste in the client secret into the "Discord Client Secret" field
-   2. Example: <br> ![Discord Settings](resources/images/TP-Discord-Plugin-Config.png)
-22. Click "Save" 
-23. After a few seconds, you should get asked to authorize the application you created as a plugin in Discord,  click "Authorize"
-    1.  These scopes are needed in order for my plugin to interact with your Discord app.
-    ![TP Authorize](resources/images/Discord-Auth-Popup.png)
-24. If for some reason, you mis-clicked and the authorize window went away
-   1. Click the Stop button on the Touch Portal Discord Plugin settings page
-   2. Then Click Start button and it should then re-ask you to authorize
-25. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
+(VIDEO COMING SOON)
+<details>
+<summary>HOW TO - Installation and Configuration (CLICK TO EXPAND)</summary>
+  
+1. **Ensure Discord is Open**
+   - Make sure the Discord app is open on your PC or Mac.
+
+2. **Download the Plugin**
+   - Download the `.tpp` file for your OS from [Releases](https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases/latest).
+
+3. **Import the Plugin into Touch Portal**
+   - Open Touch Portal and go to **Settings** (gear icon).
+   - Navigate to **Plug-ins**.
+   - Click the **Import Plug-in** button.
+   - Select the downloaded `.tpp` file and press **Open**.
+   - A popup should confirm the plugin was successfully imported.
+   - If this is your first import, you'll be asked to **Trust** the Plugin. To prevent this prompt in the future, click **Trust Always**.
+
+4. **Configure the Plugin**
+   - Select **Touch Portal Discord Plugin** from the dropdown on the Plug-ins settings page.
+
+5. **Set Up Your Discord Application**
+   - The Discord Application page should automatically open in your browser. If not, visit the [Discord Developer Portal](https://discord.com/developers/applications).
+   - Log in with your Discord credentials.
+
+6. **Create a New Application**
+   - If you already have an application from previous plugin usage, skip to Step 8.
+   - Go to **Applications** on the left side.
+   - Click **New Application** in the top right.
+   - Name your application (e.g., "Touch Portal Plugin") and click **Create**.
+
+7. **Configure OAuth2 Settings**
+   - Go to **OAuth2** on the left side.
+   - Click **Add Redirect**.
+   - Enter `http://localhost` (without trailing slash or `https://`) and click **Save Changes**.
+
+8. **Get Your Client ID and Secret**
+   - Locate the **Client ID** and click **Copy**. Paste it into the "Discord Client Id" field in the Touch Portal Settings.
+   - Locate the **Client Secret** and click **Reset Secret**. If 2FA is enabled, enter your token.
+     - Once the secret displays, click **Copy** and paste it into the "Discord Client Secret" field in the Touch Portal Settings.
+       <br> <img src="resources/images/TP-Discord-Plugin-Config.png" alt="Discord Settings" style="width: 350px;">
+
+
+9. **Authorize the Application**
+   - Click **Save**.
+   - After a few seconds, authorize the application when prompted in Discord. Click **Authorize**.
+     - These scopes are required for the plugin to interact with your Discord app.
+     <br> <img src="resources/images/Discord-Auth-Popup.png" alt="TP Authorize" style="width: 300px;">
+
+10. **Reauthorize if Necessary**
+    - If the authorization window closes unexpectedly:
+      - Click the **Stop** button on the Touch Portal Discord Plugin settings page.
+      - Click **Start** to reinitiate the authorization process.
+
+11. **Start Using the Plugin**
+    - You should now be able to use the new functions of the Touch Portal Discord Plugin!
+
+</details>
 
 ## Troubleshooting Plugin
 <details>
