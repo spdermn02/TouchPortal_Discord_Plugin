@@ -10,7 +10,7 @@
     - [States](#states)
     - [Events](#events)
   - [Installation and Configuration](#installation-and-configuration)
-  - [Known Issues \& Solutions](#known-issues--solutions)
+  - [Troubleshooting Plugin](#troubleshooting-plugin)
     - [Discord Mute:](#discord-mute)
     - [Discord Deafen:](#discord-deafen)
     - [Discord Go To Channel](#discord-go-to-channel)
@@ -149,26 +149,46 @@ This plugin simplifies your Discord interactions, bringing essential controls to
    2. Then Click Start button and it should then re-ask you to authorize
 25. Now you should be able to use the new functions of the Touch Portal Discord Plugin!
 
-## Known Issues & Solutions
-1. **My Buttons no longer work**
-   1. Make sure Discord is open
-   2. Go to Touch Portal Settings
-   3. Click Plug-ins
-   4. Select Touch Portal Discord Plugin in the dropdown
-   5. Click Stop button
-   6. Click Start Button
-   7. Reauthorize the Plugin
-1. **The server list blanked out**
-   1. delete the action and readd it
-   2. if that doesn't work stop and start the plugin as notated above
-1. **The channel list blanked out**
-   1. Change the server dropdown to a different server, and back again to the server you want
-2. **Turn on Debug Log Mode**
-   1. Go to Settings -> Plug-ins
-   2. Select `Touch Portal Discord Plugin` in the dropdown
-   3. set `Discord Debug Mode` to `On`
-   4. click Save button
-   5. to Turn off change it to `Off`
+## Troubleshooting Plugin
+<details>
+  <summary><strong>My Buttons no longer work (Click to Expand)</strong></summary>
+  <ol>
+    <li>Make sure Discord is open.</li>
+    <li>Go to Touch Portal Settings.</li>
+    <li>Click Plug-ins.</li>
+    <li>Select Touch Portal Discord Plugin in the dropdown.</li>
+    <li>Click Stop button.</li>
+    <li>Click Start Button.</li>
+    <li>Reauthorize the Plugin.</li>
+  </ol>
+</details>
+
+<details>
+  <summary><strong>The server list blanked out (Click to Expand)</strong></summary>
+  <ol>
+    <li>Delete the action and re-add it.</li>
+    <li>If that doesn't work, stop and start the plugin as noted above.</li>
+  </ol>
+</details>
+
+<details>
+  <summary><strong>The channel list blanked out </strong></summary>
+  <ol>
+    <li>Change the server dropdown to a different server, then back again to the server you want.</li>
+  </ol>
+</details>
+
+<details>
+  <summary><strong>Turn on Debug Log Mode (Click to Expand)</strong></summary>
+  <ol>
+    <li>Go to Settings -> Plug-ins.</li>
+    <li>Select `Touch Portal Discord Plugin` in the dropdown.</li>
+    <li>Set `Discord Debug Mode` to `On`.</li>
+    <li>Click Save button.</li>
+    <li>To turn off, change it to `Off`.</li>
+  </ol>
+</details>
+
 
 ### Discord Mute: 
 [Sample Mute Button](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/DiscordMute.tpb)
