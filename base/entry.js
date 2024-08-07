@@ -472,7 +472,7 @@ Object.assign(actions, {
         id: "discord_deafen_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Deafen",
+        name: "Discord: Deafen",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Deafen {$discordDeafenAction$} for user {$voiceUserList$}",
@@ -501,7 +501,7 @@ Object.assign(actions, {
         id: "discord_mute_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Mute",
+        name: "Discord: Mute",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Mute {$discordMuteAction$}, for user {$voiceUserList$}",
@@ -530,7 +530,7 @@ Object.assign(actions, {
         id: "discord_push_to_talk",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Push To Talk",
+        name: "Discord: Push To Talk",
         type: "communicate",
         tryInline: "true",
         hasHoldFunctionality: "true",
@@ -541,7 +541,7 @@ Object.assign(actions, {
         id: "discord_push_to_mute",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Push To Mute",
+        name: "Discord: Push To Mute",
         type: "communicate",
         tryInline: "true",
         hasHoldFunctionality: "true",
@@ -552,7 +552,7 @@ Object.assign(actions, {
         id: "discord_voice_volume_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Voice Volume",
+        name: "Discord: Voice Volume",
         type: "communicate",
         tryInline: "true",
         hasHoldFunctionality: "true",
@@ -580,7 +580,7 @@ Object.assign(actions, {
         id: "discord_automatic_gain_control_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Automatic Gain Control",
+        name: "Discord: Automatic Gain Control",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Automatic Gain Control {$discordAutomaticGainControlAction$}",
@@ -602,7 +602,7 @@ Object.assign(actions, {
         id: "discord_echo_cancellation_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Echo Cancellation",
+        name: "Discord: Echo Cancellation",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Echo Cancellation {$discordEchoCancellationAction$}",
@@ -624,7 +624,7 @@ Object.assign(actions, {
         id: "discord_noise_suppression_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Noise Suppression",
+        name: "Discord: Noise Suppression",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Noise Suppression {$discordNoiseSuppressionAction$} (Note: If using Krisp, this action seems to do nothing)",
@@ -646,7 +646,7 @@ Object.assign(actions, {
         id: "discord_qos_high_packet_priority_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Quality of Service Priority",
+        name: "Discord: Quality of Service Priority",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Quality of Service High Packet Priority {$discordQOSHighPacketPriorityAction$}",
@@ -668,7 +668,7 @@ Object.assign(actions, {
         id: "discord_silence_warning_action",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Silence Warning",
+        name: "Discord: Silence Warning",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set Silence Warning {$discordSilenceWarningAction$}",
@@ -699,7 +699,7 @@ Object.assign(actions, {
         id: "discord_play_sound",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Play Sound",
+        name: "Discord: Play Sound",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Play Sound {$discordSound$}",
@@ -750,16 +750,6 @@ Object.assign(actions, {
            }
        ]
     },
-    "LeaveVoice":{
-        id: "discord_leave_channel",
-        category: "Discord",
-        prefix: "Discord:",
-        name:"Discord Leave Voice Channel",
-        type:"communicate",
-        tryInline:"true",
-        format:"Discord: Disconnect from Voice Channel",
-        data: []
-     },
     "14":{
        id: "discord_voice_mode_change",
        category: "Discord",
@@ -857,7 +847,7 @@ Object.assign(actions, {
         id: "discord_toggle_camera",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Toggle Camera",
+        name: "Discord: Toggle Camera",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Toggle Camera On/Off"
@@ -866,7 +856,7 @@ Object.assign(actions, {
         id: "discord_toggle_screenshare",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Toggle Screen Share",
+        name: "Discord: Toggle Screen Share",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Toggle Screen Share On/Off"
@@ -875,7 +865,7 @@ Object.assign(actions, {
         id: "discord_setDefaultAudioDevice",
         category: "Discord",
         prefix: "Discord:",
-        name: "Discord Set Default Audio Device (Input/Output)",
+        name: "Discord: Set Default Audio Device (Input/Output)",
         type: "communicate",
         tryInline: "true",
         format: "Discord: Set {$discord_DeviceType$} Device to {$discord_SelectedDevice$}",
@@ -920,7 +910,44 @@ Object.assign(actions, {
                 default: "0.00"
             }
         ]
-    }
+    },
+    // "23":{
+    //     id: "discord_setActivity",
+    //     category: "Discord",
+    //     prefix: "Discord:",
+    //     name: "Discord: Set Activity",
+    //     type: "communicate",
+    //     tryInline: "true",
+    //     format: "Discord: Set Activity to {$discord_activity_type$} with details: {$discord_activity_details$}, state: {$discord_activity_state$}, name: {$discord_activity_name$}",
+    //     data: [
+    //         {
+    //             id: "discord_activity_type",
+    //             type: "choice",
+    //             label: "Discord Activity Type",
+    //             default: "",
+    //             valueChoices: ["Playing", "Streaming", "Listening", "Watching", "Competing", "Custom"]
+    //         },
+    //         {
+    //             id: "discord_activity_details",
+    //             type: "text",
+    //             label: "Discord Activity Details",
+    //             default: ""
+    //         },
+    //         {
+    //             id: "discord_activity_state",
+    //             type: "text",
+    //             label: "Discord Activity State",
+    //             default: ""
+    //         },
+    //         {
+    //             id: "discord_activity_name",
+    //             type: "text",
+    //             label: "Discord Activity Name",
+    //             default: ""
+    //         }
+    //     ]
+    // }
+
 
 })
 
@@ -947,7 +974,7 @@ Object.assign(connectors, {
         id: "discord_voice_volume_action_connector",
         category: "Discord",
         prefix: "Discord:",
-        name:"Set Voice Volume",
+        name:"Adjust VC User Volume",
         format:"Discord: Set Voice Volume for user {$voiceUserList_connector$}",
         data: [
             {
@@ -968,7 +995,7 @@ Object.assign(events, {
     "1":{
     id: "discord_newDM",
     category: "Direct Message",
-    name: "Discord | New Direct Message (DM)",
+    name: "Discord: New Direct Message (DM)",
     format: "When receiving a new Direct Message $val",
     type: "communicate",
     valueChoices: [

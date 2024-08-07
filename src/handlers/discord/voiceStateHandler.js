@@ -78,7 +78,7 @@ class VoiceStateHandler {
       this.DG.userID = data.id;
       this.DG.userPremiumType = data.premium_type;
       // we can decide if
-      console.log(`User ID: ${userId}, User Name: ${userName}, Premium Type: ${userPremiumType}, Avatar: ${userAvatar}`);
+      logIt("DEBUG", "USER UPDATE: ", `User ID: ${userId}, User Name: ${userName}, Premium Type: ${userPremiumType}, Avatar: ${userAvatar}`);
       // this.TPClient.stateUpdate("discord_user_id", data.id);
       // this.TPClient.stateUpdate("discord_user_name", data.username);
       // this.TPClient.stateUpdate("discord_user_discriminator", data.discriminator);
@@ -234,7 +234,7 @@ class VoiceStateHandler {
         logIt("DEBUG", "Input Device: ", String(matchedDevice.name));
       }
     } else {
-      console.log("No valid input devices found.");
+      logIt("INFO", "No valid input devices found.");
     }
     
 
@@ -253,7 +253,7 @@ class VoiceStateHandler {
         logIt("DEBUG", "Output Device: ", String(matchedDevice.name));
       }
       } else {
-        console.log("No valid input devices found.");
+        logIt("INFO", "No valid input devices found.");
       }
 
     if (data.hasOwnProperty("mute")) {
@@ -427,8 +427,7 @@ class VoiceStateHandler {
 
   getGuilds = async () => {
     let data = await this.DG.Client.getGuilds();
-    console.log("Fetched Guilds");
-
+    logIt("DEBUG", "GetGuilds:", JSON.stringify(data));
     if (!data || !data.guilds) {
       logIt("ERROR", "guild data not available");
       return;

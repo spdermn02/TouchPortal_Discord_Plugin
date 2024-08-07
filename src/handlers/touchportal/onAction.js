@@ -1,32 +1,10 @@
 // TPClient onAction
 
-// const {ActivityType} = require("../../../discord-rpc/src/constants.js");
-
-
-// // https://github.com/discordjs/RPC/issues/146
-// // Setting to custom doesnt seem to work yet.. research why?  
-// // Error: child "activity" fails because [child "type" fails because ["type" must be one of [0, 2, 3, 5]]]
-// //  at RPCClient._onRpcMessage (C:\Users\GitPC\Documents\GitHub\TouchPortal_Discord_Plugin\discord-rpc\src\client.js:178:19)
-// DG.Client.setActivity({
-//   name: "Gitago's a Genius",
-//   type: ActivityType.Listening,
-// //  emoji: {name: ":fire:", animated: false},
-//   state: "Playing with TouchPortal",
-//   details:"hmmmmm",
-//   // did not get assets/image to work yet
-//   assets: {largeImageKey: "https://www.touch-portal.com/images/teaser_main.png",
-//   largeImageText: "TouchPortal"},
-//     // havent gotten this to work eyt 
-//     // in milieconds
-//   timestamps : {start: 1722917028},
-//     // also have not gotten buttons to work yet..
-//   buttons: [{label: "TouchPortal", url: "https://www.touch-portal.com"}]
-// });
-
+const {ActivityType} = require("../../../discord-rpc/src/constants.js");
 const discordKeyMap = require("../../utils/discordKeys.js");
-
-// everything in onaction COULD be moved to index.js and then DG could be initiated inside of index.js as well instead of its own file
 const {DG} = require("../../discord_config.js");
+// everything in onaction COULD be moved to index.js and then DG could be initiated inside of index.js as well instead of its own file
+
 
 const {
   logIt,
@@ -47,9 +25,6 @@ async function onAction(message, isHeld) {
 
     let channelId = DG.channels[guildId][type.toLowerCase()].idx[channelName];
 
-    console.log("Channel ID", channelId);
-
-
     if (type === "Voice") {
       await DG.Client.selectVoiceChannel(channelId, {
         timeout: 5,
@@ -60,6 +35,45 @@ async function onAction(message, isHeld) {
     }
   } else if (message.actionId === "discord_leave_channel") {
     await DG.Client.selectVoiceChannel(null, {timeout: 5});
+
+  } else if (message.actionId === "discord_setActivity") {
+    let activityType = message.data[0].value;
+    let activityDetails = message.data[1].value;
+    let activityState = message.data[2].value;
+    let activityName = message.data[3].value;
+    // let activityImage = message.data[4].value;
+    // let activityImageText = message.data[5].value;
+    // let activityStartTimestamp = message.data[6].value;
+    // let activityLargeImageKey = message.data[7].value;
+    // let activityLargeImageText = message.data[8].value;
+    // let activitySmallImageKey = message.data[9].value;
+    // let activitySmallImageText = message.data[10].value;
+    // let activityButtonLabel = message.data[11].value;
+    // let activityButtonUrl = message.data[12].value;
+    let chosenActivityType = ActivityType[activityType];
+
+    let activity = {
+      name: activityName,
+      type: chosenActivityType,
+      state: activityState,
+      details: activityDetails,
+      // emoji: {name: "TP_LOGO", id: "1270597276439416934", animated: false},
+      // assets: {
+        // largeImageKey: activityLargeImageKey,
+        // largeImageText: activityLargeImageText,
+        // smallImageKey: activitySmallImageKey,
+        // smallImageText: activitySmallImageText,
+      // },
+      // timestamps: {start: Date.now()},
+      // buttons: [{label: "Test Button", url: "http://www.touch-portal.com"}, {label: "Test Button 2", url: "http://www.touch-portal.com"}],
+    };
+
+    // if (activityImage) {
+    //   activity.assets.largeImageKey = activityImage;
+    //   activity.assets.largeImageText = activityImageText;
+    // }
+
+    await DG.Client.setActivity(activity);
     
   } else if (message.actionId === "discord_play_sound") {
     let soundValue = message.data[0].value;
@@ -202,9 +216,9 @@ async function onAction(message, isHeld) {
           try {
             // Setting the volume
             DG.Client.setVoiceSettings(voiceSettings);
-            console.log(`Successfully set ${deviceType} volume to`, volume );
+            logIt("DEBUG", `Successfully set ${deviceType} volume to`, volume);
           } catch (error) {
-            console.error(`Error setting ${deviceType} volume:`, error);
+            logIt("ERROR", `Error setting ${deviceType} volume:`, error);
           }
         }, 100);
       }

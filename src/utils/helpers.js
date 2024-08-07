@@ -7,7 +7,7 @@ const app_monitor = {
   win32: "Discord.exe",
 };
 
-let debugMode = "Info";
+let debugMode = "INFO";
 function setDebugMode(mode) {
   debugMode = mode;
 }

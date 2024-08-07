@@ -43,23 +43,24 @@ class NotificationHandler {
   
     // If no guildId found, it must be a DM
     if (!guildId) {
-      console.log("Channel ID not found in any guild, treating as DM");
+      logIt("DEBUG", "Channel ID not found in any guild, treating as DM");
       channelType = "dm";
     } else {
-      console.log(`Guild ID: ${guildId}`);
-      console.log(`Guild Name: ${guildName}`);
-      console.log(`Channel Type: ${channelType}`);
+      logIt("DEBUG", `Guild ID: ${guildId}`);
+      logIt("DEBUG", `Guild Name: ${guildName}`);
+      logIt("DEBUG", `Channel Type: ${channelType}`);
     }
     
     // Doing stuff based on the channel type
     let states = []
     switch (channelType) {
       case "voice":
-        console.log("Looks like you just got tagged in a voice channel.. not sure what we can do with that yet..");
+        logIt("INFO", "Looks like you just got tagged in a voice channel.. not sure what we can do with that yet..");
         // this.DG.Client.selectVoiceChannel(channelId, {timeout: 5});
         break;
       
       case "text":
+        
         content = data.body;
         userAvatarBase64 = await imageToBase64(avatarUrl);
         
@@ -78,6 +79,7 @@ class NotificationHandler {
         logIt("INFO", "TEXT CHANNEL |  Guild:", guildName, "Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
       
       case "dm":
+        logIt("INFO", `DM Info: ${JSON.stringify(data)}`);
         content = data.message.body;
         userAvatarBase64 = await imageToBase64(avatarUrl);
         //// Save this for if we need to captrue the last X dms
@@ -103,7 +105,7 @@ class NotificationHandler {
         logIt("INFO", "DIRECT MESSAGE | Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
 
       default:
-        console.log("Unknown channel type");
+        logIt("ERROR", "Unknown channel type");
         break;
     }
 

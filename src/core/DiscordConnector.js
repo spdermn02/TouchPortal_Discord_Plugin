@@ -103,7 +103,8 @@ class DiscordConnector {
     }
 
     // Start Login process
-    console.log("Waiting for Login");
+    
+    logIt("INFO", "Waiting for Login");
     await this.waitForLogin();
   };
 

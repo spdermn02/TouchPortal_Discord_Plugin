@@ -24,7 +24,7 @@ class UserStateHandler {
   addUserData = async (data) => {
     if (!this.DG.currentVoiceUsers.hasOwnProperty(data.user.id)) {
       // Add the user to the currentVoiceUsers object
-      console.log(`User ${data.nick} has joined the voice channel`);
+      logIt("DEBUG", `User ${data.nick} has joined the voice channel`);
       this.DG.currentVoiceUsers[data.user.id] = data;
     }
   };
@@ -46,8 +46,6 @@ class UserStateHandler {
       }
 
       let updates = [];
-
-      // console.log(Object.keys(this.DG.currentVoiceUsers).length, " Current Voice Users")
 
       updates.push({
         id: `user_${userIndex}_deaf`,

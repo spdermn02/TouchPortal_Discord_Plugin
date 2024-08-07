@@ -3,6 +3,7 @@
 const EventEmitter = require("events");
 const find = require("find-process");
 const path = require("path");
+const { logIt } = require("../utils/helpers");
 const platform = require("process").platform;
 const LOOP_INTERVAL = 10000;
 
@@ -56,7 +57,7 @@ class ProcessReady extends EventEmitter {
       })
       .catch((err) => {
         emitEvent = null;
-        console.log(`TPDiscord: Unable to determine if process running, error occured - ${err}`);
+        logIt("INFO", `TPDiscord: Unable to determine if process running, error occured - ${err}`);
       });
 
     if (emitEvent) {

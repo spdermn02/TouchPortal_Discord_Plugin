@@ -32,7 +32,6 @@ const {onAction} = require("./handlers/touchportal/onAction.js");
 // On Info
 // ----------------------------------------------------
 TPClient.on("Info", (data) => {
-  console.log("Info Triggered.. creating default user states");
   logIt("DEBUG", "Info : We received info from Touch-Portal");
   // Adding predefined states for the users
   TPClient.choiceUpdate(DG.pttKeyStateId, Object.keys(discordKeyMap.keyboard.keyMap));
@@ -119,7 +118,7 @@ TPClient.on("Settings", (data) => {
 // On Update
 // ----------------------------------------------------
 TPClient.on("Update", (curVersion, newVersion) => {
-  console.log("DEBUG", "Update: current version:" + curVersion + " new version:" + newVersion);
+  logIt("DEBUG", "Update: current version:" + curVersion + " new version:" + newVersion);
   TPClient.sendNotification(
     `${pluginId}_update_notification`,
     `Discord Plugin Update Available (${newVersion})`,
@@ -220,7 +219,6 @@ TPClient.on("ListChange", (data) => {
   }
 
   if (data.actionId === "discord_setDefaultAudioDevice") {
-    console.log("LIST CHANGED FOUND")
     if (data.listId === "discord_DeviceType"){
       if (data.value === "Input") {
       TPClient.choiceUpdate("discord_SelectedDevice", DG.voiceSettings.inputDeviceNames);
@@ -308,7 +306,7 @@ Discord.DG.procWatcher.on("processTerminated", (processName) => {
 });
 
 
-console.log("Initiating TP CLient");
+logIt("INFO", "Initiating TP Client");
 TPClient.connect({pluginId: pluginId, updateUrl: DG.updateUrl});
 
 
