@@ -89,7 +89,7 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **Voice Average Ping**          | Value: in milliseconds                                                                                  |
 | **Voice Hostname**              | Value: Voice Host connected to at Discord                                                               |
 | **Voice Mode Type**             | Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY                                                              |
-| **Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Currently Windows only, Mac coming soon |
+| **Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Currently Windows only, Mac coming soon                         |
 | **Connected**                   | Valid Values: Connected, Disconnected                                                                   |
 | **Automatic Gain Control**      | Valid Values: On, Off                                                                                   |
 | **Echo Cancellation**           | Valid Values: On, Off                                                                                   |
@@ -99,14 +99,14 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **Speaker Volume**              | Value: Number indicating your current Speaker Volume                                                    |
 | **Camera**                      | Value: On or Off indicating camera status in voice call                                                 |
 | **Screenshare**                 | Value: On or Off indicating screen sharing status in voice call                                         |
-| **Voice Channel Participants**  | Value: Will be a string of all participants in the current voice channel separated by a | character (for now) |
-| **Voice Channel Participants IDs** | Value: Will be a string of all participant IDs in the current voice channel separated by a | character (for now) |
+| **Voice Channel Participants**  | Value: String of all participants in the current voice channel                                           |
+| **Voice Channel Participants IDs** | Value: String of all participant IDs in the current voice channel                                    |
 
 ### Events
 | **Event**              | **Description**                                     |
 |------------------------|-----------------------------------------------------|
 | **Discord DM**         | Triggered when a Direct Message is received         |
-| **Discord Notification** | Triggered when a Notification is received          |
+| **Discord Notification** | Triggered when a Notification is received         |
 
 
 ## Installation and Configuration
