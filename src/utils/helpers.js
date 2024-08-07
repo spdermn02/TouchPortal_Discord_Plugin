@@ -1,6 +1,7 @@
 // HELPER FUNCTIONS
 const platform = require("process").platform;
-const {pluginId} = require("../discord_config.js");
+// const {pluginId} = require("../discord_config.js");  all of the sudden this doesnt wanna work and comes up undefined...
+const pluginId = "TPDiscord";
 
 const app_monitor = {
   darwin: "/Applications/Discord.app/Contents/MacOS/Discord",
