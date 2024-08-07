@@ -67,6 +67,8 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **Play Sound**                   | Trigger Discord Soundboard sounds from Touch Portal.                                                    |
 | **Toggle Camera**                | Toggle the Camera on/off in Voice Chat.                                                                 |
 | **Toggle Screenshare**           | Toggle the Screenshare on/off. When turned on, it will prompt to select what to screenshare.            |
+| **Set Default Audio Device**     | Change the Input/Output device used for Discord.                                                        |
+| **Set Default Audio Volume**     | Set/Increase/Decrease the Input/Output volume for Discord. (-10 will lower by 10)                       |
 
 
 ### Connectors
@@ -95,12 +97,14 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **Echo Cancellation**           | Valid Values: On, Off                                                                                   |
 | **Noise Suppression**           | Valid Values: On, Off                                                                                   |
 | **Quality of Service Priority** | Valid Values: On, Off                                                                                   |
-| **Voice Volume**                | Value: Number indicating your current Voice Volume                                                      |
-| **Speaker Volume**              | Value: Number indicating your current Speaker Volume                                                    |
 | **Camera**                      | Value: On or Off indicating camera status in voice call                                                 |
 | **Screenshare**                 | Value: On or Off indicating screen sharing status in voice call                                         |
-| **Voice Channel Participants**  | Value: String of all participants in the current voice channel                                           |
+| **Voice Channel Participants**  | Value: String of all participants in the current voice channel                                          |
 | **Voice Channel Participants IDs** | Value: String of all participant IDs in the current voice channel                                    |
+| **Current Input Device Name**   | Value: Displays your current Input Device Name                                                          |
+| **Current Output Device Name**  | Value: Displays your current Output Device Name                                                         |
+| **Voice Volume (Input Device)** | Value: Number indicating your current Voice Volume                                                      |
+| **Speaker Volume (Output Device)** | Value: Number indicating your current Speaker Volume                                                 |
 
 ### Events
 | **Event**              | **Description**                                     |
