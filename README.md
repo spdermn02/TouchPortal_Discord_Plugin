@@ -11,12 +11,7 @@
     - [Events](#events)
   - [Installation and Configuration](#installation-and-configuration)
   - [Troubleshooting Plugin](#troubleshooting-plugin)
-    - [Discord Mute:](#discord-mute)
-    - [Discord Deafen:](#discord-deafen)
-    - [Discord Go To Channel](#discord-go-to-channel)
-    - [Discord Voice Type](#discord-voice-type)
-    - [Discord Voice Hangup](#discord-voice-hangup)
-    - [Discord Push To Talk Keys](#discord-push-to-talk-keys)
+  - [Example Buttons](#example-buttons)
 - [Sample Page](#sample-page)
 - [Cleanup pre-v4.0.0 config](#cleanup-pre-v400-config)
 - [Dependencies](#dependencies)
@@ -189,6 +184,7 @@ This plugin simplifies your Discord interactions, bringing essential controls to
   </ol>
 </details>
 
+## Example Buttons
 
 ### Discord Mute: 
 [Sample Mute Button](https://github.com/spdermn02/TouchPortal_Discord_Plugin/tree/master/resources/DiscordMute.tpb)
