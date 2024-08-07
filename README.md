@@ -110,7 +110,7 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 
 
 ## Installation and Configuration
-(VIDEO COMING SOON)
+(VIDEO COMING SOON)<br>
  <img src="https://github.com/user-attachments/assets/ac721f86-e70b-4756-a56c-9ea8a25da0f0" alt="HOW TO INSTALL (THUMB)" style="width: 300px;">
 <details>
 <summary>HOW TO - Installation and Configuration (CLICK TO EXPAND)</summary>
