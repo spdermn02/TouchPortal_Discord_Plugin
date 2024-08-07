@@ -1,8 +1,7 @@
 <h1> Touch Portal Plugin to Interact with Discord </h1>
 ![](https://img.shields.io/github/downloads/spdermn02/TouchPortal_Discord_Plugin/total)
 
-- [Touch Portal Plugin](#touch-portal-plugin)
-  - [Description](#description)
+- [Plugin Overview/Introduction](#description)
   - [ChangeLog](#changelog)
   - [Plugin Capabilities](#plugin-capabilities)
     - [Actions](#actions)
