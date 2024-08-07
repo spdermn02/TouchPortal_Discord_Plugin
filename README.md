@@ -79,32 +79,58 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 
 
 ### States
-| **State**                               | **Description**                                                                                         |
-|-----------------------------------------|---------------------------------------------------------------------------------------------------------|
-| **Mute**                        | Valid Values: On, Off                                                                                   |
-| **Deafen**                      | Valid Values: On, Off                                                                                   |
-| **Voice Channel Connected**     | Valid Values: Yes, No                                                                                   |
-| **Voice Channel Name**          | Value: Connected voice channel name or 'Personal' <None>                                                |
-| **Voice Channel ID**            | Value: Connected voice channel id or <None>                                                             |
-| **Voice Channel Server Name**   | Value: Connected voice channel server name or 'Personal' or <None>                                      |
-| **Voice Channel Server ID**     | Value: Connected voice channel server id or 'Personal' or <None>                                        |
-| **Voice Average Ping**          | Value: in milliseconds                                                                                  |
-| **Voice Hostname**              | Value: Voice Host connected to at Discord                                                               |
-| **Voice Mode Type**             | Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY                                                              |
-| **Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Currently Windows only, Mac coming soon                         |
-| **Connected**                   | Valid Values: Connected, Disconnected                                                                   |
-| **Automatic Gain Control**      | Valid Values: On, Off                                                                                   |
-| **Echo Cancellation**           | Valid Values: On, Off                                                                                   |
-| **Noise Suppression**           | Valid Values: On, Off                                                                                   |
-| **Quality of Service Priority** | Valid Values: On, Off                                                                                   |
-| **Camera**                      | Value: On or Off indicating camera status in voice call                                                 |
-| **Screenshare**                 | Value: On or Off indicating screen sharing status in voice call                                         |
-| **Voice Channel Participants**  | Value: String of all participants in the current voice channel                                          |
-| **Voice Channel Participants IDs** | Value: String of all participant IDs in the current voice channel                                    |
-| **Current Input Device Name**   | Value: Displays your current Input Device Name                                                          |
-| **Current Output Device Name**  | Value: Displays your current Output Device Name                                                         |
-| **Voice Volume (Input Device)** | Value: Number indicating your current Voice Volume                                                      |
-| **Speaker Volume (Output Device)** | Value: Number indicating your current Speaker Volume                                                 |
+| **State**                         | **Category**       | **Description**                         |
+|-----------------------------------|--------------------|-----------------------------------------|
+| **Discord Current Input Device**    | Main               | Displays the current input device in Discord |
+| **Discord Current Output Device**   | Main               | Displays the current output device in Discord|
+| **Discord Mute**                    | Main               | Mutes or unmutes Discord audio                |
+| **Discord Deafen**                  | Main               | Deafens or undeafens Discord audio            |
+| **Discord Camera**                  | Main               | Indicates the camera status in Discord       |
+| **Discord Screen Share**            | Main               | Indicates the screen sharing status in Discord |
+| **Discord Speaker Volume**          | Main               | Displays the current speaker volume in Discord |
+| **Discord Voice Volume**            | Main               | Displays the current voice volume in Discord  |
+| **Discord Process Running**         | Main               | Indicates if Discord process is running       |
+| **Discord Connected**               | Main               | Indicates if Discord is connected or disconnected |
+| **Automatic Gain Control**          | Discord Settings   | Controls automatic gain settings        |
+| **Echo Cancellation**               | Discord Settings   | Controls echo cancellation settings     |
+| **Noise Suppression**               | Discord Settings   | Controls noise suppression settings     |
+| **Silence Warning**                 | Discord Settings   | Controls silence warning settings       |
+| **Quality of Service Priority**     | Discord Settings   | Controls Quality of Service priority    |
+| **Voice Mode Type**                 | Discord Settings   | Sets the voice mode type                |
+| **DM: UserName**                    | Direct Message     | Represents the user's name in a DM      |
+| **DM: UserID**                      | Direct Message     | Represents the user's ID in a DM        |
+| **DM: ChannelID**                   | Direct Message     | Represents the channel ID for a DM      |
+| **DM: Content**                     | Direct Message     | Represents the content of a DM          |
+| **Discord New DM Event**            | Direct Message     | Indicates a new DM event                |
+| **DM: Timestamp**                   | Direct Message     | Represents the timestamp of a DM        |
+| **DM: User Avatar**                 | Direct Message     | Represents the user's avatar in a DM    |
+| **Mention: UserName**               | Mentions           | Represents the mentioned user's name    |
+| **Mention: UserID**                 | Mentions           | Represents the mentioned user's ID      |
+| **Mention: ChannelID**              | Mentions           | Represents the channel ID for a mention |
+| **Mention: Content**                | Mentions           | Represents the content of a mention     |
+| **Discord New Mention Event**       | Mentions           | Indicates a new mention event           |
+| **Mention: Timestamp**              | Mentions           | Represents the timestamp of a mention   |
+| **Mention: User Avatar**            | Mentions           | Represents the mentioned user's avatar  |
+| **Voice Channel Connected**         | Voice Channel Info | Indicates if the user is connected to a voice channel        |
+| **Voice Channel Server ID**         | Voice Channel Info | Represents the ID of the voice channel server                |
+| **Voice Channel Server Name**       | Voice Channel Info | Represents the name of the voice channel server              |
+| **Voice Channel ID**                | Voice Channel Info | Represents the ID of the voice channel                       |
+| **Voice Channel Name**              | Voice Channel Info | Represents the name of the voice channel                     |
+| **Voice Average Ping**              | Voice Channel Info | Represents the average ping in the voice channel             |
+| **Voice Hostname**                  | Voice Channel Info | Represents the hostname of the voice server                  |
+| **Voice Channel Participants**      | Voice Channel Info | Lists the participants in the current voice channel          |
+| **Voice Channel Participant IDs**   | Voice Channel Info | Lists the participant IDs in the current voice channel       |
+| **User Status: isSpeaking**         | User Info (VC)     | Indicates if the user is currently speaking |
+| **User ID**                         | User Info (VC)     | Represents the user's ID in the voice chat |
+| **User Nickname**                   | User Info (VC)     | Represents the user's nickname in the voice chat |
+| **User Status: Mute**               | User Info (VC)     | Indicates if the user is muted            |
+| **User Status: Self Mute**          | User Info (VC)     | Indicates if the user has self-muted      |
+| **User Status: Self Deaf**          | User Info (VC)     | Indicates if the user has self-deafened    |
+| **User Status: Deafen**             | User Info (VC)     | Indicates if the user is deafened         |
+| **User Volume**                     | User Info (VC)     | Represents the user's volume level        |
+| **User Avatar**                     | User Info (VC)     | Represents the user's avatar image        |
+| **User Avatar ID**                  | User Info (VC)     | Represents the ID for the user's avatar   |
+| **User Status: Server Mute**        | User Info (VC)     | Indicates if the user is server-muted     |
 
 ### Events
 | **Event**              | **Description**                                     |
