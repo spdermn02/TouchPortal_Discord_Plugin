@@ -89,7 +89,7 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **Discord Voice Average Ping**          | Value: in milliseconds                                                                                  |
 | **Discord Voice Hostname**              | Value: Voice Host connected to at Discord                                                               |
 | **Discord Voice Mode Type**             | Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY                                                              |
-| **Discord Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Windows only, Mac will always be Unknown (until I find a good process watcher script for MacOS) |
+| **Discord Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Currently Windows only, Mac coming soon |
 | **Discord Connected**                   | Valid Values: Connected, Disconnected                                                                   |
 | **Discord Automatic Gain Control**      | Valid Values: On, Off                                                                                   |
 | **Discord Echo Cancellation**           | Valid Values: On, Off                                                                                   |
