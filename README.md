@@ -47,26 +47,26 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 ### Actions
 | **Action**                               | **Description**                                                                                         |
 |------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| **Discord Mute**                         | Mute yourself in Discord.                                                                               |
-| **Discord Deafen**                       | Deafen yourself in Discord (inherently mutes as well).                                                  |
-| **Discord Voice Mode**                   | Change between Voice Activity and Push-To-Talk Modes.                                                   |
-| **Discord Hang Up**                      | Hang up the voice call when in a voice call.                                                            |
-| **Discord Select Channel**               | Go to a specific voice/text channel in a given server.                                                  |
-| **Discord Reset Push To Talk Keys**      | Resets the array inside the plugin; doesn't affect Discord directly.                                    |
-| **Discord Push To Talk Key**             | Adds a key to the push-to-talk key array inside the plugin; doesn't affect Discord directly.            |
-| **Discord Store Push To Talk Keys**      | Store the key combinations in the push-to-talk key array to Discord for use with Push to Talk.          |
-| **Discord Auto Gain Control**            | Toggle/Enable/Disable Auto Gain Control.                                                                |
-| **Discord Quality of Service Priority**  | Toggle/Enable/Disable Quality of Service Priority.                                                      |
-| **Discord Echo Cancellation**            | Toggle/Enable/Disable Echo Cancellation.                                                                |
-| **Discord Noise Suppression**            | Toggle/Enable/Disable Noise Suppression. If using Krisp, this does nothing to disable that.             |
-| **Discord Silence Warning**              | Toggle/Enable/Disable Silence Warning. (Not much documentation available on this.)                      |
-| **Discord DM Voice Channel**             | Join a Personal or Group DM Voice Channel by Channel ID. Note: Does not ring the other person; it just forces you into the voice channel. |
-| **Discord DM Text Channel**              | Join a Personal or Group DM Text Channel by Channel ID.                                                 |
-| **Discord Push To Talk**                 | (Only works in Voice Activity mode) Un-mutes/Deafens on hold; re-mutes on release.                      |
-| **Discord Push To Mute**                 | (Only works in Voice Activity mode) Mutes/Deafens on hold; un-mutes/Deafens on release.                 |
-| **Discord Play Sound**                   | Trigger Discord Soundboard sounds from Touch Portal.                                                    |
-| **Discord Toggle Camera**                | Toggle the Camera on/off in Voice Chat.                                                                 |
-| **Discord Toggle Screenshare**           | Toggle the Screenshare on/off. When turned on, it will prompt to select what to screenshare.            |
+| **Mute**                         | Mute yourself in Discord.                                                                               |
+| **Deafen**                       | Deafen yourself in Discord (inherently mutes as well).                                                  |
+| **Voice Mode**                   | Change between Voice Activity and Push-To-Talk Modes.                                                   |
+| **Hang Up**                      | Hang up the voice call when in a voice call.                                                            |
+| **Select Channel**               | Go to a specific voice/text channel in a given server.                                                  |
+| **Reset Push To Talk Keys**      | Resets the array inside the plugin; doesn't affect Discord directly.                                    |
+| **Push To Talk Key**             | Adds a key to the push-to-talk key array inside the plugin; doesn't affect Discord directly.            |
+| **Store Push To Talk Keys**      | Store the key combinations in the push-to-talk key array to Discord for use with Push to Talk.          |
+| **Auto Gain Control**            | Toggle/Enable/Disable Auto Gain Control.                                                                |
+| **Quality of Service Priority**  | Toggle/Enable/Disable Quality of Service Priority.                                                      |
+| **Echo Cancellation**            | Toggle/Enable/Disable Echo Cancellation.                                                                |
+| **Noise Suppression**            | Toggle/Enable/Disable Noise Suppression. If using Krisp, this does nothing to disable that.             |
+| **Silence Warning**              | Toggle/Enable/Disable Silence Warning. (Not much documentation available on this.)                      |
+| **DM Voice Channel**             | Join a Personal or Group DM Voice Channel by Channel ID. Note: Does not ring the other person; it just forces you into the voice channel. |
+| **DM Text Channel**              | Join a Personal or Group DM Text Channel by Channel ID.                                                 |
+| **Push To Talk**                 | (Only works in Voice Activity mode) Un-mutes/Deafens on hold; re-mutes on release.                      |
+| **Push To Mute**                 | (Only works in Voice Activity mode) Mutes/Deafens on hold; un-mutes/Deafens on release.                 |
+| **Play Sound**                   | Trigger Discord Soundboard sounds from Touch Portal.                                                    |
+| **Toggle Camera**                | Toggle the Camera on/off in Voice Chat.                                                                 |
+| **Toggle Screenshare**           | Toggle the Screenshare on/off. When turned on, it will prompt to select what to screenshare.            |
 
 
 ### Connectors
@@ -79,29 +79,28 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 ### States
 | **State**                               | **Description**                                                                                         |
 |-----------------------------------------|---------------------------------------------------------------------------------------------------------|
-| **Discord Mute**                        | Valid Values: On, Off                                                                                   |
-| **Discord Deafen**                      | Valid Values: On, Off                                                                                   |
-| **Discord Voice Channel Connected**     | Valid Values: Yes, No                                                                                   |
-| **Discord Voice Channel Name**          | Value: Connected voice channel name or 'Personal' <None>                                                |
-| **Discord Voice Channel ID**            | Value: Connected voice channel id or <None>                                                             |
-| **Discord Voice Channel Server Name**   | Value: Connected voice channel server name or 'Personal' or <None>                                      |
-| **Discord Voice Channel Server ID**     | Value: Connected voice channel server id or 'Personal' or <None>                                        |
-| **Discord Voice Average Ping**          | Value: in milliseconds                                                                                  |
-| **Discord Voice Hostname**              | Value: Voice Host connected to at Discord                                                               |
-| **Discord Voice Mode Type**             | Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY                                                              |
-| **Discord Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Currently Windows only, Mac coming soon |
-| **Discord Connected**                   | Valid Values: Connected, Disconnected                                                                   |
-| **Discord Automatic Gain Control**      | Valid Values: On, Off                                                                                   |
-| **Discord Echo Cancellation**           | Valid Values: On, Off                                                                                   |
-| **Discord Noise Suppression**           | Valid Values: On, Off                                                                                   |
-| **Discord Quality of Service Priority** | Valid Values: On, Off                                                                                   |
-| **Discord Voice Channel Participants**  | Value: Will be a string of all participants in the current voice channel separated by a | character (for now) |
-| **Discord Voice Channel Participants IDs** | Value: Will be a string of all participant IDs in the current voice channel separated by a | character (for now) |
-| **Discord Voice Volume**                | Value: Number indicating your current Voice Volume                                                      |
-| **Discord Speaker Volume**              | Value: Number indicating your current Speaker Volume                                                    |
-| **Discord Camera**                      | Value: On or Off indicating camera status in voice call                                                 |
-| **Discord Screenshare**                 | Value: On or Off indicating screen sharing status in voice call                                         |
-
+| **Mute**                        | Valid Values: On, Off                                                                                   |
+| **Deafen**                      | Valid Values: On, Off                                                                                   |
+| **Voice Channel Connected**     | Valid Values: Yes, No                                                                                   |
+| **Voice Channel Name**          | Value: Connected voice channel name or 'Personal' <None>                                                |
+| **Voice Channel ID**            | Value: Connected voice channel id or <None>                                                             |
+| **Voice Channel Server Name**   | Value: Connected voice channel server name or 'Personal' or <None>                                      |
+| **Voice Channel Server ID**     | Value: Connected voice channel server id or 'Personal' or <None>                                        |
+| **Voice Average Ping**          | Value: in milliseconds                                                                                  |
+| **Voice Hostname**              | Value: Voice Host connected to at Discord                                                               |
+| **Voice Mode Type**             | Valid Values: PUSH_TO_TALK, VOICE_ACTIVITY                                                              |
+| **Process Running**             | Valid Values: Yes, No, Unknown<br>Note: Currently Windows only, Mac coming soon |
+| **Connected**                   | Valid Values: Connected, Disconnected                                                                   |
+| **Automatic Gain Control**      | Valid Values: On, Off                                                                                   |
+| **Echo Cancellation**           | Valid Values: On, Off                                                                                   |
+| **Noise Suppression**           | Valid Values: On, Off                                                                                   |
+| **Quality of Service Priority** | Valid Values: On, Off                                                                                   |
+| **Voice Volume**                | Value: Number indicating your current Voice Volume                                                      |
+| **Speaker Volume**              | Value: Number indicating your current Speaker Volume                                                    |
+| **Camera**                      | Value: On or Off indicating camera status in voice call                                                 |
+| **Screenshare**                 | Value: On or Off indicating screen sharing status in voice call                                         |
+| **Voice Channel Participants**  | Value: Will be a string of all participants in the current voice channel separated by a | character (for now) |
+| **Voice Channel Participants IDs** | Value: Will be a string of all participant IDs in the current voice channel separated by a | character (for now) |
 
 ### Events
 | **Event**              | **Description**                                     |
