@@ -74,8 +74,9 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 ### Connectors
 | **Connector**           | **Description**                                     |
 |-------------------------|-----------------------------------------------------|
-| **Adjust Input Volume** | Slider to control the Voice Volume                  |
-| **Adjust Output Volume**| Slider to control the Speaker Volume                |
+| **Adjust Input Volume**  | Slider to control the Voice Volume                  |
+| **Adjust Output Volume** | Slider to control the Speaker Volume                |
+| **Adjust VC User Volume**| Slider to control a users Volume in a Voice Chat   |
 
 
 ### States
@@ -133,10 +134,10 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 | **User Status: Server Mute**        | User Info (VC)     | Indicates if the user is server-muted     |
 
 ### Events
-| **Event**              | **Description**                                     |
-|------------------------|-----------------------------------------------------|
-| **Discord DM**         | Triggered when a Direct Message is received         |
-| **Discord Notification** | Triggered when a Notification is received         |
+| **Event**                | **Description**                                                         |
+|--------------------------|-------------------------------------------------------------------------|
+| **Discord DM**           | Triggered when a Direct Message is received (See Direct Message States) |
+| **Discord Notification** | Triggered when a Notification is received (See Notification States)     |
 
 
 ## Installation and Configuration
