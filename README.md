@@ -224,7 +224,7 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 </details>
 
 <details>
-  <summary><strong>The channel list blanked out </strong></summary>
+  <summary><strong>The channel list blanked out (Click to Expand)</strong></summary>
   <ol>
     <li>Change the server dropdown to a different server, then back again to the server you want.</li>
   </ol>
