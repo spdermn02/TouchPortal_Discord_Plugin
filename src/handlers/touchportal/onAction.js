@@ -128,8 +128,8 @@ async function onAction(message, isHeld) {
     try {
       await DG.Client.selectTextChannel(channelId, {timeout: 5});
     } catch (error) {
-      logIt("ERROR", `Failed to select channel: Channel ID: ${channelId}`);
-      logIt("DEBUG", error);
+      logIt("ERROR", `Failed to select channel: Channel ID: ${channelId} - Please check for correct ID`);
+      logIt("DEBUG", `Select Text/DM Channel: ${error}`);
     }
   } else if (message.actionId === "discord_hangup_voice") {
     DG.Client.selectVoiceChannel(null, {timeout: 5});

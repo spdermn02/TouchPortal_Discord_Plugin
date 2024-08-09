@@ -212,6 +212,13 @@ Object.assign(states, {
         desc: "Mention: User Avatar",
         default: ""
     },
+    "Mention8":{
+        id: "discord_Mention_channelType",
+        category: "Mentions",
+        type: "text",
+        desc: "Mention: Channel Type",
+        default: ""
+    },
 
 })
 

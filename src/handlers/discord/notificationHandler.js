@@ -7,6 +7,21 @@ class NotificationHandler {
     this.TPClient = TPClient;
     this.DG = DG;
   }
+
+  extractForumOrAnnouncementName = (title)  =>{
+    const regex = /\(\s*"[^"]*"\s*,\s*([^)]*)\s*\)/;
+    const match = title.match(regex);
+    
+    if (match) {
+      // Extract the part after the comma
+      const extracted = match[1].trim();
+      // Split by comma if needed and take the first part
+      const parts = extracted.split(',');
+      return parts[0].trim(); // Return the trimmed forum/announcement name
+    }
+    return null;
+  }
+  
   async onNotification(data) {
     // When getting DMs, or Tagged in a message.. can give  you details as to where.. so could set up a button to take to channel where tagged technically..
     // Select channel action would need a custom input for channel ID
@@ -38,34 +53,47 @@ class NotificationHandler {
         guildName = this.DG.guilds.idx[key];
         channelType = "text";
         break;
+      } else if (value.announcement.names[channelId]) {
+        guildId = key;
+        guildName = this.DG.guilds.idx[key];
+        channelType = "announcement";
+        break;
+      } else {
+        // If not found, its either a DM or a forum..
+        // deciding if its a forum by using regex to extract the forum name from the title
+        const forumOrAnnouncementName = this.extractForumOrAnnouncementName(data.title);
+        if (forumOrAnnouncementName) {
+          if (value.forum.idx[forumOrAnnouncementName]) {
+            guildId = key;
+            guildName = this.DG.guilds.idx[key];
+            channelType = "forum";
+          }
+        } else {
+          logIt("DEBUG", "Channel ID not found in any guild, treating as DM");
+          channelType = "dm";
+        }
+        break;
       }
+      
     }
-  
-    // If no guildId found, it must be a DM
-    if (!guildId) {
-      logIt("DEBUG", "Channel ID not found in any guild, treating as DM");
-      channelType = "dm";
-    } else {
-      logIt("DEBUG", `Guild ID: ${guildId}`);
-      logIt("DEBUG", `Guild Name: ${guildName}`);
-      logIt("DEBUG", `Channel Type: ${channelType}`);
-    }
-    
+    logIt("DEBUG", `Guild ID: ${guildId}, Name: ${guildName}, ChannelType: ${channelType}`);
+
     // Doing stuff based on the channel type
     let states = []
     switch (channelType) {
       case "voice":
         logIt("INFO", "Looks like you just got tagged in a voice channel.. not sure what we can do with that yet..");
-        // this.DG.Client.selectVoiceChannel(channelId, {timeout: 5});
         break;
       
       case "text":
-        
+      case "forum":
+      case "announcement":
         content = data.body;
         userAvatarBase64 = await imageToBase64(avatarUrl);
         
         states.push(
            { id: "discord_newMention_eventState", value: "true" },
+           { id: "discord_Mention_channelType", value: channelType },
            { id: "discord_Mention_user", value: userName },
            { id: "discord_Mention_userID", value: userId },
            { id: "discord_Mention_channelID", value: channelId },
@@ -77,7 +105,8 @@ class NotificationHandler {
         this.TPClient.stateUpdateMany(states);
         this.TPClient.stateUpdate("discord_newMention_eventState", "false");
         logIt("INFO", "TEXT CHANNEL |  Guild:", guildName, "Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
-      
+        break;
+
       case "dm":
         logIt("INFO", `DM Info: ${JSON.stringify(data)}`);
         content = data.body;
@@ -102,8 +131,7 @@ class NotificationHandler {
 
         this.TPClient.stateUpdateMany(states);
         this.TPClient.stateUpdate("discord_newDM_eventState", "false");
-        logIt("INFO", "DIRECT MESSAGE | Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
-
+        break;
       default:
         logIt("ERROR", "Unknown channel type");
         break;

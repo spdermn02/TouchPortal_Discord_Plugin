@@ -70,7 +70,7 @@
                 {
                     "id": "discord_voice_volume_action_connector",
                     "prefix": "Discord:",
-                    "name": "Set Voice Volume",
+                    "name": "Adjust VC User Volume",
                     "format": "Discord: Set Voice Volume for user {$voiceUserList_connector$}",
                     "data": [
                         {
@@ -98,7 +98,7 @@
                 {
                     "id": "discord_deafen_action",
                     "prefix": "Discord:",
-                    "name": "Discord Deafen",
+                    "name": "Discord: Deafen",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Deafen {$discordDeafenAction$} for user {$voiceUserList$}",
@@ -138,7 +138,7 @@
                 {
                     "id": "discord_mute_action",
                     "prefix": "Discord:",
-                    "name": "Discord Mute",
+                    "name": "Discord: Mute",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Mute {$discordMuteAction$}, for user {$voiceUserList$}",
@@ -178,7 +178,7 @@
                 {
                     "id": "discord_push_to_talk",
                     "prefix": "Discord:",
-                    "name": "Discord Push To Talk",
+                    "name": "Discord: Push To Talk",
                     "type": "communicate",
                     "tryInline": "true",
                     "hasHoldFunctionality": "true",
@@ -188,7 +188,7 @@
                 {
                     "id": "discord_push_to_mute",
                     "prefix": "Discord:",
-                    "name": "Discord Push To Mute",
+                    "name": "Discord: Push To Mute",
                     "type": "communicate",
                     "tryInline": "true",
                     "hasHoldFunctionality": "true",
@@ -198,7 +198,7 @@
                 {
                     "id": "discord_voice_volume_action",
                     "prefix": "Discord:",
-                    "name": "Discord Voice Volume",
+                    "name": "Discord: Voice Volume",
                     "type": "communicate",
                     "tryInline": "true",
                     "hasHoldFunctionality": "true",
@@ -234,7 +234,7 @@
                 {
                     "id": "discord_automatic_gain_control_action",
                     "prefix": "Discord:",
-                    "name": "Discord Automatic Gain Control",
+                    "name": "Discord: Automatic Gain Control",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Automatic Gain Control {$discordAutomaticGainControlAction$}",
@@ -255,7 +255,7 @@
                 {
                     "id": "discord_echo_cancellation_action",
                     "prefix": "Discord:",
-                    "name": "Discord Echo Cancellation",
+                    "name": "Discord: Echo Cancellation",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Echo Cancellation {$discordEchoCancellationAction$}",
@@ -276,7 +276,7 @@
                 {
                     "id": "discord_noise_suppression_action",
                     "prefix": "Discord:",
-                    "name": "Discord Noise Suppression",
+                    "name": "Discord: Noise Suppression",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Noise Suppression {$discordNoiseSuppressionAction$} (Note: If using Krisp, this action seems to do nothing)",
@@ -297,7 +297,7 @@
                 {
                     "id": "discord_qos_high_packet_priority_action",
                     "prefix": "Discord:",
-                    "name": "Discord Quality of Service Priority",
+                    "name": "Discord: Quality of Service Priority",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Quality of Service High Packet Priority {$discordQOSHighPacketPriorityAction$}",
@@ -318,7 +318,7 @@
                 {
                     "id": "discord_silence_warning_action",
                     "prefix": "Discord:",
-                    "name": "Discord Silence Warning",
+                    "name": "Discord: Silence Warning",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set Silence Warning {$discordSilenceWarningAction$}",
@@ -347,7 +347,7 @@
                 {
                     "id": "discord_play_sound",
                     "prefix": "Discord:",
-                    "name": "Discord Play Sound",
+                    "name": "Discord: Play Sound",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Play Sound {$discordSound$}",
@@ -485,7 +485,7 @@
                 {
                     "id": "discord_toggle_camera",
                     "prefix": "Discord:",
-                    "name": "Discord Toggle Camera",
+                    "name": "Discord: Toggle Camera",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Toggle Camera On/Off"
@@ -493,7 +493,7 @@
                 {
                     "id": "discord_toggle_screenshare",
                     "prefix": "Discord:",
-                    "name": "Discord Toggle Screen Share",
+                    "name": "Discord: Toggle Screen Share",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Toggle Screen Share On/Off"
@@ -501,7 +501,7 @@
                 {
                     "id": "discord_setDefaultAudioDevice",
                     "prefix": "Discord:",
-                    "name": "Discord Set Default Audio Device (Input/Output)",
+                    "name": "Discord: Set Default Audio Device (Input/Output)",
                     "type": "communicate",
                     "tryInline": "true",
                     "format": "Discord: Set {$discord_DeviceType$} Device to {$discord_SelectedDevice$}",
@@ -551,15 +551,6 @@
                             "default": "0.00"
                         }
                     ]
-                },
-                {
-                    "id": "discord_leave_channel",
-                    "prefix": "Discord:",
-                    "name": "Discord Leave Voice Channel",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Disconnect from Voice Channel",
-                    "data": []
                 }
             ],
             "events": [],
@@ -798,7 +789,7 @@
             "events": [
                 {
                     "id": "discord_newDM",
-                    "name": "Discord | New Direct Message (DM)",
+                    "name": "Discord: New Direct Message (DM)",
                     "format": "When receiving a new Direct Message $val",
                     "type": "communicate",
                     "valueChoices": [
@@ -912,6 +903,12 @@
                     "id": "discord_Mention_avatar",
                     "type": "text",
                     "desc": "Mention: User Avatar",
+                    "default": ""
+                },
+                {
+                    "id": "discord_Mention_channelType",
+                    "type": "text",
+                    "desc": "Mention: Channel Type",
                     "default": ""
                 }
             ]
