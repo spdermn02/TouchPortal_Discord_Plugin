@@ -1,16 +1,6 @@
 <h1> Touch Portal Plugin to Interact with Discord </h1>
 ![](https://img.shields.io/github/downloads/spdermn02/TouchPortal_Discord_Plugin/total)
 
-- [Plugin Overview/Introduction](#description)
-  - [ChangeLog](#changelog)
-  - [Plugin Capabilities](#plugin-capabilities)
-    - [Actions](#actions)
-    - [Connectors](#connectors)
-    - [States](#states)
-    - [Events](#events)
-  - [Installation and Configuration](#installation-and-configuration)
-  - [Troubleshooting Plugin](#troubleshooting-plugin)
-- [Sample Buttons](#sample-buttons)
 - [Sample Page](#sample-page)
 - [Cleanup pre-v4.0.0 config](#cleanup-pre-v400-config)
 - [Dependencies](#dependencies)
