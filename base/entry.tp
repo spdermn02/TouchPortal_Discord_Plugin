@@ -53,7 +53,7 @@
         {
             "id": "TPDiscord",
             "name": "Discord",
-            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png.png",
+            "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [
                 {
                     "id": "discord_voice_volume_connector",
