@@ -36,16 +36,14 @@ class VoiceStateHandler {
       await this.DG.Client.subscribe("VOICE_SETTINGS_UPDATE").catch((err) => {
         logIt("ERROR", err);
       });
-      await this.DG.Client.subscribe("GUILD_CREATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("CHANNEL_CREATE").catch((err) => {
-        logIt("ERROR", err);
-      });
       await this.DG.Client.subscribe("VOICE_CHANNEL_SELECT").catch((err) => {
         logIt("ERROR", err);
       });
       await this.DG.Client.subscribe("VOICE_CONNECTION_STATUS").catch((err) => {
+        logIt("ERROR", err);
+      });
+
+      await this.DG.Client.subscribe("CHANNEL_CREATE").catch((err) => {
         logIt("ERROR", err);
       });
       await this.DG.Client.subscribe("VIDEO_STATE_UPDATE").catch((err) => {
@@ -57,7 +55,9 @@ class VoiceStateHandler {
       await this.DG.Client.subscribe("NOTIFICATION_CREATE").catch((err) => {
         logIt("ERROR", err);
       });
-
+      await this.DG.Client.subscribe("GUILD_CREATE").catch((err) => {
+        logIt("ERROR", err);
+      });
       await this.DG.Client.subscribe("CURRENT_USER_UPDATE").catch((err) => {
         logIt("ERROR", err);
       });
@@ -78,7 +78,6 @@ class VoiceStateHandler {
       this.DG.userID = data.id;
       this.DG.userPremiumType = data.premium_type;
       // we can decide if
-      logIt("DEBUG", "USER UPDATE: ", `User ID: ${userId}, User Name: ${userName}, Premium Type: ${userPremiumType}, Avatar: ${userAvatar}`);
       // this.TPClient.stateUpdate("discord_user_id", data.id);
       // this.TPClient.stateUpdate("discord_user_name", data.username);
       // this.TPClient.stateUpdate("discord_user_discriminator", data.discriminator);
@@ -263,7 +262,7 @@ class VoiceStateHandler {
         this.DG.voiceSettings.muteState = 0;
       }
 
-      logIt("INFO", `discord mute is ${this.DG.voiceSettings.muteState} `);
+      logIt("DEBUG", `discord mute is ${this.DG.voiceSettings.muteState} `);
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
     }
     if (data.hasOwnProperty("deaf")) {
@@ -275,7 +274,7 @@ class VoiceStateHandler {
       }
       states.push({id: "discord_deafen", value: this.DG.voiceSettings.deafState ? "On" : "Off"});
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
-      logIt("INFO", `discord deafen is ${this.DG.voiceSettings.deafState}`);
+      logIt("DEBUG", `discord deafen is ${this.DG.voiceSettings.deafState}`);
     }
 
     if (
@@ -463,26 +462,7 @@ class VoiceStateHandler {
     await this.buildGuildChannelIndex(guild.id);
   };
 
-  // buildGuildChannelIndex = async(guildId) => {
-  // let chData = await this.getGuildChannels(guildId);
-  //
-  // DG.channels[guildId] = {
-  // voice: {
-  // array: [],
-  // idx: {},
-  // names: {}
-  // },
-  // text: {
-  // array: [],
-  // idx: {},
-  // names: {}
-  // }
-  // };
-  //
-  // chData.forEach(async (channel,idx) => {
-  // this.assignChannelIndex(guildId, channel);
-  // });
-  // };
+
   buildGuildChannelIndex = async (guildId) => {
     let chData = await this.getGuildChannels(guildId);
 

@@ -93,7 +93,7 @@ class VoiceChannelHandler {
       await Promise.all(
         channel.voice_states.map(async (vs) => {
           if (vs.user.id !== this.DG.Client.user.id) {
-            logIt("INFO", "User ID: ", vs.user.id, "User: ", vs.user.username);
+            logIt("DEBUG", "User VS: ", vs, "User: ", vs.user.username);
   
             vs.speaking = false; // adding speaking to the object to track speaking status
             if (vs.user.avatar === null) {
@@ -123,35 +123,13 @@ class VoiceChannelHandler {
             {id: [`user_${i}_Speaking`], value: "Off"},
             {id: [`user_${i}_id`], value: this.DG.currentVoiceUsers[key].user.id},
             {id: [`user_${i}_nick`], value: this.DG.currentVoiceUsers[key].nick},
-            {
-              id: [`user_${i}_mute`],
-              value: this.DG.currentVoiceUsers[key].mute ? "On" : "Off",
-            },
-            {
-              id: [`user_${i}_deaf`],
-              value: this.DG.currentVoiceUsers[key].voice_state.deaf ? "On" : "Off",
-            },
-            {
-              id: [`user_${i}_self_deaf`],
-              value: this.DG.currentVoiceUsers[key].voice_state.self_deaf ? "On" : "Off",
-            },
-            {
-              id: [`user_${i}_self_mute`],
-              value: this.DG.currentVoiceUsers[key].voice_state.self_mute ? "On" : "Off",
-            },
-            {
-              id: [`user_${i}_server_mute`],
-              value: this.DG.currentVoiceUsers[key].voice_state.mute ? "On" : "Off",
-            },
-            {
-              id: [`user_${i}_avatar`],
-              value: this.DG.currentVoiceUsers[key].user.base64Avatar,
-            },
-            {
-              id: [`user_${i}_avatarID`],
-              value: this.DG.currentVoiceUsers[key].user.avatar,
-            },
-  
+            { id: [`user_${i}_mute`],  value: this.DG.currentVoiceUsers[key].mute ? "On" : "Off"},
+            { id: [`user_${i}_deaf`], value: this.DG.currentVoiceUsers[key].voice_state.deaf ? "On" : "Off"},
+            { id: [`user_${i}_self_deaf`], value: this.DG.currentVoiceUsers[key].voice_state.self_deaf ? "On" : "Off"},
+            { id: [`user_${i}_self_mute`], value: this.DG.currentVoiceUsers[key].voice_state.self_mute ? "On" : "Off"},
+            { id: [`user_${i}_server_mute`], value: this.DG.currentVoiceUsers[key].voice_state.mute ? "On" : "Off"},
+            { id: [`user_${i}_avatar`], value: this.DG.currentVoiceUsers[key].user.base64Avatar},
+            { id: [`user_${i}_avatarID`], value: this.DG.currentVoiceUsers[key].user.avatar},
             {id: [`user_${i}_volume`], value: this.DG.currentVoiceUsers[key].volume},
           ]);
         }
@@ -162,21 +140,12 @@ class VoiceChannelHandler {
     let states = [
       {id: "discord_voice_channel_name", value: this.DG.voiceChannelInfo.voice_channel_name},
       {id: "discord_voice_channel_id", value: this.DG.voiceChannelInfo.voice_channel_id},
-      {
-        id: "discord_voice_channel_server_name",
-        value: this.DG.voiceChannelInfo.voice_channel_server_name,
-      },
+      { id: "discord_voice_channel_server_name", value: this.DG.voiceChannelInfo.voice_channel_server_name},
       {id: "discord_voice_channel_server_id", value: this.DG.voiceChannelInfo.voice_channel_server_id},
-      {
-        id: "discord_voice_channel_participants",
-        value: this.DG.voiceChannelInfo.voice_channel_participants,
-      },
-      {
-        id: "discord_voice_channel_participant_ids",
-        value: this.DG.voiceChannelInfo.voice_channel_participant_ids,
-      },
+      { id: "discord_voice_channel_participants", value: this.DG.voiceChannelInfo.voice_channel_participants},
+      { id: "discord_voice_channel_participant_ids", value: this.DG.voiceChannelInfo.voice_channel_participant_ids},
     ];
-  
+
     this.TPClient.stateUpdateMany(states);
   };
 
@@ -203,7 +172,7 @@ class VoiceChannelHandler {
       });
 
       let eventKeys = Object.keys(events);
-      logIt("Info", "Subscribed to Voice Channel Events", eventKeys);
+      logIt("DEBUG", "Subscribed to Voice Channel Events", eventKeys);
       await wait(0.15);
     }
   }
@@ -212,7 +181,7 @@ class VoiceChannelHandler {
     if (this.DG.voiceChannelInfo.last_voice_channel_subs.length > 0) {
       logIt("DEBUG", "START - Unsubscribing from Voice Channel voice states");
       for (let i = 0; i < this.DG.voiceChannelInfo.last_voice_channel_subs.length; i++) {
-        logIt("INFO", `Unsubscribing from ${this.DG.voiceChannelInfo.last_voice_channel_subs[i].description}`);
+        logIt("DEBUG", `Unsubscribing from ${this.DG.voiceChannelInfo.last_voice_channel_subs[i].description}`);
         // await this.DG.voiceChannelInfo.last_voice_channel_subs[i].unsubscribe();
         // took off await and it fixed the unsubscribe issue/subscribe
         this.DG.voiceChannelInfo.last_voice_channel_subs[i].subscription.unsubscribe();

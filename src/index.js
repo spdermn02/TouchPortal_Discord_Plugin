@@ -15,7 +15,6 @@ const {onAction} = require("./handlers/touchportal/onAction.js");
 
 
 // Issues
-// If the plugin is running and a new voice/text channel is created, the plugin does not recognize this when using the select channel action
 // Set Activity is not working properly, it is not updating the activity on discord (onAction.js)
 // possible issue with Notification for DMs etc where if channel is a announcement channel it will return as a DM as it doesnt get a proper channel type.. its not voice/text basically? i dont know
 // ^^ also doesn show for channel choice list..
@@ -154,7 +153,7 @@ TPClient.on("NotificationClicked", (data) => {
 TPClient.on("Close", (data) => {
   logIt("WARN", "Closing due to TouchPortal sending closePlugin message");
   TPClient.stateUpdate("discord_running", "Unknown");
-  TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING, "Disconnected");
+  TPClient.settingUpdate("discord_connected", "Disconnected");
 });
 
 
@@ -210,7 +209,7 @@ TPClient.on("ConnectorChange", (data) => {
 // On List Change
 // ----------------------------------------------------
 TPClient.on("ListChange", (data) => {
-  logIt("INFO", "ListChange :" + JSON.stringify(data));
+  logIt("DEBUG", "ListChange :" + JSON.stringify(data));
   if (isEmpty(DG.instanceIds[data.instanceId])) {
     DG.instanceIds[data.instanceId] = {};
   }
