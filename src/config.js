@@ -1,3 +1,4 @@
+
 module.exports = {
-    discordWin32: "Discord.exe"
+  discordWin32: "Discord.exe"
 }

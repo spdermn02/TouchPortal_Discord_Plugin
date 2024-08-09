@@ -1,0 +1,40 @@
+name: Node.js CI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+
+      - name: Clone discord-rpc repository
+        run: git clone https://github.com/spdermn02/RPC.git discord-rpc
+        
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            package-lock.json
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci --loglevel verbose
+      - run: npm run pkg-all
+      
+      - name: Upload artifacts to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "installers/*.tpp"  # Adjust the path if your files are in a different location or have different extensions
+          overwrite: true
+          file_glob: true
