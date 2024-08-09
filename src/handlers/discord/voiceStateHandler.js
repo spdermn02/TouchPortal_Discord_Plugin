@@ -268,7 +268,7 @@ class VoiceStateHandler {
     if (data.hasOwnProperty("deaf")) {
       if (data.deaf) {
         this.DG.voiceSettings.deafState = 1;
-        // this.DG.voiceSettings.muteState = 1; // deaf is deaf.. why would we turn off mute? i understand if they are deaf they are mute also but thats up to the user to decide??
+        this.DG.voiceSettings.muteState = 1;
       } else {
         this.DG.voiceSettings.deafState = 0;
       }
