@@ -125,7 +125,12 @@ async function onAction(message, isHeld) {
     });
   } else if (message.actionId === "discord_dm_text_select") {
     let channelId = message.data[0].value;
-    await DG.Client.selectTextChannel(channelId, {timeout: 5});
+    try {
+      await DG.Client.selectTextChannel(channelId, {timeout: 5});
+    } catch (error) {
+      logIt("ERROR", `Failed to select channel: Channel ID: ${channelId}`);
+      logIt("DEBUG", error);
+    }
   } else if (message.actionId === "discord_hangup_voice") {
     DG.Client.selectVoiceChannel(null, {timeout: 5});
   } else if (message.actionId === "discord_reset_push_to_talk_key") {
