@@ -22,19 +22,26 @@ async function onAction(message, isHeld) {
     let guildId = DG.guilds.idx[server];
 
     logIt("DEBUG", "select discord channel", server, channelName, guildId);
-
+    
     let channelId = DG.channels[guildId][type.toLowerCase()].idx[channelName];
 
-    if (type === "Voice") {
-      await DG.Client.selectVoiceChannel(channelId, {
-        timeout: 5,
-        force: true,
-      });
-    } else {
-      await DG.Client.selectTextChannel(channelId, {timeout: 5});
+    try {
+      if (type === "Voice") {
+        await DG.Client.selectVoiceChannel(channelId, {
+          timeout: 5,
+          force: true,
+        });
+      } else {
+        await DG.Client.selectTextChannel(channelId, { timeout: 5 });
+      }
+    } catch (error) {
+      logIt("ERROR", `Failed to select channel: Channel ID: ${channelId}`);
+      logIt("DEBUG", error);
     }
-  } else if (message.actionId === "discord_leave_channel") {
-    await DG.Client.selectVoiceChannel(null, {timeout: 5});
+    
+    if (message.actionId === "discord_leave_channel") {
+      await DG.Client.selectVoiceChannel(null, { timeout: 5 });
+    }
 
   } else if (message.actionId === "discord_setActivity") {
     let activityType = message.data[0].value;

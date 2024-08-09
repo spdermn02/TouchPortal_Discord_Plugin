@@ -1020,29 +1020,3 @@ Object.assign(events, {
 
 
 module.exports = {PLUGIN_ID, PLUGIN_NAME, PLUGIN_FOLDER, PLUGIN_ICON, TP_PLUGIN_INFO, TP_PLUGIN_SETTINGS}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

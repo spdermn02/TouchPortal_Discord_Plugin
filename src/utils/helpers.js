@@ -103,6 +103,18 @@ const imageToBase64 = async (imageUrl) => {
   }
 };
 
+// passing tpclient to func to make life simple for now... will refactor later
+function createStates(prefix, states, group = `${prefix} - States`, TPClient) {
+  for (let state of states) {
+    let stateId = `${prefix}_${state.id}`;
+    if (!TPClient.customStates[stateId]) {
+      // Check if the state already exists
+      TPClient.createState(stateId, `VC | ${prefix} ${state.title}`, state.value, group);
+    }
+  }
+}
+
+
 module.exports = {
   logIt,
   isEmpty,
@@ -113,7 +125,8 @@ module.exports = {
   setStateBasedOnValue,
   getUserIdFromIndex,
   imageToBase64,
-  platform,
-  app_monitor,
   setDebugMode,
+  createStates,
+  platform,
+  app_monitor
 };

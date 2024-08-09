@@ -5,7 +5,7 @@ const RPC = require("../discord-rpc/src/index.js");
 const {DG} = require("./discord_config.js");
 const {pluginId} = require("./discord_config.js");
 const discordKeyMap = require("./utils/discordKeys.js");
-const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode} = require("./utils/helpers.js");
+const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode, createStates} = require("./utils/helpers.js");
 const {DiscordConnector} = require("./core/DiscordConnector.js");
 const {UserStateHandler} = require("./handlers/discord/userStateHandler.js");
 const {VoiceStateHandler} = require("./handlers/discord/voiceStateHandler.js");
@@ -21,11 +21,6 @@ const {onAction} = require("./handlers/touchportal/onAction.js");
 
 // To Do
 // make event for when device has changed.. 
-// line 530 in voiceStateHandler - started added option to select Forum and or Announcement channels..
-// --- need to finish the action for this and stuff...
-
-
-
 
 // ----------------------------------------------------
 // On Info
@@ -40,7 +35,7 @@ TPClient.on("Info", (data) => {
   // Create the default user states
 
   for (let i = 0; i < 10; i++) {
-    createStates(`user_${i}`, DG.DEFAULT_USER_STATES, `VC | User_${i}`);
+    createStates(`user_${i}`, DG.DEFAULT_USER_STATES, `VC | User_${i}`, TPClient);
   }
 });
 
@@ -80,7 +75,7 @@ TPClient.on("Settings", (data) => {
     for (let userId in DG.customVoiceAcivityUsers) {
       try {
         let customID = DG.customVoiceAcivityUsers[userId];
-        createStates(customID, DG.DEFAULT_USER_STATES);
+        createStates({prefix:customID, states:DG.DEFAULT_USER_STATES, TPClient:TPClient});
       } catch (error) {}
     }
   }
@@ -254,16 +249,6 @@ TPClient.on("ListChange", (data) => {
     }
   }
 });
-
-function createStates(prefix, states, group = `${prefix} - States`) {
-  for (let state of states) {
-    let stateId = `${prefix}_${state.id}`;
-    if (!TPClient.customStates[stateId]) {
-      // Check if the state already exists
-      TPClient.createState(stateId, `${prefix} ${state.title}`, state.value, group);
-    }
-  }
-}
 
 
 
