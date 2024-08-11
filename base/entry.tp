@@ -793,7 +793,8 @@
                     "format": "When receiving a new Direct Message $val",
                     "type": "communicate",
                     "valueChoices": [
-                        "True"
+                        "True",
+                        "False"
                     ],
                     "valueType": "choice",
                     "valueStateId": "discord_newDM_eventState"
@@ -804,7 +805,8 @@
                     "format": "When receiving a new Mention $val",
                     "type": "communicate",
                     "valueChoices": [
-                        "True"
+                        "True",
+                        "False"
                     ],
                     "valueType": "choice",
                     "valueStateId": "discord_newMention_eventState"
