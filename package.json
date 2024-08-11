@@ -1,36 +1,43 @@
 {
   "name": "tpdiscord",
-  "version": "4.3.1",
+  "version": "5.0.0",
   "description": "Touch Portal Plugin for Discord using RPC",
+  "main": "src/index.js",
   "bin": {
     "tpdiscord": "src/index.js"
   },
-  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "pkg": "pkg .",
     "pkg-win": "pkg --targets node16-win-x64 .",
     "pkg-mac": "pkg --targets node16-macos-x64 .",
-    "build-win": "pkg --targets node16-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
-    "build-win-c": "pkg --targets node16-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win-DiscordCanary.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win-DiscordCanary.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
-    "build-win-ptb": "pkg --targets node16-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win-PTB.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win-PTB.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
-    "build-win-dev": "pkg --targets node16-win-x64 . && move tpdiscord.exe base/Win/TPDiscord/ && copy base\\entry.tp base\\Win\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Win-DEVELOPMENT.tpp && cd base\\Win && 7z a -tzip ../../Installers/TPDiscord-Win-DEVELOPMENT.tpp TPDiscord && del TPDiscord\\tpdiscord.exe && del TPDiscord\\entry.tp",
-    "build-mac": "pkg --targets node16-macos-x64 . && move tpdiscord base/Mac/TPDiscord/ && copy base\\entry.tp base\\Mac\\TPDiscord\\entry.tp && del Installers\\TPDiscord-Mac.tpp && cd base\\Mac && 7z a -tzip ../../Installers/TPDiscord-Mac.tpp TPDiscord && del TPDiscord\\tpdiscord && del TPDiscord\\entry.tp"
+    "pkg-linux": "pkg --targets node16-linux-x64 .",
+    "pkg-all": "node scripts/build.js"
   },
   "author": "Jameson Allen aka Spdermn02",
   "license": "ISC",
   "pkg": {
     "scripts": [
-      "src/**/*.js"
+      "src/**/*.js",
+      "src/*.js"
+    ],
+    "assets": [
+      "discord-rpc/**/*"
     ]
   },
   "dependencies": {
-    "discord-rpc": "^4.0.1",
+    "@types/markdown-it": "^14.1.2",
+    "discord-rpc": "file:./discord-rpc",
     "find-process": "^1.4.7",
-    "out-url": "^1.1.1",
-    "touchportal-api": "^3.2.1"
+    "touchportal-api": "^3.3.0"
   },
   "devDependencies": {
-    "pkg": "^5.5.1"
+    "adm-zip": "^0.5.14",
+    "eslint": "^8.21.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "typescript": "^4.7.4",
+    "out-url": "^1.2.2",
+    "pkg": "^5.8.1"
   }
 }

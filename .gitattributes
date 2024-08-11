@@ -1,0 +1,3 @@
+*.tpb linguist-vendored
+*.tpb linguist-generated
+*.tpb linguist-detectable=false
