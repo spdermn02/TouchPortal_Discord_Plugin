@@ -564,7 +564,7 @@
                 {
                     "id": "discord_outputDevice",
                     "type": "text",
-                    "desc": "Discord Current Input Device",
+                    "desc": "Discord Current Output Device",
                     "default": ""
                 },
                 {
@@ -909,7 +909,13 @@
                     "id": "discord_Mention_channelType",
                     "type": "text",
                     "desc": "Mention: Channel Type",
-                    "default": ""
+                    "default": "",
+                    "valueChoices": [
+                        "text",
+                        "forum",
+                        "announcement",
+                        "dm"
+                    ]
                 }
             ]
         }
