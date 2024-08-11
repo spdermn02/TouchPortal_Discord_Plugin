@@ -1,4 +1,4 @@
-const {convertVolumeToPercentage, imageToBase64, logIt} = require("../../utils/helpers.js");
+const {convertVolumeToPercentage, imageToBase64, logIt, createStates} = require("../../utils/helpers.js");
 
 class UserStateHandler {
   constructor(TPClient, DG) {
@@ -25,6 +25,10 @@ class UserStateHandler {
       // Add the user to the currentVoiceUsers object
       logIt("DEBUG", `User ${data.nick} has joined the voice channel`);
       this.DG.currentVoiceUsers[data.user.id] = data;
+
+      this.DG.voiceChannelInfo.voice_channel_participants = Object.keys(this.DG.currentVoiceUsers).length > 0 ? Object.keys(this.DG.currentVoiceUsers).join("|") : "<None>";
+      this.DG.voiceChannelInfo.voice_channel_participant_ids = Object.keys(this.DG.currentVoiceUsers).length > 0 ? Object.values(this.DG.currentVoiceUsers).map(user => user.user.id).join("|") : "<None>";
+
     }
   };
 
@@ -38,6 +42,14 @@ class UserStateHandler {
 
       const userIndex = Object.keys(this.DG.currentVoiceUsers).indexOf(data.user.id);
       const user = this.DG.currentVoiceUsers[data.user.id];
+
+      // console.log("Current Length: ", Object.keys(this.DG.currentVoiceUsers).length);
+      // Now check if there are 11 or more users in the channel, if so, we need to create more user states
+      // By default we create 10 states on boot for users in the voice channel
+      if (Object.keys(this.DG.currentVoiceUsers).length >= 11) {
+        createStates(`user_${userIndex}`, this.DG.DEFAULT_USER_STATES, `VC | User_${userIndex}`, this.TPClient);
+      }
+
 
       if (user.base64Avatar == undefined) {
         const avatarUrl = `https://cdn.discordapp.com/avatars/${user.user.id}/${user.user.avatar}.webp?size=128`;
@@ -97,6 +109,8 @@ class UserStateHandler {
       // Now lets repopulate the list
       this.repopulateUserStates();
     }
+    this.DG.voiceChannelInfo.voice_channel_participants = Object.keys(this.DG.currentVoiceUsers).length > 0 ? Object.keys(this.DG.currentVoiceUsers).join("|") : "<None>";
+    this.DG.voiceChannelInfo.voice_channel_participant_ids = Object.keys(this.DG.currentVoiceUsers).length > 0 ? Object.values(this.DG.currentVoiceUsers).map(user => user.user.id).join("|") : "<None>";
   };
 
   repopulateUserStates = async () => {

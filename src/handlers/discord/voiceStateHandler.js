@@ -364,9 +364,11 @@ class VoiceStateHandler {
       {id: "discord_voice_hostname", value: this.DG.voiceChannelInfo.voice_hostname},
       {id: "discord_voice_channel_name", value: this.DG.voiceChannelInfo.voice_channel_name},
       {id: "discord_voice_channel_id", value: this.DG.voiceChannelInfo.voice_channel_id},
-      { id: "discord_voice_channel_server_name", value: this.DG.voiceChannelInfo.voice_channel_server_name},
-      { id: "discord_voice_channel_server_id", value: this.DG.voiceChannelInfo.voice_channel_server_id},
-      { id: "discord_voice_channel_participants", value: this.DG.voiceChannelInfo.voice_channel_participants},
+      {id: "discord_voice_channel_server_name", value: this.DG.voiceChannelInfo.voice_channel_server_name},
+      {id: "discord_voice_channel_server_id", value: this.DG.voiceChannelInfo.voice_channel_server_id},
+      {id: "discord_voice_channel_participants", value: this.DG.voiceChannelInfo.voice_channel_participants},
+      {id: "discord_voice_channel_participant_ids", value: this.DG.voiceChannelInfo.voice_channel_participant_ids}
+      
     ];
     this.TPClient.stateUpdateMany(states);
   };
