@@ -62,8 +62,8 @@ TPClient.on("Settings", (data) => {
     logIt("DEBUG", "Settings: Setting received for |" + key + "|");
   });
 
+  // Setting the debug mode for logit
   setDebugMode(DG.pluginSettings["Discord Debug Mode"]);
-  // console.log("Debug mode: ", DG.pluginSettings["Discord Debug Mode"]);
 
   if (DG.pluginSettings["VoiceActivity Tracker - Seperate each ID by commas"].length > 0) {
     let customUsers =
@@ -148,7 +148,8 @@ TPClient.on("NotificationClicked", (data) => {
 TPClient.on("Close", (data) => {
   logIt("WARN", "Closing due to TouchPortal sending closePlugin message");
   TPClient.stateUpdate("discord_running", "Unknown");
-  TPClient.settingUpdate("discord_connected", "Disconnected");
+  TPClient.stateUpdate("discord_connected", "Disconnected");
+  TPClient.settingUpdate("Plugin Connected", "Disconnected");
 });
 
 
@@ -158,7 +159,11 @@ TPClient.on("Close", (data) => {
 // On Action
 // ----------------------------------------------------
 TPClient.on("Action", (data, isHeld) => {
-  onAction(data, isHeld);
+  if (DG.connected) {
+    onAction(data, isHeld);
+  } else {
+    logIt("WARN", "Action: Not connected to Discord, ignoring action");
+  }
 });
 
 
@@ -170,31 +175,34 @@ TPClient.on("Action", (data, isHeld) => {
 TPClient.on("ConnectorChange", (data) => {
     logIt("DEBUG", `Connector change event fired ` + JSON.stringify(data));
     const action = data.connectorId;
-  
-    if (action === "discord_voice_volume_connector") {
-      let newVol = parseInt(data.value, 10);
-      newVol = Math.max(0, Math.min(newVol, 100));
-      DG.Client.setVoiceSettings({
-        input: {volume: convertPercentageToVolume(newVol)},
-      });
-    } else if (action === "discord_speaker_volume_connector") {
-      let newVol = parseInt(data.value, 10);
-      newVol = Math.max(0, Math.min(newVol, 100)) * 2;
-      DG.Client.setVoiceSettings({
-        output: {volume: convertPercentageToVolume(newVol)},
-      });
-    } else if (action === "discord_voice_volume_action_connector") {
-      let newVol = parseInt(data.value, 10);
-      newVol = Math.max(0, Math.min(newVol, 100)) * 2;
-      const userId = getUserIdFromIndex(data.data[0].value, DG.currentVoiceUsers);
-      if (userId !== undefined) {
-        logIt("INFO", "Setting Voice Volume for ", userId, " to ", newVol);
-        DG.Client.setUserVoiceSettings(userId, {
-          volume: convertPercentageToVolume(newVol),
+    if (DG.connected) {
+      if (action === "discord_voice_volume_connector") {
+        let newVol = parseInt(data.value, 10);
+        newVol = Math.max(0, Math.min(newVol, 100));
+        DG.Client.setVoiceSettings({
+          input: {volume: convertPercentageToVolume(newVol)},
         });
+      } else if (action === "discord_speaker_volume_connector") {
+        let newVol = parseInt(data.value, 10);
+        newVol = Math.max(0, Math.min(newVol, 100)) * 2;
+        DG.Client.setVoiceSettings({
+          output: {volume: convertPercentageToVolume(newVol)},
+        });
+      } else if (action === "discord_voice_volume_action_connector") {
+        let newVol = parseInt(data.value, 10);
+        newVol = Math.max(0, Math.min(newVol, 100)) * 2;
+        const userId = getUserIdFromIndex(data.data[0].value, DG.currentVoiceUsers);
+        if (userId !== undefined) {
+          logIt("INFO", "Setting Voice Volume for ", userId, " to ", newVol);
+          DG.Client.setUserVoiceSettings(userId, {
+            volume: convertPercentageToVolume(newVol),
+          });
+        }
+      } else {
+        logIt("WARN", `Unknown action called ${action}`);
       }
     } else {
-      logIt("WARN", `Unknown action called ${action}`);
+      logIt("WARN", "Action: Not connected to Discord, ignoring action");
     }
   
 });

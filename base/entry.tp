@@ -564,7 +564,7 @@
                 {
                     "id": "discord_outputDevice",
                     "type": "text",
-                    "desc": "Discord Current Input Device",
+                    "desc": "Discord Current Output Device",
                     "default": ""
                 },
                 {
@@ -793,7 +793,8 @@
                     "format": "When receiving a new Direct Message $val",
                     "type": "communicate",
                     "valueChoices": [
-                        "True"
+                        "True",
+                        "False"
                     ],
                     "valueType": "choice",
                     "valueStateId": "discord_newDM_eventState"
@@ -804,7 +805,8 @@
                     "format": "When receiving a new Mention $val",
                     "type": "communicate",
                     "valueChoices": [
-                        "True"
+                        "True",
+                        "False"
                     ],
                     "valueType": "choice",
                     "valueStateId": "discord_newMention_eventState"
@@ -909,7 +911,13 @@
                     "id": "discord_Mention_channelType",
                     "type": "text",
                     "desc": "Mention: Channel Type",
-                    "default": ""
+                    "default": "",
+                    "valueChoices": [
+                        "text",
+                        "forum",
+                        "announcement",
+                        "dm"
+                    ]
                 }
             ]
         }

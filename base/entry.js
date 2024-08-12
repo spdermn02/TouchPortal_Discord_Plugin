@@ -74,7 +74,7 @@ let TP_PLUGIN_CATEGORIES = {
     "Discord": {
         id: "TPDiscord",
         name: "Discord",
-        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}.png`,
+        imagepath: `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_ICON}`,
     },
     "VoiceChannel Info": {
         id: "TPDiscord_VoiceChannel",
@@ -217,7 +217,15 @@ Object.assign(states, {
         category: "Mentions",
         type: "text",
         desc: "Mention: Channel Type",
-        default: ""
+        default: "",
+        valueChoices: [
+            // "voice",
+            "text",
+            "forum",
+            "announcement",
+            "dm"
+        ]
+
     },
 
 })
@@ -385,7 +393,7 @@ Object.assign(states, {
         id: "discord_outputDevice",
         category: "Discord",
         type: "text",
-        desc: "Discord Current Input Device",
+        desc: "Discord Current Output Device",
         default: ""
     },
     "16":{
@@ -1006,7 +1014,8 @@ Object.assign(events, {
     format: "When receiving a new Direct Message $val",
     type: "communicate",
     valueChoices: [
-      "True"
+      "True",
+      "False"
         ],
     valueType: "choice",
     valueStateId: "discord_newDM_eventState"
@@ -1018,7 +1027,8 @@ Object.assign(events, {
     format: "When receiving a new Mention $val",
     type: "communicate",
     valueChoices: [
-      "True"
+      "True",
+      "False"
     ],
     valueType: "choice",
     valueStateId: "discord_newMention_eventState"
@@ -1026,4 +1036,4 @@ Object.assign(events, {
 })
 
 
-module.exports = {PLUGIN_ID, PLUGIN_NAME, PLUGIN_FOLDER, PLUGIN_ICON, TP_PLUGIN_INFO, TP_PLUGIN_SETTINGS}
+// module.exports = {PLUGIN_ID, PLUGIN_NAME, PLUGIN_FOLDER, PLUGIN_ICON, TP_PLUGIN_INFO, TP_PLUGIN_SETTINGS}

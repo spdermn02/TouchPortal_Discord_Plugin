@@ -59,22 +59,21 @@ class NotificationHandler {
         channelType = "announcement";
         break;
       } else {
-        // If not found, its either a DM or a forum..
-        // deciding if its a forum by using regex to extract the forum name from the title
+        // Handle forum or DM in the same iteration if none of the above match
         const forumOrAnnouncementName = this.extractForumOrAnnouncementName(data.title);
-        if (forumOrAnnouncementName) {
-          if (value.forum.idx[forumOrAnnouncementName]) {
-            guildId = key;
-            guildName = this.DG.guilds.idx[key];
-            channelType = "forum";
-          }
-        } else {
-          logIt("DEBUG", "Channel ID not found in any guild, treating as DM");
-          channelType = "dm";
+        if (forumOrAnnouncementName && value.forum.idx[forumOrAnnouncementName]) {
+          guildId = key;
+          guildName = this.DG.guilds.idx[key];
+          channelType = "forum";
+          break;
         }
-        break;
       }
-      
+    }
+    
+    // If channelType is still not set, it defaults to DM
+    if (!channelType) {
+      logIt("DEBUG", "Channel ID not found in any guild, treating as DM");
+      channelType = "dm";
     }
     logIt("DEBUG", `Guild ID: ${guildId}, Name: ${guildName}, ChannelType: ${channelType}`);
 
@@ -104,11 +103,11 @@ class NotificationHandler {
           
         this.TPClient.stateUpdateMany(states);
         this.TPClient.stateUpdate("discord_newMention_eventState", "false");
-        logIt("INFO", "TEXT CHANNEL |  Guild:", guildName, "Author:", userName, "ID:", userId, "Channel ID:", channelId, "Content:", content);
+        logIt("DEBUG", `Notification for ${channelType} channel ${JSON.stringify(data)}`);
         break;
 
       case "dm":
-        logIt("INFO", `DM Info: ${JSON.stringify(data)}`);
+        logIt("DEBUG", `DM Info: ${JSON.stringify(data)}`);
         content = data.body;
         userAvatarBase64 = await imageToBase64(avatarUrl);
         //// Save this for if we need to captrue the last X dms

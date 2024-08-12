@@ -24,6 +24,8 @@ class DiscordG {
     this.accessToken = undefined; // Discord Access Token
     this.procWatcher = new procWatcher(); // Process Watcher
     this.connecting = false;
+    this.connected = false; // using this to make sure no commands are fired unless we are fully connected
+                            // I did not use this.connecting since it defaults to false, then turns to true while its connecting, and then back to false.. which would cause issues 
 
     this.scopes = [
       "identify",
