@@ -32,26 +32,8 @@ class VoiceChannelHandler {
       // Subscribe to voice channel events
       await this.subscribeToEvents(data.channel_id);
     } else {
-      // Lookup Voice Channel Name
-      if (!this.DG.channels[data.guild_id] || !this.DG.channels[data.guild_id].voice) {
-  
-  
-        /// This should be referring to voicestateHandler... but its not.. so its literally doin nothing right now..
-        try {
-          // if user changes channels while plugin is booting, it may error/crash without this..
-          getGuildChannels(data.guild_id).then(() => {
-            if (this.DG.channels[data.guild_id] && this.DG.channels[data.guild_id].voice) {
-              this.DG.voiceChannelInfo.voice_channel_name = this.DG.channels[data.guild_id].voice.names[data.channel_id];
-            }
-          });
-        } catch (error) {
-          logIt("ERROR", "Error getting Guild Channels", error);
-        }
-  
-      } else {
-        this.DG.voiceChannelInfo.voice_channel_name = this.DG.channels[data.guild_id].voice.names[data.channel_id];
-      }
-  
+      this.DG.voiceChannelInfo.voice_channel_name = this.DG.channels[data.guild_id].voice.names[data.channel_id];
+
       this.DG.voiceChannelInfo.voice_channel_id = data.channel_id;
       this.DG.voiceChannelInfo.voice_channel_server_id = data.guild_id;
   
