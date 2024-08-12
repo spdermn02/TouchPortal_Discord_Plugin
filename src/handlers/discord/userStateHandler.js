@@ -9,7 +9,7 @@ class UserStateHandler {
   }
 
   updateParticipantCount = async () => {
-    this.DG.voiceChannelInfo.voice_channel_participants = Object.keys(this.DG.currentVoiceUsers).length > 0 ? Object.keys(this.DG.currentVoiceUsers).join("|") : "<None>";
+    this.DG.voiceChannelInfo.voice_channel_participants = Object.keys(DG.currentVoiceUsers).length > 0 ? Object.values(DG.currentVoiceUsers).map(user => user.user.username).join("|") : "<None>";
     this.DG.voiceChannelInfo.voice_channel_participant_ids = Object.keys(this.DG.currentVoiceUsers).length > 0 ? Object.values(this.DG.currentVoiceUsers).map(user => user.user.id).join("|") : "<None>";
   };
 

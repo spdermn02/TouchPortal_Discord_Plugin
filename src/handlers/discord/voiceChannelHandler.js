@@ -86,8 +86,6 @@ class VoiceChannelHandler {
     // when we first join a channel, or plugin launches we get the voice states of the users in the channel
     // console.time('for...of');
     if (this.DG.voiceChannelInfo.voice_channel_id !== "<None>") {
-      let ids = [];
-      let names = [];
       let avatarUrl;
       const channel = await this.DG.Client.getChannel(this.DG.voiceChannelInfo.voice_channel_id);
   
@@ -115,27 +113,13 @@ class VoiceChannelHandler {
       Object.keys(this.DG.currentVoiceUsers).forEach((key, i) => {
         // Making sure not to add Client User to the list as it's not needed and would likely cause issues being in the flow of things for certain actions that cant be used on the client user
         if (this.DG.currentVoiceUsers[key].user.id !== this.DG.Client.user.id) {
-          ids.push(this.DG.currentVoiceUsers[key].user.id);
-          names.push(this.DG.currentVoiceUsers[key].user.username);
           // When we join a voice channel, update the states for all users in the channel
-          this.TPClient.stateUpdateMany([
-            {id: [`user_${i}_Speaking`], value: "Off"},
-            {id: [`user_${i}_id`], value: this.DG.currentVoiceUsers[key].user.id},
-            {id: [`user_${i}_nick`], value: this.DG.currentVoiceUsers[key].nick},
-            {id: [`user_${i}_mute`],  value: this.DG.currentVoiceUsers[key].mute ? "On" : "Off"},
-            {id: [`user_${i}_deaf`], value: this.DG.currentVoiceUsers[key].voice_state.deaf ? "On" : "Off"},
-            {id: [`user_${i}_self_deaf`], value: this.DG.currentVoiceUsers[key].voice_state.self_deaf ? "On" : "Off"},
-            {id: [`user_${i}_self_mute`], value: this.DG.currentVoiceUsers[key].voice_state.self_mute ? "On" : "Off"},
-            {id: [`user_${i}_server_mute`], value: this.DG.currentVoiceUsers[key].voice_state.mute ? "On" : "Off"},
-            {id: [`user_${i}_avatar`], value: this.DG.currentVoiceUsers[key].user.base64Avatar},
-            {id: [`user_${i}_avatarID`], value: this.DG.currentVoiceUsers[key].user.avatar},
-            {id: [`user_${i}_volume`], value: this.DG.currentVoiceUsers[key].volume},
-          ]);
+          let states = this.userStateHandler.generateUserUpdates(i, this.DG.currentVoiceUsers[key], "user");
+          this.TPClient.stateUpdateMany(states);
         }
       });
 
-      this.DG.voiceChannelInfo.voice_channel_participant_ids = ids.length > 0 ? ids.join("|") : "<None>";
-      this.DG.voiceChannelInfo.voice_channel_participants = names.length > 0 ? names.join("|") : "<None>";
+      await this.userStateHandler.updateParticipantCount();
     }
     
     let states = [
