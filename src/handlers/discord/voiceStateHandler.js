@@ -10,11 +10,16 @@ class VoiceStateHandler {
     this.DG = DG
     this.userStateHandler = userStateHandler;
     this.voiceChannelHandler = voiceChannelHandler;
+    this.doLogin = null;
 
     // not using?
     // this.repopulateUserStates = this.userStateHandler.repopulateUserStates;
 
     this.notification = notificationHandler;
+  }
+
+  initiate_doLogin = (doLogin) => {
+    this.doLogin = doLogin;
   }
 
   registerEvents = () => {
@@ -149,9 +154,8 @@ class VoiceStateHandler {
       this.TPClient.settingUpdate("Plugin Connected", "Disconnected");
       this.TPClient.stateUpdate("discord_connected", "Disconnected");
       this.DG.connected = false;
-      if (platform != "win32") {
-        // return this.Discord.doLogin();
-        print("wooopsie.. this is not windows.., gitago forgot to fix the reglogin he didnt think was needed");
+      if (platform != "win32" && this.DG.pluginSettings["Skip Process Watcher"] === "No") {
+        return this.doLogin();
       }
     });
   };
