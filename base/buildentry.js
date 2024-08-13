@@ -115,7 +115,7 @@ const combineInfo = (TP_PLUGIN_INFO, TP_PLUGIN_SETTINGS, categoriesArray) => {
 
 // Write the JSON object to a file
 const writeToFile = (jsonString) => {
-    fs.writeFile('tppentry.tp', jsonString, (err) => {
+    fs.writeFile('./base/entry.tp', jsonString, (err) => {
         if (err) {
             console.error(err);
             return;

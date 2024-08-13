@@ -235,6 +235,8 @@ class VoiceStateHandler {
     
         if (matchedDevice) {
           this.TPClient.stateUpdate(`discord_${type}Device`, matchedDevice.name);
+          this.TPClient.stateUpdate(`discord_default_audio_device_change_eventState`, `${type.charAt(0).toUpperCase() + type.slice(1)}`);
+
           logIt("DEBUG", `${type.charAt(0).toUpperCase() + type.slice(1)} Device:`, matchedDevice.name);
         } else {
           logIt("ERROR", `No ${type} device matched the ID.`);
@@ -247,9 +249,13 @@ class VoiceStateHandler {
         const matchedDevice = this.DG.voiceSettings[`${type}Devices`].find(device => device.id === this.DG.voiceSettings[`${type}DeviceId`]);
         if (matchedDevice) {
           this.TPClient.stateUpdate(`discord_${type}Device`, matchedDevice.name);
+          this.TPClient.stateUpdate(`discord_default_audio_device_change_eventState`, `${type.charAt(0).toUpperCase() + type.slice(1)}`);
         }
         logIt("DEBUG", `Using ${type} device ID:`, this.DG.voiceSettings[`${type}DeviceId`]);
       }
+
+      this.TPClient.stateUpdate(`discord_default_audio_device_change_eventState`, ``);
+
     } else {
       logIt("INFO", `No ${type} device data found.`);
     }
@@ -288,6 +294,7 @@ class VoiceStateHandler {
         this.DG.voiceSettings.muteState = 1;
       } else {
         this.DG.voiceSettings.deafState = 0;
+        this.DG.voiceSettings.muteState = 0;
       }
       states.push({id: "discord_deafen", value: this.DG.voiceSettings.deafState ? "On" : "Off"});
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});

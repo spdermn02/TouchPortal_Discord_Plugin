@@ -553,7 +553,44 @@
                     ]
                 }
             ],
-            "events": [],
+            "events": [
+                {
+                    "id": "discord_newDM",
+                    "name": "Discord: New Direct Message (DM)",
+                    "format": "When receiving a new Direct Message $val",
+                    "type": "communicate",
+                    "valueChoices": [
+                        "True",
+                        "False"
+                    ],
+                    "valueType": "choice",
+                    "valueStateId": "discord_newDM_eventState"
+                },
+                {
+                    "id": "discord_newMention",
+                    "name": "Discord | New Mention",
+                    "format": "When receiving a new Mention $val",
+                    "type": "communicate",
+                    "valueChoices": [
+                        "True",
+                        "False"
+                    ],
+                    "valueType": "choice",
+                    "valueStateId": "discord_newMention_eventState"
+                },
+                {
+                    "id": "discord_default_audio_device_change",
+                    "name": "Discord: Default Audio Device Changed",
+                    "format": "When Default $val Device Changed",
+                    "type": "communicate",
+                    "valueChoices": [
+                        "Input",
+                        "Output"
+                    ],
+                    "valueType": "choice",
+                    "valueStateId": "discord_default_audio_device_change_eventState"
+                }
+            ],
             "states": [
                 {
                     "id": "discord_inputDevice",
@@ -639,6 +676,16 @@
                         "Connected",
                         "Disconnected"
                     ]
+                },
+                {
+                    "id": "discord_default_audio_device_change_eventState",
+                    "type": "choice",
+                    "desc": "Discord Default Audio Device Change Event",
+                    "default": "",
+                    "valueChoices": [
+                        "Input",
+                        "Output"
+                    ]
                 }
             ]
         },
@@ -650,16 +697,6 @@
             "actions": [],
             "events": [],
             "states": [
-                {
-                    "id": "discord_voice_channel_connected",
-                    "type": "choice",
-                    "desc": "Discord Voice Channel Connected",
-                    "default": "No",
-                    "valueChoices": [
-                        "No",
-                        "Yes"
-                    ]
-                },
                 {
                     "id": "discord_voice_channel_server_id",
                     "type": "text",
@@ -786,32 +823,7 @@
             "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [],
             "actions": [],
-            "events": [
-                {
-                    "id": "discord_newDM",
-                    "name": "Discord: New Direct Message (DM)",
-                    "format": "When receiving a new Direct Message $val",
-                    "type": "communicate",
-                    "valueChoices": [
-                        "True",
-                        "False"
-                    ],
-                    "valueType": "choice",
-                    "valueStateId": "discord_newDM_eventState"
-                },
-                {
-                    "id": "discord_newMention",
-                    "name": "Discord | New Mention",
-                    "format": "When receiving a new Mention $val",
-                    "type": "communicate",
-                    "valueChoices": [
-                        "True",
-                        "False"
-                    ],
-                    "valueType": "choice",
-                    "valueStateId": "discord_newMention_eventState"
-                }
-            ],
+            "events": [],
             "states": [
                 {
                     "id": "discord_DM_user",
