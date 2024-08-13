@@ -154,7 +154,7 @@ class VoiceStateHandler {
       this.TPClient.settingUpdate("Plugin Connected", "Disconnected");
       this.TPClient.stateUpdate("discord_connected", "Disconnected");
       this.DG.connected = false;
-      if (platform != "win32" && this.DG.pluginSettings["Skip Process Watcher"] === "No") {
+      if (platform != "win32" || this.DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
         return this.doLogin();
       }
     });
