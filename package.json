@@ -1,6 +1,6 @@
 {
   "name": "tpdiscord",
-  "version": "5.0.0-alpha-2",
+  "version": "5.0.0-alpha-3",
   "description": "Touch Portal Plugin for Discord using RPC",
   "main": "src/index.js",
   "bin": {
