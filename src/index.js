@@ -6,6 +6,7 @@ const {DG} = require("./discord_config.js");
 const {pluginId} = require("./discord_config.js");
 const discordKeyMap = require("./utils/discordKeys.js");
 const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode, createStates} = require("./utils/helpers.js");
+const {procWatcher} = require("./core/process_watcher");
 const {DiscordConnector} = require("./core/DiscordConnector.js");
 const {UserStateHandler} = require("./handlers/discord/userStateHandler.js");
 const {VoiceStateHandler} = require("./handlers/discord/voiceStateHandler.js");
@@ -14,13 +15,14 @@ const {VoiceChannelHandler}= require("./handlers/discord/voiceChannelHandler.js"
 const {onAction} = require("./handlers/touchportal/onAction.js");
 
 
+
 // Issues
 // Set Activity is not working properly, it is not updating the activity on discord (onAction.js)
 // possible issue with Notification for DMs etc where if channel is a announcement channel it will return as a DM as it doesnt get a proper channel type.. its not voice/text basically? i dont know
 // ^^ also doesn show for channel choice list..
 
 // To Do
-// make event for when device has changed.. 
+// initiate DG and procwatcher here in index.js instead of discord_config.js
 
 // ----------------------------------------------------
 // On Info
@@ -94,14 +96,14 @@ TPClient.on("Settings", (data) => {
 
   if (platform != "win32" || DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
     TPClient.stateUpdate("discord_running", "Unknown");
-    DG.procWatcher.stopWatch();
+    ProcWatcher.stopWatch();
     Discord.doLogin()
   } else if (
     platform == "win32" &&
     DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "no"
   ) {
     logIt("INFO", `Starting process watcher for ${app_monitor[platform]}`);
-    DG.procWatcher.watch(app_monitor[platform]);
+    ProcWatcher.watch(app_monitor[platform]);
   }
 });
 
@@ -261,6 +263,7 @@ TPClient.on("ListChange", (data) => {
 
 
 
+const ProcWatcher = new procWatcher();
 const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
 const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
@@ -271,7 +274,7 @@ voiceStateHandler.initiate_doLogin(Discord.doLogin);
 
 
 // Process Watcher
-Discord.DG.procWatcher.on("processRunning", (processName) => {
+ProcWatcher.on("processRunning", (processName) => {
   logIt("INFO", `${processName} detected as running`);
   TPClient.stateUpdate("discord_running", "Yes");
 
@@ -282,7 +285,7 @@ Discord.DG.procWatcher.on("processRunning", (processName) => {
   }, 1000);
 });
 
-Discord.DG.procWatcher.on("processTerminated", (processName) => {
+ProcWatcher.on("processTerminated", (processName) => {
   logIt("WARN", `${processName} not detected as running`);
   TPClient.stateUpdate("discord_running", "No");
   if (Discord.DG.Client) {
