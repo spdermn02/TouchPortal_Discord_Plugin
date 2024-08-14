@@ -95,7 +95,7 @@ TPClient.on("Settings", (data) => {
   if (platform != "win32" || DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
     TPClient.stateUpdate("discord_running", "Unknown");
     DG.procWatcher.stopWatch();
-    doLogin();
+    Discord.doLogin()
   } else if (
     platform == "win32" &&
     DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "no"
