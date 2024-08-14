@@ -267,12 +267,7 @@ const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandl
 const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler);
 const Discord = new DiscordConnector(TPClient, DG, RPC, userStateHandler, notificationHandler, voiceStateHandler);
 
-
-
-
-
-
-
+voiceStateHandler.initiate_doLogin(Discord.doLogin);
 
 
 // Process Watcher

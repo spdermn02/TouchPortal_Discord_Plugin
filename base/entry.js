@@ -477,6 +477,17 @@ Object.assign(states, {
             "Connected",
             "Disconnected"
         ]
+    },
+    "24":{
+        id: "discord_default_audio_device_change_eventState",
+        category: "Discord",
+        type: "choice",
+        desc: "Discord Default Audio Device Change Event",
+        default: "",
+        valueChoices:[
+            "Input",
+            "Output"
+        ]  
     }
 })
 
@@ -1009,7 +1020,7 @@ Object.assign(connectors, {
 Object.assign(events, {
     "1":{
     id: "discord_newDM",
-    category: "Direct Message",
+    category: "Discord",
     name: "Discord: New Direct Message (DM)",
     format: "When receiving a new Direct Message $val",
     type: "communicate",
@@ -1022,7 +1033,7 @@ Object.assign(events, {
   },
   "2": {
     id: "discord_newMention",
-    category: "Direct Message",
+    category: "Discord",
     name: "Discord | New Mention",
     format: "When receiving a new Mention $val",
     type: "communicate",
@@ -1032,7 +1043,21 @@ Object.assign(events, {
     ],
     valueType: "choice",
     valueStateId: "discord_newMention_eventState"
+},
+    "3":{
+        id: "discord_default_audio_device_change",
+        category: "Discord",
+        name: "Discord: Default Audio Device Changed",
+        format: "When Default $val Device Changed",
+        type: "communicate",
+        valueChoices: [
+            "Input",
+            "Output"
+        ],
+        valueType: "choice",
+        valueStateId: "discord_default_audio_device_change_eventState"
     }
+
 })
 
 

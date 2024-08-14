@@ -10,11 +10,16 @@ class VoiceStateHandler {
     this.DG = DG
     this.userStateHandler = userStateHandler;
     this.voiceChannelHandler = voiceChannelHandler;
+    this.doLogin = null;
 
     // not using?
     // this.repopulateUserStates = this.userStateHandler.repopulateUserStates;
 
     this.notification = notificationHandler;
+  }
+
+  initiate_doLogin = (doLogin) => {
+    this.doLogin = doLogin;
   }
 
   registerEvents = () => {
@@ -149,9 +154,8 @@ class VoiceStateHandler {
       this.TPClient.settingUpdate("Plugin Connected", "Disconnected");
       this.TPClient.stateUpdate("discord_connected", "Disconnected");
       this.DG.connected = false;
-      if (platform != "win32") {
-        // return this.Discord.doLogin();
-        print("wooopsie.. this is not windows.., gitago forgot to fix the reglogin he didnt think was needed");
+      if (platform != "win32" || this.DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
+        return this.doLogin();
       }
     });
   };
@@ -231,6 +235,8 @@ class VoiceStateHandler {
     
         if (matchedDevice) {
           this.TPClient.stateUpdate(`discord_${type}Device`, matchedDevice.name);
+          this.TPClient.stateUpdate(`discord_default_audio_device_change_eventState`, `${type.charAt(0).toUpperCase() + type.slice(1)}`);
+
           logIt("DEBUG", `${type.charAt(0).toUpperCase() + type.slice(1)} Device:`, matchedDevice.name);
         } else {
           logIt("ERROR", `No ${type} device matched the ID.`);
@@ -243,9 +249,13 @@ class VoiceStateHandler {
         const matchedDevice = this.DG.voiceSettings[`${type}Devices`].find(device => device.id === this.DG.voiceSettings[`${type}DeviceId`]);
         if (matchedDevice) {
           this.TPClient.stateUpdate(`discord_${type}Device`, matchedDevice.name);
+          this.TPClient.stateUpdate(`discord_default_audio_device_change_eventState`, `${type.charAt(0).toUpperCase() + type.slice(1)}`);
         }
         logIt("DEBUG", `Using ${type} device ID:`, this.DG.voiceSettings[`${type}DeviceId`]);
       }
+
+      this.TPClient.stateUpdate(`discord_default_audio_device_change_eventState`, ``);
+
     } else {
       logIt("INFO", `No ${type} device data found.`);
     }
@@ -284,6 +294,7 @@ class VoiceStateHandler {
         this.DG.voiceSettings.muteState = 1;
       } else {
         this.DG.voiceSettings.deafState = 0;
+        this.DG.voiceSettings.muteState = 0;
       }
       states.push({id: "discord_deafen", value: this.DG.voiceSettings.deafState ? "On" : "Off"});
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
