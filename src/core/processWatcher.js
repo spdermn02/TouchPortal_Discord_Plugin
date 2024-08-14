@@ -68,5 +68,5 @@ class ProcessWatcher extends EventEmitter {
   }
 }
 
-module.exports = {procWatcher:ProcessWatcher};
+module.exports = {ProcWatcher:ProcessWatcher};
 

@@ -5,7 +5,7 @@ const RPC = require("../discord-rpc/src/index.js");
 const {DiscordConfig, pluginId} = require("./discordConfig.js");
 const discordKeyMap = require("./utils/discordKeys.js");
 const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode, createStates} = require("./utils/helpers.js");
-const {procWatcher} = require("./core/processWatcher.js");
+const {ProcWatcher} = require("./core/processWatcher.js");
 const {DiscordConnector} = require("./core/DiscordConnector.js");
 const {UserStateHandler} = require("./handlers/discord/userStateHandler.js");
 const {VoiceStateHandler} = require("./handlers/discord/voiceStateHandler.js");
@@ -98,14 +98,14 @@ TPClient.on("Settings", (data) => {
 
   if (platform != "win32" || DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
     TPClient.stateUpdate("discord_running", "Unknown");
-    ProcWatcher.stopWatch();
+    procWatcher.stopWatch();
     Discord.doLogin()
   } else if (
     platform == "win32" &&
     DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "no"
   ) {
     logIt("INFO", `Starting process watcher for ${app_monitor[platform]}`);
-    ProcWatcher.watch(app_monitor[platform]);
+    procWatcher.watch(app_monitor[platform]);
   }
 });
 
@@ -265,7 +265,7 @@ TPClient.on("ListChange", (data) => {
 
 
 const DG = new DiscordConfig();
-const ProcWatcher = new procWatcher();
+const procWatcher = new ProcWatcher();
 const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
 const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
@@ -276,7 +276,7 @@ voiceStateHandler.initiate_doLogin(Discord.doLogin);
 
 
 // Process Watcher
-ProcWatcher.on("processRunning", (processName) => {
+procWatcher.on("processRunning", (processName) => {
   logIt("INFO", `${processName} detected as running`);
   TPClient.stateUpdate("discord_running", "Yes");
 
@@ -287,7 +287,7 @@ ProcWatcher.on("processRunning", (processName) => {
   }, 1000);
 });
 
-ProcWatcher.on("processTerminated", (processName) => {
+procWatcher.on("processTerminated", (processName) => {
   logIt("WARN", `${processName} not detected as running`);
   TPClient.stateUpdate("discord_running", "No");
   if (Discord.DG.Client) {
