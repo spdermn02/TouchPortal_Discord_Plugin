@@ -2,7 +2,7 @@
 
 const {ActivityType} = require("../../../discord-rpc/src/constants.js");
 const discordKeyMap = require("../../utils/discordKeys.js");
-const {DG} = require("../../discord_config.js");
+// const {DG} = require("../../discord_config.js");
 // everything in onaction COULD be moved to index.js and then DG could be initiated inside of index.js as well instead of its own file
 
 
@@ -13,7 +13,7 @@ const {
   setStateBasedOnValue,
 } = require("../../utils/helpers.js");
 
-async function onAction(message, isHeld) {
+async function onAction(message, isHeld, DG) {
   logIt("DEBUG", JSON.stringify(message));
   if (message.actionId === "discord_select_channel") {
     let server = message.data[0].value;

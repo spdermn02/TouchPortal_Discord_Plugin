@@ -115,6 +115,6 @@ class DiscordG {
 
 
 module.exports = {
-  DG: new DiscordG(),
+  Discord_Config: DiscordG,
   pluginId
 };

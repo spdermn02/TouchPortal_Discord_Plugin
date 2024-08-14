@@ -2,7 +2,7 @@ const TP = require("touchportal-api");
 const TPClient = new TP.Client();
 const RPC = require("../discord-rpc/src/index.js");
 
-const {DG} = require("./discord_config.js");
+const {Discord_Config} = require("./discord_config.js");
 const {pluginId} = require("./discord_config.js");
 const discordKeyMap = require("./utils/discordKeys.js");
 const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode, createStates} = require("./utils/helpers.js");
@@ -22,7 +22,10 @@ const {onAction} = require("./handlers/touchportal/onAction.js");
 // ^^ also doesn show for channel choice list..
 
 // To Do
-// initiate DG and procwatcher here in index.js instead of discord_config.js
+// Fix Set Activity
+// Fix Crash when discord reboots for an update
+// 
+
 
 // ----------------------------------------------------
 // On Info
@@ -162,7 +165,7 @@ TPClient.on("Close", (data) => {
 // ----------------------------------------------------
 TPClient.on("Action", (data, isHeld) => {
   if (DG.connected) {
-    onAction(data, isHeld);
+    onAction(data, isHeld, DG);
   } else {
     logIt("WARN", "Action: Not connected to Discord, ignoring action");
   }
@@ -262,7 +265,7 @@ TPClient.on("ListChange", (data) => {
 
 
 
-
+const DG = new Discord_Config();
 const ProcWatcher = new procWatcher();
 const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
