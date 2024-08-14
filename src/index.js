@@ -2,8 +2,7 @@ const TP = require("touchportal-api");
 const TPClient = new TP.Client();
 const RPC = require("../discord-rpc/src/index.js");
 
-const {Discord_Config} = require("./discord_config.js");
-const {pluginId} = require("./discord_config.js");
+const {DiscordConfig, pluginId} = require("./discordConfig.js");
 const discordKeyMap = require("./utils/discordKeys.js");
 const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, app_monitor, isEmpty, setDebugMode, createStates} = require("./utils/helpers.js");
 const {procWatcher} = require("./core/process_watcher");
@@ -265,7 +264,7 @@ TPClient.on("ListChange", (data) => {
 
 
 
-const DG = new Discord_Config();
+const DG = new DiscordConfig();
 const ProcWatcher = new procWatcher();
 const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );

@@ -2,9 +2,6 @@
 
 const {ActivityType} = require("../../../discord-rpc/src/constants.js");
 const discordKeyMap = require("../../utils/discordKeys.js");
-// const {DG} = require("../../discord_config.js");
-// everything in onaction COULD be moved to index.js and then DG could be initiated inside of index.js as well instead of its own file
-
 
 const {
   logIt,
