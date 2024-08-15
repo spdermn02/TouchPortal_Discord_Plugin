@@ -2,6 +2,7 @@ const TP = require("touchportal-api");
 const RPC = require("../discord-rpc/src/index.js");
 
 const {DiscordConfig, pluginId} = require("./discordConfig.js");
+const {open} = require("out-url");
 const discordKeyMap = require("./utils/discordKeys.js");
 const {logIt, convertPercentageToVolume, getUserIdFromIndex, platform, discord_paths, isEmpty, setDebugMode, createStates} = require("./utils/helpers.js");
 const {ProcWatcher} = require("./core/processWatcher.js");
