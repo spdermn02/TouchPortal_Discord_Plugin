@@ -800,7 +800,7 @@ Object.assign(actions, {
        id: "discord_reset_push_to_talk_key",
        category: "Discord Settings",
        prefix: "Discord:",
-       name:"Discord Store Reset Push To Talk Keys",
+       name:"Discord Reset Push To Talk Keys",
        type:"communicate",
        tryInline:"true",
        format:"Discord: Reset Push To Talk Keys"
