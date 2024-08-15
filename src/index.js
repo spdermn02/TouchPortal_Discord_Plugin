@@ -30,7 +30,7 @@ const procWatcher = new ProcWatcher();
 const notificationHandler = new NotificationHandler(TPClient, DG);
 const userStateHandler = new UserStateHandler(TPClient, DG );
 const voiceChannelHandler = new VoiceChannelHandler(DG, TPClient, userStateHandler);
-const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler);
+const voiceStateHandler = new VoiceStateHandler(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler, procWatcher);
 const Discord = new DiscordConnector(TPClient, DG, RPC, userStateHandler, notificationHandler, voiceStateHandler);
 
 voiceStateHandler.initiate_doLogin(Discord.doLogin);

@@ -1,16 +1,18 @@
 // voiceStateHandler
 
 
-const {logIt, diff, convertVolumeToPercentage, convertPercentageToVolume, platform} = require("../../utils/helpers.js");
+const {logIt, diff, convertVolumeToPercentage, convertPercentageToVolume, platform, discord_paths} = require("../../utils/helpers.js");
 
 
 class VoiceStateHandler {
-  constructor(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler) {
+  constructor(DG,  TPClient, userStateHandler, notificationHandler, voiceChannelHandler, procWatcher) {
     this.TPClient = TPClient;
     this.DG = DG
     this.userStateHandler = userStateHandler;
     this.voiceChannelHandler = voiceChannelHandler;
     this.doLogin = null;
+    this.processNames = procWatcher.processNames; // this is from procWatcher for us to set processName to false when disconnected.. 
+                                          // this is a bit of a 'hack' for when user disconnects from a update on discord
 
     // not using?
     // this.repopulateUserStates = this.userStateHandler.repopulateUserStates;
@@ -153,7 +155,12 @@ class VoiceStateHandler {
       logIt("WARN", "discord connection closed, will attempt reconnect, once process detected");
       this.TPClient.settingUpdate("Plugin Connected", "Disconnected");
       this.TPClient.stateUpdate("discord_connected", "Disconnected");
+      
       this.DG.connected = false;
+
+      // setting procWatcher processNames to false so we can force it to try to reconnect
+      this.processNames[discord_paths[platform]]["isRunning"] = false;
+      
       if (platform != "win32" || this.DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
         return this.doLogin();
       }
