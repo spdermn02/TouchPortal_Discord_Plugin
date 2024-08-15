@@ -12,8 +12,7 @@ class DiscordConfig {
       "VoiceActivity Tracker - Seperate each ID by commas": "",
     };
 
-    this.updateUrl =
-      "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
+    this.updateUrl = "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
     this.releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
     this.redirectUri = "http://localhost";
     this.Client = null;            // Discord Client
