@@ -232,111 +232,6 @@
                     ]
                 },
                 {
-                    "id": "discord_automatic_gain_control_action",
-                    "prefix": "Discord:",
-                    "name": "Discord: Automatic Gain Control",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Set Automatic Gain Control {$discordAutomaticGainControlAction$}",
-                    "data": [
-                        {
-                            "id": "discordAutomaticGainControlAction",
-                            "type": "choice",
-                            "label": "Automatic Gain Control Action",
-                            "default": "",
-                            "valueChoices": [
-                                "Toggle",
-                                "Off",
-                                "On"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_echo_cancellation_action",
-                    "prefix": "Discord:",
-                    "name": "Discord: Echo Cancellation",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Set Echo Cancellation {$discordEchoCancellationAction$}",
-                    "data": [
-                        {
-                            "id": "discordEchoCancellationAction",
-                            "type": "choice",
-                            "label": "Echo Cancellation Action",
-                            "default": "",
-                            "valueChoices": [
-                                "Toggle",
-                                "Off",
-                                "On"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_noise_suppression_action",
-                    "prefix": "Discord:",
-                    "name": "Discord: Noise Suppression",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Set Noise Suppression {$discordNoiseSuppressionAction$} (Note: If using Krisp, this action seems to do nothing)",
-                    "data": [
-                        {
-                            "id": "discordNoiseSuppressionAction",
-                            "type": "choice",
-                            "label": "Noise Suppression Action",
-                            "default": "",
-                            "valueChoices": [
-                                "Toggle",
-                                "Off",
-                                "On"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_qos_high_packet_priority_action",
-                    "prefix": "Discord:",
-                    "name": "Discord: Quality of Service Priority",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Set Quality of Service High Packet Priority {$discordQOSHighPacketPriorityAction$}",
-                    "data": [
-                        {
-                            "id": "discordQOSHighPacketPriorityAction",
-                            "type": "choice",
-                            "label": "Quality of Service High Packet Priority Action",
-                            "default": "",
-                            "valueChoices": [
-                                "Toggle",
-                                "Off",
-                                "On"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_silence_warning_action",
-                    "prefix": "Discord:",
-                    "name": "Discord: Silence Warning",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Set Silence Warning {$discordSilenceWarningAction$}",
-                    "data": [
-                        {
-                            "id": "discordSilenceWarningAction",
-                            "type": "choice",
-                            "label": "Silence Warning Action",
-                            "default": "",
-                            "valueChoices": [
-                                "Toggle",
-                                "Off",
-                                "On"
-                            ]
-                        }
-                    ]
-                },
-                {
                     "id": "discord_hangup_voice",
                     "prefix": "Discord:",
                     "name": "Discord Hang Up",
@@ -397,88 +292,28 @@
                     ]
                 },
                 {
-                    "id": "discord_voice_mode_change",
+                    "id": "discord_select_channel_custom",
                     "prefix": "Discord:",
-                    "name": "Discord Voice Mode",
+                    "name": "Discord Select Channel (by ID)",
                     "type": "communicate",
                     "tryInline": "true",
-                    "format": "Discord: Set Voice Type to {$discordVoiceMode$}",
+                    "format": "Discord: Go to {$discordChannelTypeCustom$} Channel with id: {$discordChannelIdCustom$}",
                     "data": [
                         {
-                            "id": "discordVoiceMode",
-                            "type": "choice",
-                            "label": "Discord Voice Mode",
-                            "default": "Toggle",
-                            "valueChoices": [
-                                "Voice Activity",
-                                "Push To Talk",
-                                "Toggle"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_reset_push_to_talk_key",
-                    "prefix": "Discord:",
-                    "name": "Discord Store Reset Push To Talk Keys",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Reset Push To Talk Keys"
-                },
-                {
-                    "id": "discord_push_to_talk_key",
-                    "prefix": "Discord:",
-                    "name": "Discord Push To Talk Key",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
-                    "data": [
-                        {
-                            "id": "discordPTTKeyboardKey",
-                            "type": "choice",
-                            "label": "Discord Push To Talk Keyboard Key",
-                            "default": "",
-                            "valueChoices": []
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_set_push_to_talk_key",
-                    "prefix": "Discord:",
-                    "name": "Discord Store Push To Talk Keys",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Store Push To Talk Keys"
-                },
-                {
-                    "id": "discord_dm_voice_select",
-                    "prefix": "Discord:",
-                    "name": "Discord DM Voice Channel",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Go to Voice Channel with id: {$discordDMVoiceChannelId$}",
-                    "data": [
-                        {
-                            "id": "discordDMVoiceChannelId",
+                            "id": "discordChannelIdCustom",
                             "type": "text",
                             "label": "Discord DM Voice Channel Id",
                             "default": ""
-                        }
-                    ]
-                },
-                {
-                    "id": "discord_dm_text_select",
-                    "prefix": "Discord:",
-                    "name": "Discord DM Text Channel",
-                    "type": "communicate",
-                    "tryInline": "true",
-                    "format": "Discord: Go to Text Channel with id: {$discordDMTextChannelId$}",
-                    "data": [
+                        },
                         {
-                            "id": "discordDMTextChannelId",
-                            "type": "text",
-                            "label": "Discord DM Text Channel Id",
-                            "default": ""
+                            "id": "discordChannelTypeCustom",
+                            "type": "choice",
+                            "label": "Discord Channel Type",
+                            "default": "",
+                            "valueChoices": [
+                                "Text",
+                                "Voice"
+                            ]
                         }
                     ]
                 },
@@ -762,7 +597,167 @@
             "name": "Discord Settings",
             "imagepath": "%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord.png",
             "connectors": [],
-            "actions": [],
+            "actions": [
+                {
+                    "id": "discord_automatic_gain_control_action",
+                    "prefix": "Discord:",
+                    "name": "Discord: Automatic Gain Control",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Automatic Gain Control {$discordAutomaticGainControlAction$}",
+                    "data": [
+                        {
+                            "id": "discordAutomaticGainControlAction",
+                            "type": "choice",
+                            "label": "Automatic Gain Control Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_echo_cancellation_action",
+                    "prefix": "Discord:",
+                    "name": "Discord: Echo Cancellation",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Echo Cancellation {$discordEchoCancellationAction$}",
+                    "data": [
+                        {
+                            "id": "discordEchoCancellationAction",
+                            "type": "choice",
+                            "label": "Echo Cancellation Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_noise_suppression_action",
+                    "prefix": "Discord:",
+                    "name": "Discord: Noise Suppression",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Noise Suppression {$discordNoiseSuppressionAction$} (Note: If using Krisp, this action seems to do nothing)",
+                    "data": [
+                        {
+                            "id": "discordNoiseSuppressionAction",
+                            "type": "choice",
+                            "label": "Noise Suppression Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_qos_high_packet_priority_action",
+                    "prefix": "Discord:",
+                    "name": "Discord: Quality of Service Priority",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Quality of Service High Packet Priority {$discordQOSHighPacketPriorityAction$}",
+                    "data": [
+                        {
+                            "id": "discordQOSHighPacketPriorityAction",
+                            "type": "choice",
+                            "label": "Quality of Service High Packet Priority Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_silence_warning_action",
+                    "prefix": "Discord:",
+                    "name": "Discord: Silence Warning",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Silence Warning {$discordSilenceWarningAction$}",
+                    "data": [
+                        {
+                            "id": "discordSilenceWarningAction",
+                            "type": "choice",
+                            "label": "Silence Warning Action",
+                            "default": "",
+                            "valueChoices": [
+                                "Toggle",
+                                "Off",
+                                "On"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_voice_mode_change",
+                    "prefix": "Discord:",
+                    "name": "Discord Voice Mode",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Set Voice Type to {$discordVoiceMode$}",
+                    "data": [
+                        {
+                            "id": "discordVoiceMode",
+                            "type": "choice",
+                            "label": "Discord Voice Mode",
+                            "default": "Toggle",
+                            "valueChoices": [
+                                "Voice Activity",
+                                "Push To Talk",
+                                "Toggle"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_reset_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Store Reset Push To Talk Keys",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Reset Push To Talk Keys"
+                },
+                {
+                    "id": "discord_push_to_talk_key",
+                    "prefix": "Discord",
+                    "name": "Discord Add Push To Talk Key",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
+                    "data": [
+                        {
+                            "id": "discordPTTKeyboardKey",
+                            "type": "choice",
+                            "label": "Discord Push To Talk Keyboard Key",
+                            "default": "",
+                            "valueChoices": []
+                        }
+                    ]
+                },
+                {
+                    "id": "discord_set_push_to_talk_key",
+                    "prefix": "Discord:",
+                    "name": "Discord Store Push To Talk Keys",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Store Push To Talk Keys"
+                }
+            ],
             "events": [],
             "states": [
                 {

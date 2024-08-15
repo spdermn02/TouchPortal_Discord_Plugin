@@ -114,20 +114,32 @@ async function onAction(message, isHeld, DG) {
     await DG.Client.toggleVideo();
   } else if (message.actionId == "discord_toggle_screenshare") {
     await DG.Client.toggleScreenshare();
-  } else if (message.actionId === "discord_dm_voice_select") {
+  } else if ( message.actionId === "discord_dm_voice_select" || message.actionId === "discord_dm_text_select" || message.actionId === "discord_select_channel_custom"){
     let channelId = message.data[0].value;
-    await DG.Client.selectVoiceChannel(channelId, {
-      timeout: 5,
-      force: true,
-    });
-  } else if (message.actionId === "discord_dm_text_select") {
-    let channelId = message.data[0].value;
-    try {
-      await DG.Client.selectTextChannel(channelId, {timeout: 5});
-    } catch (error) {
-      logIt("ERROR", `Failed to select channel: Channel ID: ${channelId} - Please check for correct ID`);
-      logIt("DEBUG", `Select Text/DM Channel: ${error}`);
+    let channelType;
+    if (message.actionId === "discord_dm_voice_select") {
+        channelType = "voice";
+    } else if (message.actionId === "discord_dm_text_select") {
+        channelType = "text";
+    } else if (message.actionId === "discord_select_channel_custom") {
+        channelType = message.data[1].value; // "text" or "voice"
     }
+
+    console.log("AND THE CHANNEL TYPE IS: ", channelType);
+    if (channelType.toLowerCase() === "voice") {
+        await DG.Client.selectVoiceChannel(channelId, {
+            timeout: 5,
+            force: true,
+        });
+    } else if (channelType.toLowerCase() === "text") {
+        try {
+            await DG.Client.selectTextChannel(channelId, { timeout: 5 });
+        } catch (error) {
+            logIt("ERROR", `Failed to select channel: Channel ID: ${channelId} - Please check for correct ID`);
+            logIt("DEBUG", `Select Text/DM Channel: ${error}`);
+        }
+    }
+
   } else if (message.actionId === "discord_hangup_voice") {
     DG.Client.selectVoiceChannel(null, {timeout: 5});
   } else if (message.actionId === "discord_reset_push_to_talk_key") {

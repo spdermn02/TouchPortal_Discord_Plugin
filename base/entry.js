@@ -602,7 +602,7 @@ Object.assign(actions, {
     },
     "Discord_setautomaticGain":{
         id: "discord_automatic_gain_control_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Automatic Gain Control",
         type: "communicate",
@@ -624,7 +624,7 @@ Object.assign(actions, {
     },
     "Discord_setEchoCancellation":{
         id: "discord_echo_cancellation_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Echo Cancellation",
         type: "communicate",
@@ -646,7 +646,7 @@ Object.assign(actions, {
     },
     "Discord_setnoiseSuppression":{
         id: "discord_noise_suppression_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Noise Suppression",
         type: "communicate",
@@ -668,7 +668,7 @@ Object.assign(actions, {
     },
     "Discord_setQos":{
         id: "discord_qos_high_packet_priority_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Quality of Service Priority",
         type: "communicate",
@@ -690,7 +690,7 @@ Object.assign(actions, {
     },
     "Discord_setsilenceWarning":{
         id: "discord_silence_warning_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Silence Warning",
         type: "communicate",
@@ -776,7 +776,7 @@ Object.assign(actions, {
     },
     "Discord_setVoiceMode":{
        id: "discord_voice_mode_change",
-       category: "Discord",
+       category: "Discord Settings",
        prefix: "Discord:",
        name:"Discord Voice Mode",
        type:"communicate",
@@ -798,7 +798,7 @@ Object.assign(actions, {
     },
     "Discord_resetPTT":{
        id: "discord_reset_push_to_talk_key",
-       category: "Discord",
+       category: "Discord Settings",
        prefix: "Discord:",
        name:"Discord Store Reset Push To Talk Keys",
        type:"communicate",
@@ -807,9 +807,9 @@ Object.assign(actions, {
     },
     "Discord_PTT":{
        id: "discord_push_to_talk_key",
-       category: "Discord",
-       prefix: "Discord:",
-       name:"Discord Push To Talk Key",
+       category: "Discord Settings",
+       prefix: "Discord",
+       name:"Discord Add Push To Talk Key",
        type:"communicate",
        tryInline:"true",
        format:"Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
@@ -826,47 +826,40 @@ Object.assign(actions, {
     },
     "Discord_setPTT":{
        id: "discord_set_push_to_talk_key",
-       category: "Discord",
+       category: "Discord Settings",
        prefix: "Discord:",
        name:"Discord Store Push To Talk Keys",
        type:"communicate",
        tryInline:"true",
        format:"Discord: Store Push To Talk Keys"
     },
-    "Discord_dmVoiceSelect":{
-       id: "discord_dm_voice_select",
-       category: "Discord",
-       prefix: "Discord:",
-       name:"Discord DM Voice Channel",
-       type:"communicate",
-       tryInline:"true",
-       format:"Discord: Go to Voice Channel with id: {$discordDMVoiceChannelId$}",
-       data:[
+    "Discord_selectChannelCustom":{
+        id: "discord_select_channel_custom",
+        category: "Discord",
+        prefix: "Discord:",
+        name:"Discord Select Channel (by ID)",
+        type:"communicate",
+        tryInline:"true",
+        format:"Discord: Go to {$discordChannelTypeCustom$} Channel with id: {$discordChannelIdCustom$}",
+        data:[
+             {
+                id:"discordChannelIdCustom",
+                type:"text",
+                label:"Discord DM Voice Channel Id",
+                default:""
+            },
             {
-               id:"discordDMVoiceChannelId",
-               type:"text",
-               label:"Discord DM Voice Channel Id",
-               default:""
-           }
-       ]
-    },
-    "Discord_dmTextSelect":{
-       id: "discord_dm_text_select",
-       category: "Discord",
-       prefix: "Discord:",
-       name:"Discord DM Text Channel",
-       type:"communicate",
-       tryInline:"true",
-       format:"Discord: Go to Text Channel with id: {$discordDMTextChannelId$}",
-       data:[
-            {
-               id:"discordDMTextChannelId",
-               type:"text",
-               label:"Discord DM Text Channel Id",
-               default:""
-           }
-       ]
-    },
+             id:"discordChannelTypeCustom",
+             type:"choice",
+             label:"Discord Channel Type",
+             default:"",
+             valueChoices:[
+                 "Text",
+                 "Voice",
+             ]
+            }
+        ]
+     },
     "Discord_toggleCamera":{
         id: "discord_toggle_camera",
         category: "Discord",
