@@ -1,7 +1,7 @@
 const TP = require("touchportal-api");
 const TPClient = new TP.Client();
 const RPC = require("../discord-rpc/src/index.js");
-const {open} = require("out-url");
+
 const {DG} = require("./discord_config.js");
 const {pluginId} = require("./discord_config.js");
 const discordKeyMap = require("./utils/discordKeys.js");
