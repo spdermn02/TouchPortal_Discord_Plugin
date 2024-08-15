@@ -1,14 +1,12 @@
 // HELPER FUNCTIONS
 const platform = require("process").platform;
-// const {pluginId} = require("../discord_config.js");  all of the sudden this doesnt wanna work and comes up undefined...
-const pluginId = "TPDiscord";
-
-const app_monitor = {
+const {pluginId} = require("../discordConfig.js");
+let debugMode = "INFO";
+const discord_paths = {
   darwin: "/Applications/Discord.app/Contents/MacOS/Discord",
   win32: "Discord.exe",
 };
 
-let debugMode = "INFO";
 function setDebugMode(mode) {
   debugMode = mode;
 }
@@ -128,5 +126,5 @@ module.exports = {
   setDebugMode,
   createStates,
   platform,
-  app_monitor
+  discord_paths
 };

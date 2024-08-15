@@ -1,4 +1,3 @@
-const DEFAULT_BASE64_AVATAR = require("./utils/DEFAULT_BASE64_AVATAR.js");
 const pluginId = "TPDiscord";
 
 class DiscordConfig {
@@ -6,7 +5,6 @@ class DiscordConfig {
     this.userPremiumType = 0;
     this.userId = "";
 
-    // this.pluginId = pluginId;
     this.pluginSettings = {
       "Plugin Connected": "No",
       "Skip Process Watcher": "No",
@@ -17,13 +15,12 @@ class DiscordConfig {
     this.updateUrl =
       "https://raw.githubusercontent.com/spdermn02/TouchPortal_Discord_Plugin/master/package.json";
     this.releaseUrl = "https://github.com/spdermn02/TouchPortal_Discord_Plugin/releases";
-    this.redirectUri = "http://localhost"; // same here..
-
-    this.Client = null; // Discord Client
+    this.redirectUri = "http://localhost";
+    this.Client = null;            // Discord Client
     this.accessToken = undefined; // Discord Access Token
     this.connecting = false;
-    this.connected = false; // using this to make sure no commands are fired unless we are fully connected
-    // I did not use this.connecting since it defaults to false, then turns to true while its connecting, and then back to false.. which would cause issues
+    this.connected = false;       // using this to make sure no commands are fired unless we are fully connected- did not use this.connecting since it defaults to false,
+                                 //  then turns to true while its connecting, and then back to false.. which would cause issues
 
     this.scopes = [
       "identify",
@@ -38,8 +35,6 @@ class DiscordConfig {
       "rpc.screenshare.write",
       "rpc.notifications.read",
     ];
-
-    this.DEFAULT_BASE64_AVATAR = DEFAULT_BASE64_AVATAR;
 
     this.DEFAULT_USER_STATES = [
       // used on creation of states for each user when plugin first boots
@@ -66,14 +61,13 @@ class DiscordConfig {
       deafState: 0,
       voice_mode_type: "UNKNOWN",
       prevVoiceActivityData: {}, // keeping track of end user voice settings data
+
       inputDevices: "",
       outputDevices: "",
-
       inputDeviceId: "",
       outputDeviceId: "",
       outputDeviceVolume: 0,
       inputDeviceVolume: 0,
-
       inputDeviceNames: ["RutRoh - Connection Issue, or Device Name"],
       outputDeviceNames: ["RutRoh - Connection Issue, or Device Name"],
     };
@@ -94,7 +88,7 @@ class DiscordConfig {
       speaker_volume_connector: "0",
     };
 
-    this.currentVoiceUsers = {}; // The Current People in Voice Chat
+    this.currentVoiceUsers = {};        // The Current People in Voice Chat
     this.customVoiceAcivityUsers = {};
 
     this.guilds = {};
@@ -106,7 +100,6 @@ class DiscordConfig {
 
     this.instanceIds = {};
 
-    // this.prevVoiceActivityData = {}; // Used for Self States
   }
 }
 

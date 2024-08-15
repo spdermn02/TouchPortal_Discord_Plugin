@@ -1,4 +1,6 @@
 const {logIt, wait, imageToBase64} = require("../../utils/helpers.js");
+const DEFAULT_BASE64_AVATAR = require("../../utils/DEFAULT_BASE64_AVATAR.js");
+
 
 
 class VoiceChannelHandler {
@@ -78,7 +80,7 @@ class VoiceChannelHandler {
   
             vs.speaking = false; // adding speaking to the object to track speaking status
             if (vs.user.avatar === null) {
-              vs.user.base64Avatar = this.DG.DEFAULT_BASE64_AVATAR;
+              vs.user.base64Avatar = DEFAULT_BASE64_AVATAR;
             } else if (vs.user.avatar !== null) {
               avatarUrl = `https://cdn.discordapp.com/avatars/${vs.user.id}/${vs.user.avatar}.webp?size=128`;
   
