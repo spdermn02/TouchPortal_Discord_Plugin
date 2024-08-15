@@ -7,7 +7,7 @@ const { logIt } = require("../utils/helpers");
 const platform = require("process").platform;
 const LOOP_INTERVAL = 10000;
 
-class ProcessReady extends EventEmitter {
+class ProcessWatcher extends EventEmitter {
   constructor(options = {}) {
     super();
     this.loop = null;
@@ -67,6 +67,6 @@ class ProcessReady extends EventEmitter {
     }
   }
 }
-// const procWatcher = new ProcessReady();
-module.exports = ProcessReady;
-// module.exports = procWatcher;
+
+module.exports = {ProcWatcher:ProcessWatcher};
+

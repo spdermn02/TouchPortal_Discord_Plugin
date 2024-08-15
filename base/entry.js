@@ -106,49 +106,49 @@ let TP_PLUGIN_CATEGORIES = {
 // Adding states for DM Category
 // ----------------------------------------------------
 Object.assign(states, {
-    "1":{
+    "DM1":{
         id: "discord_DM_user",
         category: "Direct Message",
         type: "text",
         desc: "DM: UserName",
         default: ""
     },
-    "2":{
+    "DM2":{
         id: "discord_DM_userID",
         category: "Direct Message",
         type: "text",
         desc: "DM: UserID",
         default: ""
     },
-    "3":{
+    "DM3":{
         id: "discord_DM_channelID",
         category: "Direct Message",
         type: "text",
         desc: "DM: ChannelID",
         default: ""
     },
-    "4":{
+    "DM4":{
         id: "discord_DM_content",
         category: "Direct Message",
         type: "text",
         desc: "DM: Content",
         default: ""
     },
-    "5":{
+    "DM5":{
         id: "discord_newDM_eventState",
         category: "Direct Message",
         type: "text",
         desc: "Discord New DM Event",
         default: "False"
     },
-    "6":{
+    "DM6":{
         id: "discord_DM_timestamp",
         category: "Direct Message",
         type: "text",
         desc: "DM: Timestamp",
         default: ""
     },
-   "7": {
+   "DM7": {
         id: "discord_DM_avatar",
         category: "Direct Message",
         type: "text",
@@ -234,7 +234,7 @@ Object.assign(states, {
 // Adding states for Discord Settings Category
 // ----------------------------------------------------
 Object.assign(states, {
-   "8": {
+   "Settings1": {
         id: "discord_automatic_gain_control",
         category: "Discord Settings",
         type: "choice",
@@ -245,7 +245,7 @@ Object.assign(states, {
             "On"
         ]
     },
-   "9":{
+   "Settings2":{
         id: "discord_echo_cancellation",
         category: "Discord Settings",
         type: "choice",
@@ -256,7 +256,7 @@ Object.assign(states, {
             "On"
         ]
     },
-    "10":{
+    "Settings3":{
         id: "discord_noise_suppression",
         category: "Discord Settings",
         type: "choice",
@@ -267,7 +267,7 @@ Object.assign(states, {
             "On"
         ]
     },
-    "11":{
+    "Settings4":{
         id: "discord_silence_warning",
         category: "Discord Settings",
         type: "choice",
@@ -278,7 +278,7 @@ Object.assign(states, {
             "On"
         ]
     },
-    "12":{
+    "Settings5":{
         id: "discord_qos_priority",
         category: "Discord Settings",
         type: "choice",
@@ -289,7 +289,7 @@ Object.assign(states, {
             "On"
         ]
     },
-   "13": {
+   "Settings6": {
         id: "discord_voice_mode_type",
         category: "Discord Settings",
         type: "choice",
@@ -308,7 +308,7 @@ Object.assign(states, {
 // Adding states for voiceChannelInfo Category
 // ----------------------------------------------------
 Object.assign(states, {
-    "24":{
+    "VoiceChannelInfo_Connected":{
         id: "discord_voice_channel_connected",
         category: "VoiceChannel Info",
         type: "choice",
@@ -319,56 +319,56 @@ Object.assign(states, {
             "Yes"
         ]
     },
-    "25":{
+    "VoiceChannelInfo_serverID":{
         id: "discord_voice_channel_server_id",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Channel Server ID",
         default: ""
     },
-   "26": {
+   "VoiceChannelInfo_serverName": {
         id: "discord_voice_channel_server_name",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Channel Server Name",
         default: ""
     },
-    "27":{
+    "VoiceChannelInfo_channelId":{
         id: "discord_voice_channel_id",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Channel ID",
         default: ""
     },
-    "28":{
+    "VoiceChannelInfo_channelName":{
         id: "discord_voice_channel_name",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Channel Name",
         default: ""
     },
-    "29":{
+    "VoiceChannelInfo_averagePing":{
         id: "discord_voice_average_ping",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Average Ping",
         default: "0.00"
     },
-    "30":{
+    "VoiceChannelInfo_hostname":{
         id: "discord_voice_hostname",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Hostname",
         default: ""
     },
-    "31":{
+    "VoiceChannelInfo_channelParticipants":{
         id: "discord_voice_channel_participants",
         category: "VoiceChannel Info",
         type: "text",
         desc: "Discord Voice Channel Participants",
         default: "<None>"
     },
-    "32":{
+    "VoiceChannelInfo_channelParticipantIds":{
         id: "discord_voice_channel_participant_ids",
         category: "VoiceChannel Info",
         type: "text",
@@ -382,21 +382,21 @@ Object.assign(states, {
 // Adding states for the main category
 // ----------------------------------------------------
 Object.assign(states, {
-    "14":{
+    "Discord_inputDevice":{
         id: "discord_inputDevice",
         category: "Discord",
         type: "text",
         desc: "Discord Current Input Device",
         default: ""
     },
-    "15":{
+    "Discord_outputDevice":{
         id: "discord_outputDevice",
         category: "Discord",
         type: "text",
         desc: "Discord Current Output Device",
         default: ""
     },
-    "16":{
+    "Discord_Mute":{
         id: "discord_mute",
         category: "Discord",
         type: "choice",
@@ -407,7 +407,7 @@ Object.assign(states, {
             "On"
         ]
     },
-    "17":{
+    "Discord_Deafen":{
         id: "discord_deafen",
         category: "Discord",
         type: "choice",
@@ -418,7 +418,7 @@ Object.assign(states, {
             "On"
         ]
     },
-    "18":{
+    "Discord_cameraStatus":{
         id: "discord_camera_status",
         category: "Discord",
         type:"choice",
@@ -430,7 +430,7 @@ Object.assign(states, {
         ]
 
     },
-    "19":{
+    "Discord_screenshareStatus":{
         id: "discord_screenshare_status",
         category: "Discord",
         type:"choice",
@@ -441,21 +441,21 @@ Object.assign(states, {
             "On"
         ]
     },
-    "20":{
+    "Discord_speakerVolume":{
         id: "discord_speaker_volume",
         category: "Discord",
         type: "text",
         desc: "Discord Speaker Volume",
         default: "0.00"
     },
-    "21":{
+    "Discord_voiceVolume":{
         id: "discord_voice_volume",
         category: "Discord",
         type: "text",
         desc: "Discord Voice Volume",
         default: "0.00"
     },
-    "22":{
+    "Discord_Running":{
         id: "discord_running",
         category: "Discord",
         type: "choice",
@@ -467,7 +467,7 @@ Object.assign(states, {
             "Unknown"
         ]
     },
-    "23":{
+    "Discord_Connected":{
         id: "discord_connected",
         category: "Discord",
         type: "choice",
@@ -478,7 +478,7 @@ Object.assign(states, {
             "Disconnected"
         ]
     },
-    "24":{
+    "Discord_audioDeviceEvent":{
         id: "discord_default_audio_device_change_eventState",
         category: "Discord",
         type: "choice",
@@ -494,7 +494,7 @@ Object.assign(states, {
 
 // Adding Actions for Main Category
 Object.assign(actions, {
-   "1": {
+   "Discord_setDeafen": {
         id: "discord_deafen_action",
         category: "Discord",
         prefix: "Discord:",
@@ -523,7 +523,7 @@ Object.assign(actions, {
             }
         ]
     },
-    "2":{
+    "Discord_setMute":{
         id: "discord_mute_action",
         category: "Discord",
         prefix: "Discord:",
@@ -552,7 +552,7 @@ Object.assign(actions, {
             }
         ]
     },
-    "3":{
+    "Discord_pushtoTalk":{
         id: "discord_push_to_talk",
         category: "Discord",
         prefix: "Discord:",
@@ -563,7 +563,7 @@ Object.assign(actions, {
         format: "Discord: Push To Talk",
         data: []
     },
-   "4": {
+   "Discord_pushtoMute": {
         id: "discord_push_to_mute",
         category: "Discord",
         prefix: "Discord:",
@@ -574,7 +574,7 @@ Object.assign(actions, {
         format: "Discord: Push To Mute",
         data: []
     },
-    "5":{
+    "Discord_setVolume":{
         id: "discord_voice_volume_action",
         category: "Discord",
         prefix: "Discord:",
@@ -600,11 +600,9 @@ Object.assign(actions, {
             }
         ]
     },
-
-
-    "6":{
+    "Discord_setautomaticGain":{
         id: "discord_automatic_gain_control_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Automatic Gain Control",
         type: "communicate",
@@ -624,9 +622,9 @@ Object.assign(actions, {
             }
         ]
     },
-    "7":{
+    "Discord_setEchoCancellation":{
         id: "discord_echo_cancellation_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Echo Cancellation",
         type: "communicate",
@@ -646,9 +644,9 @@ Object.assign(actions, {
             }
         ]
     },
-    "8":{
+    "Discord_setnoiseSuppression":{
         id: "discord_noise_suppression_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Noise Suppression",
         type: "communicate",
@@ -668,9 +666,9 @@ Object.assign(actions, {
             }
         ]
     },
-    "9":{
+    "Discord_setQos":{
         id: "discord_qos_high_packet_priority_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Quality of Service Priority",
         type: "communicate",
@@ -690,9 +688,9 @@ Object.assign(actions, {
             }
         ]
     },
-    "10":{
+    "Discord_setsilenceWarning":{
         id: "discord_silence_warning_action",
-        category: "Discord",
+        category: "Discord Settings",
         prefix: "Discord:",
         name: "Discord: Silence Warning",
         type: "communicate",
@@ -712,7 +710,7 @@ Object.assign(actions, {
             }
         ]
     },
-   "11": {
+   "Discord_hangupVoice": {
        id: "discord_hangup_voice",
        category: "Discord",
        prefix: "Discord:",
@@ -721,7 +719,7 @@ Object.assign(actions, {
        tryInline:"true",
        format:"Discord: Hang Up Voice Channel"
     },
-    "12":{
+    "Discord_playSound":{
         id: "discord_play_sound",
         category: "Discord",
         prefix: "Discord:",
@@ -739,7 +737,7 @@ Object.assign(actions, {
             }
         ]
     },
-    "13":{
+    "Discord_selectChannel":{
        id: "discord_select_channel",
        category: "Discord",
        prefix: "Discord:",
@@ -776,9 +774,9 @@ Object.assign(actions, {
            }
        ]
     },
-    "14":{
+    "Discord_setVoiceMode":{
        id: "discord_voice_mode_change",
-       category: "Discord",
+       category: "Discord Settings",
        prefix: "Discord:",
        name:"Discord Voice Mode",
        type:"communicate",
@@ -798,20 +796,20 @@ Object.assign(actions, {
            }
        ]
     },
-    "15":{
+    "Discord_resetPTT":{
        id: "discord_reset_push_to_talk_key",
-       category: "Discord",
+       category: "Discord Settings",
        prefix: "Discord:",
-       name:"Discord Store Reset Push To Talk Keys",
+       name:"Discord Reset Push To Talk Keys",
        type:"communicate",
        tryInline:"true",
        format:"Discord: Reset Push To Talk Keys"
     },
-    "16":{
+    "Discord_PTT":{
        id: "discord_push_to_talk_key",
-       category: "Discord",
-       prefix: "Discord:",
-       name:"Discord Push To Talk Key",
+       category: "Discord Settings",
+       prefix: "Discord",
+       name:"Discord Add Push To Talk Key",
        type:"communicate",
        tryInline:"true",
        format:"Discord: Add Push To Talk Key from keyboard Key: {$discordPTTKeyboardKey$}",
@@ -826,50 +824,43 @@ Object.assign(actions, {
            }
        ]
     },
-    "17":{
+    "Discord_setPTT":{
        id: "discord_set_push_to_talk_key",
-       category: "Discord",
+       category: "Discord Settings",
        prefix: "Discord:",
        name:"Discord Store Push To Talk Keys",
        type:"communicate",
        tryInline:"true",
        format:"Discord: Store Push To Talk Keys"
     },
-    "18":{
-       id: "discord_dm_voice_select",
-       category: "Discord",
-       prefix: "Discord:",
-       name:"Discord DM Voice Channel",
-       type:"communicate",
-       tryInline:"true",
-       format:"Discord: Go to Voice Channel with id: {$discordDMVoiceChannelId$}",
-       data:[
+    "Discord_selectChannelCustom":{
+        id: "discord_select_channel_custom",
+        category: "Discord",
+        prefix: "Discord:",
+        name:"Discord Select Channel (by ID)",
+        type:"communicate",
+        tryInline:"true",
+        format:"Discord: Go to {$discordChannelTypeCustom$} Channel with id: {$discordChannelIdCustom$}",
+        data:[
+             {
+                id:"discordChannelIdCustom",
+                type:"text",
+                label:"Discord DM Voice Channel Id",
+                default:""
+            },
             {
-               id:"discordDMVoiceChannelId",
-               type:"text",
-               label:"Discord DM Voice Channel Id",
-               default:""
-           }
-       ]
-    },
-    "19":{
-       id: "discord_dm_text_select",
-       category: "Discord",
-       prefix: "Discord:",
-       name:"Discord DM Text Channel",
-       type:"communicate",
-       tryInline:"true",
-       format:"Discord: Go to Text Channel with id: {$discordDMTextChannelId$}",
-       data:[
-            {
-               id:"discordDMTextChannelId",
-               type:"text",
-               label:"Discord DM Text Channel Id",
-               default:""
-           }
-       ]
-    },
-    "20":{
+             id:"discordChannelTypeCustom",
+             type:"choice",
+             label:"Discord Channel Type",
+             default:"",
+             valueChoices:[
+                 "Text",
+                 "Voice",
+             ]
+            }
+        ]
+     },
+    "Discord_toggleCamera":{
         id: "discord_toggle_camera",
         category: "Discord",
         prefix: "Discord:",
@@ -878,7 +869,7 @@ Object.assign(actions, {
         tryInline: "true",
         format: "Discord: Toggle Camera On/Off"
     },
-    "21":{
+    "Discord_toggleScreenshare":{
         id: "discord_toggle_screenshare",
         category: "Discord",
         prefix: "Discord:",
@@ -887,7 +878,7 @@ Object.assign(actions, {
         tryInline: "true",
         format: "Discord: Toggle Screen Share On/Off"
     },
-    "22":{
+    "Discord_setAudioDevice":{
         id: "discord_setDefaultAudioDevice",
         category: "Discord",
         prefix: "Discord:",
@@ -912,7 +903,7 @@ Object.assign(actions, {
             }
         ]
     },
-    "23":{
+    "Discord_setAudioDeviceVolume":{
         id: "discord_setDefaultAudioDevice_volume",
         category: "Discord",
         prefix: "Discord:",
