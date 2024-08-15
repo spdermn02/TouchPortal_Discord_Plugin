@@ -698,6 +698,16 @@
             "events": [],
             "states": [
                 {
+                    "id": "discord_voice_channel_connected",
+                    "type": "choice",
+                    "desc": "Discord Voice Channel Connected",
+                    "default": "No",
+                    "valueChoices": [
+                        "No",
+                        "Yes"
+                    ]
+                },
+                {
                     "id": "discord_voice_channel_server_id",
                     "type": "text",
                     "desc": "Discord Voice Channel Server ID",
