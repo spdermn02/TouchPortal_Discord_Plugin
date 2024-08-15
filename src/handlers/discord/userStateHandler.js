@@ -43,21 +43,20 @@ class UserStateHandler {
       { id: `${idPrefix}_${userIndex}_server_mute`, value: user.voice_state.mute ? "On" : "Off" },
       { id: `${idPrefix}_${userIndex}_id`, value: user.user.id },
       { id: `${idPrefix}_${userIndex}_nick`, value: user.nick },
-      { id: `${idPrefix}_${userIndex}_volume`, value: Math.round(user.volume) },
+      // { id: `${idPrefix}_${userIndex}_volume`, value: Math.round(user.volume) },
       { id: `${idPrefix}_${userIndex}_avatar`, value: user.base64Avatar },
       { id: `${idPrefix}_${userIndex}_avatarID`, value: user.user.avatar }
     ];
 }
-
 
   updateUserStates = async (data) => {
     try {
       // if user is not added, we add it..
       await this.addUserData(data);
 
-      // Getting user index from the currentVoiceUsers object
-      const userIndex = Object.keys(this.DG.currentVoiceUsers).indexOf(data.user.id);
-      const user = this.DG.currentVoiceUsers[data.user.id];
+      const userId = data.user.id;
+      const userIndex = Object.keys(this.DG.currentVoiceUsers).indexOf(userId);
+      const user = this.DG.currentVoiceUsers[userId];
 
       // Now check if there are 11 or more users in the channel, if so, we need to create more user states
       if (Object.keys(this.DG.currentVoiceUsers).length >= 11) {
@@ -65,28 +64,31 @@ class UserStateHandler {
       }
 
       // If user doesn't have a base64Avatar from previous update, we fetch it and add it to the user object
-      if (user.base64Avatar == undefined) {
-        const avatarUrl = `https://cdn.discordapp.com/avatars/${user.user.id}/${user.user.avatar}.webp?size=128`;
-        this.DG.currentVoiceUsers[data.user.id].base64Avatar = await imageToBase64(avatarUrl);
+      if (user.base64Avatar === undefined) {
+        const avatarUrl = `https://cdn.discordapp.com/avatars/${userId}/${user.user.avatar}.webp?size=128`;
+        user.base64Avatar = await imageToBase64(avatarUrl);
       }
 
       // Updating general user states
       let updates = this.generateUserUpdates(userIndex, user);
+      // Check and update volume if changed
+      let newVolume = convertVolumeToPercentage(user.volume) / 2;
+      this.TPClient.connectorUpdate(`discord_voice_volume_action_connector|voiceUserList_connector=${userIndex}`, newVolume);
+      logIt("DEBUG", `User ${data.nick} has updated their volume to ${newVolume}`);
+
+      updates.push({ id: `user_${userIndex}_volume`, value: Math.round(newVolume) })
+
       this.TPClient.stateUpdateMany(updates);
-
-      let volume = convertVolumeToPercentage(this.DG.currentVoiceUsers[data.user.id].volume) / 2;
-      this.TPClient.connectorUpdate(`discord_voice_volume_action_connector|voiceUserList_connector=${userIndex}`, volume );
-
-      // This is for CustomVoiceActivityusers which will be defined by the end user to track specific users
-      if (this.DG.customVoiceAcivityUsers.hasOwnProperty(data.user.id)) {
-          let customUserIndex = this.DG.customVoiceAcivityUsers[data.user.id];
-          let customUpdates = this.generateUserUpdates(customUserIndex, user, "customUser");
-          this.TPClient.stateUpdateMany(customUpdates);
+      // Update custom voice activity users if applicable
+      if (this.DG.customVoiceAcivityUsers.hasOwnProperty(userId)) {
+        let customUserIndex = this.DG.customVoiceAcivityUsers[userId];
+        let customUpdates = this.generateUserUpdates(customUserIndex, user, "customUser");
+        this.TPClient.stateUpdateMany(customUpdates);
       }
     } catch (error) {
       logIt("ERROR", `updateUserStates: ${error}`);
     }
-  }
+  };
 
   deleteUserStates = async (data) => {
     if (this.DG.Client.user.id === data.user.id) {
