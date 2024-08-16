@@ -16,8 +16,10 @@ class VoiceStateHandler {
 
     // not using?
     // this.repopulateUserStates = this.userStateHandler.repopulateUserStates;
-
     this.notification = notificationHandler;
+
+    this.prevMuteState = this.DG.voiceSettings.prevVoiceActivityData.mute;
+    this.prevDeafState = this.DG.voiceSettings.prevVoiceActivityData.deaf;
   }
 
   initiate_doLogin = (doLogin) => {
@@ -284,24 +286,29 @@ class VoiceStateHandler {
     if (data.hasOwnProperty('output') && data.output.hasOwnProperty('device_id')) {      
       this.handleDeviceChange('output', data);
     }
-    
-    if (data.hasOwnProperty("mute") && data.mute != this.DG.voiceSettings.prevVoiceActivityData.mute) {
+    if (data.hasOwnProperty("mute") && data.mute !== this.prevMuteState) {
       if (data.mute) {
         this.DG.voiceSettings.muteState = 1;
       } else {
-        this.DG.voiceSettings.muteState = 0;
+        // Only unmute if not deafened
+        if (!data.deaf) {
+          this.DG.voiceSettings.muteState = 0;
+        }
       }
-      logIt("DEBUG", `discord mute is ${this.DG.voiceSettings.muteState} `);
-      states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
+      logIt("DEBUG", `discord mute is ${this.DG.voiceSettings.muteState}`);
+      states.push({ id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off" });
     }
 
-    if (data.hasOwnProperty("deaf") && data.deaf != this.DG.voiceSettings.prevVoiceActivityData.deaf) {
+    if (data.hasOwnProperty("deaf") && data.deaf !== this.prevDeafState) {
       if (data.deaf) {
         this.DG.voiceSettings.deafState = 1;
-        this.DG.voiceSettings.muteState = 1;
+        this.DG.voiceSettings.muteState = 1; // Deafening also mutes
       } else {
         this.DG.voiceSettings.deafState = 0;
-        this.DG.voiceSettings.muteState = 0;
+        // Only unmute if mute was set due to deafening and not explicitly muted
+        if (this.prevDeafState && !data.mute) {
+          this.DG.voiceSettings.muteState = 0;
+        }
       }
       states.push({id: "discord_deafen", value: this.DG.voiceSettings.deafState ? "On" : "Off"});
       states.push({id: "discord_mute", value: this.DG.voiceSettings.muteState ? "On" : "Off"});
