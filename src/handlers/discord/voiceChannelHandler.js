@@ -99,7 +99,9 @@ class VoiceChannelHandler {
         if (this.DG.currentVoiceUsers[key].user.id !== this.DG.Client.user.id) {
           // When we join a voice channel, update the states for all users in the channel
           let states = this.userStateHandler.generateUserUpdates(i, this.DG.currentVoiceUsers[key], "user");
-          this.TPClient.stateUpdateMany(states);
+          if (states.length > 0) {
+            this.TPClient.stateUpdateMany(states);
+          }
         }
       });
 
