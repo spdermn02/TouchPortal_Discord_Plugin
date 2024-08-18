@@ -209,7 +209,7 @@ TPClient.on("ConnectorChange", (data) => {
         newVol = Math.max(0, Math.min(newVol, 100)) * 2;
         const userId = getUserIdFromIndex(data.data[0].value, DG.currentVoiceUsers);
         if (userId !== undefined) {
-          logIt("INFO", "Setting Voice Volume for ", userId, " to ", newVol);
+          logIt("DEBUG", "Setting Voice Volume for ", userId, " to ", newVol/2);
           DG.Client.setUserVoiceSettings(userId, {
             volume: convertPercentageToVolume(newVol),
           });
