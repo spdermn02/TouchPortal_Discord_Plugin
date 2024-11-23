@@ -7,17 +7,17 @@ const { exit } = require("process")
 
 const build = async(platform, options ) => {
     if( fs.existsSync(`./base/${platform}`) ) {
-      fs.rmdirSync(`./base/${platform}`, { recursive : true})
+      fs.rmSync(`./base/${platform}`, { recursive : true})
     }
     fs.mkdirSync(`./base/${platform}`)
     fs.copyFileSync("./base/entry.tp", `./base/${platform}/entry.tp`)
     fs.copyFileSync("./base/plugin_icon.png", `./base/${platform}/${packageJson.name}.png`)
     
-    if(options !== undefined && fs.existsSync(`./configs/config.js.${options.type}`) ){
-      fs.copyFileSync(`./configs/config.js.${options.type}`, './src/config.js')
+    if(options !== undefined && fs.existsSync(`./configs/discordPaths.js.${options.type}`) ){
+      fs.copyFileSync(`./configs/discordPaths.js.${options.type}`, './src/discordPaths.js')
     }
     else {
-      fs.copyFileSync(`./configs/config.js`, './src/config.js')
+      fs.copyFileSync(`./configs/discordPaths.js`, './src/discordPaths.js')
     }
 
     let nodeVersion = 'node18-win-x64'
@@ -62,7 +62,7 @@ const build = async(platform, options ) => {
     zip.writeZip(path.normalize(packageName))
 
     console.log("Cleaning Up")
-    fs.unlinkSync(`./src/config.js`)
+    fs.unlinkSync(`./src/discordPaths.js`)
     fs.rmSync(`./base/${platform}`, { recursive : true})
 }
 
@@ -89,7 +89,7 @@ const executeBuilds= async () => {
     await build("Windows", { type: "PTB"} )
     //await build("Windows", { type: "DEVELOP"} )
     
-    fs.copyFileSync(`./configs/config.js`, './src/config.js')
+    fs.copyFileSync(`./configs/discordPaths.js`, './src/discordPaths.js')
 }
 
 executeBuilds();

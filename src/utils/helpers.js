@@ -1,11 +1,9 @@
 // HELPER FUNCTIONS
 const platform = require("process").platform;
 const {pluginId} = require("../discordConfig.js");
+const {discord_paths} = require("../discordPaths.js");
 let debugMode = "INFO";
-const discord_paths = {
-  darwin: "/Applications/Discord.app/Contents/MacOS/Discord",
-  win32: "Discord.exe",
-};
+
 
 function setDebugMode(mode) {
   debugMode = mode;
