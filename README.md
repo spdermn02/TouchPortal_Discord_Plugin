@@ -130,10 +130,14 @@ This plugin simplifies your Discord interactions, bringing essential controls to
 
 
 ## Installation and Configuration
-(VIDEO COMING SOON)<br>
- <img src="https://github.com/user-attachments/assets/ac721f86-e70b-4756-a56c-9ea8a25da0f0" alt="HOW TO INSTALL (THUMB)" style="width: 300px;">
+**Q:** What is Canary or PTB Versions??<br>
+**A:** Find out [Here](https://github.com/spdermn02/TouchPortal_Discord_Plugin/blob/master/resources/discordVersion_readme.md)
+
 <details>
 <summary>HOW TO - Installation and Configuration (CLICK TO EXPAND)</summary>
+<a href="https://github.com/user-attachments/assets/1b1f23e6-49e7-40e4-a84a-ac34a6e1483f">
+  <img src="https://github.com/user-attachments/assets/1b1f23e6-49e7-40e4-a84a-ac34a6e1483f" alt="Simple Setup Dev Portal" style="width: 600px;">
+</a>
   
 1. **Ensure Discord is Open**
    - Make sure the Discord app is open on your PC or Mac.
@@ -189,6 +193,11 @@ This plugin simplifies your Discord interactions, bringing essential controls to
     - You should now be able to use the new functions of the Touch Portal Discord Plugin!
 
 </details>
+
+Complete Installation Video (Includes Troubleshooting)<br>
+<a href="https://youtu.be/vw7JtNke4EA">
+  <img src="https://github.com/user-attachments/assets/ac721f86-e70b-4756-a56c-9ea8a25da0f0" alt="HOW TO INSTALL (THUMB)" style="width: 300px;">
+</a>
 
 ## Troubleshooting Plugin
 <details>
