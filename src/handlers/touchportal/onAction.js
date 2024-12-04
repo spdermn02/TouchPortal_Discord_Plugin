@@ -218,8 +218,7 @@ async function onAction(message, isHeld, DG) {
     let volume;
 
     // const adjustVolume((deviceType, message)) => {
-    const adjustDeviceVolume = (deviceType, message, isHeld) => {
-      let multiply = isHeld ? 1 : 2;
+    const adjustDeviceVolume = (deviceType, message) => {
       // If isHeld is undefined or null, set the volume directly
       if (deviceType === "Input") {
         DG.voiceSettings.inputDeviceVolume += parseInt(message.data[1].value, 10);
@@ -249,7 +248,6 @@ async function onAction(message, isHeld, DG) {
     if (isHeld === undefined || isHeld === null) {
       adjustDeviceVolume(deviceType, message, isHeld);
     }
-
 
 
     if (isHeld) {
