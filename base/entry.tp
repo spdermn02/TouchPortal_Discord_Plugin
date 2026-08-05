@@ -1,12 +1,12 @@
 {
     "sdk": 6,
-    "version": 5100,
-    "TPDiscord_Version": "5.1.0",
+    "version": 5200,
+    "TPDiscord_Version": "5.2.0",
     "name": "Touch Portal Discord Plugin",
     "id": "TPDiscord",
     "plugin_start_cmd_windows": "\"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe\"",
-    "plugin_start_cmd_mac": "sh %TP_PLUGIN_FOLDER%tpdiscord/start_tpdiscord.sh",
-    "plugin_start_cmd_linux": "sh %TP_PLUGIN_FOLDER%tpdiscord/start_tpdiscord.sh",
+    "plugin_start_cmd_mac": "/bin/sh -c \"chmod +x '%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord' 2>/dev/null; exec '%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord'\"",
+    "plugin_start_cmd_linux": "/bin/sh -c \"chmod +x '%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord' 2>/dev/null; exec '%TP_PLUGIN_FOLDER%tpdiscord/tpdiscord'\"",
     "configuration": {
         "colorDark": "#23272A",
         "colorLight": "#7289DA"

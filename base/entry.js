@@ -5,6 +5,14 @@ const PLUGIN_NAME = "Touch Portal Discord Plugin";
 const PLUGIN_FOLDER = "tpdiscord";
 const PLUGIN_ICON = "tpdiscord.png";
 
+// The build stamps 0755 into the .tpp with a UNIX host byte so the executable arrives with
+// its execute bit intact. Touch Portal does not document whether its extractor preserves
+// those bits, so the POSIX start command re-applies it before exec'ing as a cheap fallback.
+// `exec` matters: Touch Portal supervises the process it spawns, so the plugin has to
+// replace the shell rather than be backgrounded by it.
+const POSIX_EXECUTABLE = `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_FOLDER}`;
+const POSIX_START_CMD = `/bin/sh -c "chmod +x '${POSIX_EXECUTABLE}' 2>/dev/null; exec '${POSIX_EXECUTABLE}'"`;
+
 let states = {};
 let events = {};
 let actions = {};
@@ -12,13 +20,13 @@ let connectors = {};
 
 let TP_PLUGIN_INFO = {
   sdk: 6,
-  version: 5100,
-  TPDiscord_Version: "5.1.0",
+  version: 5200,
+  TPDiscord_Version: "5.2.0",
   name: `${PLUGIN_NAME}`,
   id: `${PLUGIN_ID}`,
-  plugin_start_cmd_windows: '"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe"',
-  plugin_start_cmd_mac: `sh %TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/start_tpdiscord.sh`,
-  plugin_start_cmd_linux: `sh %TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/start_tpdiscord.sh`,
+  plugin_start_cmd_windows: `"%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}\\${PLUGIN_FOLDER}.exe"`,
+  plugin_start_cmd_mac: POSIX_START_CMD,
+  plugin_start_cmd_linux: POSIX_START_CMD,
   configuration: {
     colorDark: "#23272A",
     colorLight: "#7289DA",

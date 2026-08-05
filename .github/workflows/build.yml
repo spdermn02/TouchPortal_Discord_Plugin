@@ -1,15 +1,34 @@
-name: Node.js CI
+name: Build & Release
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  # Node's single-executable format injects the plugin into a copy of the running node
+  # binary, so each package has to be built on its own platform. Building macOS natively
+  # is also the only way to codesign it: an unsigned or broken signature is fatal on
+  # Apple Silicon, and that could never be produced from the old Windows-only runner.
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: Windows
+          - os: ubuntu-latest
+            target: Linux
+          - os: macos-13
+            target: MacOS
+          - os: macos-latest
+            target: MacOS-Arm64
+
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v6
@@ -19,12 +38,31 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '22'
           cache: npm
 
-      - run: npm ci --ignore-scripts --loglevel verbose
-      - run: .\node_modules\.bin\tsc -p node_modules\touchportal-api\tsconfig.json
-      - run: npm run pkg-all
+      - run: npm ci --ignore-scripts
+
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tpp-${{ matrix.target }}
+          path: Installers/*.tpp
+          if-no-files-found: error
+
+  release:
+    name: Attach packages to release
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: Installers
+          pattern: tpp-*
+          merge-multiple: true
 
       - name: Upload artifacts to release
         uses: svenstaro/upload-release-action@v2
