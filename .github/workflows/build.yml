@@ -22,7 +22,10 @@ jobs:
             target: Windows
           - os: ubuntu-latest
             target: Linux
-          - os: macos-13
+          # macos-15-intel is the only remaining x86_64 macOS image; macos-13 was retired
+          # in December 2025. GitHub retires Intel macOS entirely in Fall 2027, after which
+          # this leg has to go and Intel Macs fall back to the arm64 build under Rosetta 2.
+          - os: macos-15-intel
             target: MacOS
           - os: macos-latest
             target: MacOS-Arm64
@@ -45,7 +48,7 @@ jobs:
 
       - run: npm run build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: tpp-${{ matrix.target }}
           path: Installers/*.tpp
@@ -58,7 +61,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v4
+      # v8 only decompresses downloads whose Content-Type says zip. The packages themselves
+      # are zips, but upload-artifact archives them into an artifact container (archive
+      # defaults to true), so the container is what gets unzipped and the .tpp files land
+      # intact. Do not set archive:false on the upload side or this stops holding.
+      - uses: actions/download-artifact@v8
         with:
           path: Installers
           pattern: tpp-*
