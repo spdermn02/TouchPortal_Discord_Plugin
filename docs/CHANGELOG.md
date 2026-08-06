@@ -11,11 +11,17 @@ Build and packaging release. No new actions, events, or states — this fixes th
 macOS packages, which had never worked correctly.
 
 ### Fixed
-- **Linux and macOS packages shipped a non-executable plugin.** The `.tpp` archive is a zip,
-  and the build stamped it with a Windows host byte and mode `0666`. Unix extractors only
-  honour permission bits when the archive advertises a UNIX host, so the execute bit was
-  silently discarded on every release. Packages now carry a UNIX host byte with mode `0755`
-  on the executable and `0644` on data files, regardless of which OS built them.
+- **Linux and macOS packages shipped a non-executable plugin.** Touch Portal does not
+  preserve the Unix mode bits recorded in a `.tpp` when it unpacks a plugin, so the
+  executable arrives without permission to run. It is now started through
+  `base/start_tpdiscord.sh`, which restores the execute bit and then `exec`s the plugin.
+  Touch Portal launches that script with `sh`, so the script itself needs no execute bit —
+  which is the only reason this works at all.
+  - The archive metadata was independently wrong: built on Windows, it advertised an NTFS
+    host with mode `0666`, and Unix extractors only honour permission bits when the archive
+    says UNIX. Packages now carry a UNIX host byte with `0755` on the executable and `0644`
+    on data files regardless of build host. This is not what makes the plugin run, but it
+    means unpacking a `.tpp` by hand now yields something sane.
 - **Plugin crashed on startup on Linux.** `src/utils/discordkeys.js` was required as
   `./utils/discordKeys.js` (capital K) from `src/index.js` and `onAction.js`. Case-insensitive
   filesystems hid this on Windows and macOS; on Linux it was a hard `MODULE_NOT_FOUND`.
@@ -25,9 +31,13 @@ macOS packages, which had never worked correctly.
   produced on macOS runners and ad-hoc signed.
 - **Plugin was not supervised correctly on Linux and macOS.** The old start script
   backgrounded the executable with `&` and exited, so Touch Portal lost track of the process
-  it had spawned. The start command now `exec`s the plugin so it replaces the shell.
+  it had spawned. The launcher now `exec`s the plugin so it replaces the shell.
 - **Start script was not POSIX-compatible.** It used a bash-only `[[ ]]` test under a
   `#!/bin/sh` shebang, which fails outright on Debian and Ubuntu, where `/bin/sh` is dash.
+  It also invoked the executable as `./tpdiscord`, depending on a working directory Touch
+  Portal does not guarantee; the launcher now resolves its own directory.
+- Removed the old script's `ps`/`grep`/`kill -9` block, which killed processes matched by
+  name before starting.
 - `entry.tp` advertised version `5.1.0` while the released package was `5.1.2`, which could
   mislead Touch Portal's update check. The version is now bumped in one place.
 
@@ -47,10 +57,13 @@ macOS packages, which had never worked correctly.
 ### Added
 - **Native Apple Silicon (arm64) package.** Previously macOS shipped x64-only.
 
-### Removed
-- `base/start_tpdiscord.sh`. It existed only to `chmod +x` the executable, working around the
-  packaging bug above. The POSIX start command now re-applies the execute bit inline as a
-  fallback, since Touch Portal does not document whether its extractor preserves zip modes.
+### Notes for plugin developers
+- `plugin_start_cmd_*` accepts only a **single** command. Chaining with `;` or `&&`, or
+  wrapping in `sh -c "…"`, does not work, which is why the `chmod` lives in a script rather
+  than inline in `entry.tp`.
+- Touch Portal does **not** preserve Unix permission bits from the `.tpp` archive. Anything
+  that has to be executable on macOS or Linux must either be launched through an interpreter
+  (`sh script.sh`) or have its mode restored at runtime.
 
 ---
 

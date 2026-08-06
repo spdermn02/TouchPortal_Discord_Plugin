@@ -32,7 +32,12 @@ const MODE_DATA = 0o644;
 // apply the permission bits from a member's external attributes when this field says the
 // archive was made on UNIX. adm-zip defaults to the host it runs on, so a package built on
 // Windows used to advertise host 10 (NTFS) and every extractor silently discarded the mode
-// bits - which is why the executable came out non-executable on Linux and macOS.
+// bits below.
+//
+// Touch Portal's own extractor discards them regardless, so this is not what makes the
+// plugin runnable - base/start_tpdiscord.sh is. It is still worth getting right: anyone
+// unpacking the .tpp by hand, and any future Touch Portal that does honour modes, gets a
+// correct archive rather than one that silently claims 0666 on an executable.
 const ZIP_MADE_BY_UNIX = 0x0314;
 
 const isWindows = process.platform === "win32";
@@ -172,6 +177,13 @@ const writePackage = (executablePath, channel) => {
   addEntry(zip, "entry.tp", fs.readFileSync(path.join(ROOT, "base/entry.tp")), MODE_DATA);
   addEntry(zip, `${PLUGIN_FOLDER}.png`, fs.readFileSync(path.join(ROOT, "base/plugin_icon.png")), MODE_DATA);
   addEntry(zip, path.basename(executablePath), fs.readFileSync(executablePath), MODE_EXEC);
+
+  // macOS and Linux start through a launcher script, because Touch Portal does not preserve
+  // the mode bits below and accepts only one command in plugin_start_cmd_*. It is invoked as
+  // `sh <path>` so it needs no execute bit itself. Windows starts the .exe directly.
+  if (!isWindows) {
+    addEntry(zip, "start_tpdiscord.sh", fs.readFileSync(path.join(ROOT, "base/start_tpdiscord.sh")), MODE_EXEC);
+  }
 
   const label = channel ? `${target}-${channel}` : target;
   const packagePath = path.join(INSTALLERS_DIR, `${PLUGIN_FOLDER}-${label}-${packageJson.version}.tpp`);

@@ -5,13 +5,15 @@ const PLUGIN_NAME = "Touch Portal Discord Plugin";
 const PLUGIN_FOLDER = "tpdiscord";
 const PLUGIN_ICON = "tpdiscord.png";
 
-// The build stamps 0755 into the .tpp with a UNIX host byte so the executable arrives with
-// its execute bit intact. Touch Portal does not document whether its extractor preserves
-// those bits, so the POSIX start command re-applies it before exec'ing as a cheap fallback.
-// `exec` matters: Touch Portal supervises the process it spawns, so the plugin has to
-// replace the shell rather than be backgrounded by it.
-const POSIX_EXECUTABLE = `%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/${PLUGIN_FOLDER}`;
-const POSIX_START_CMD = `/bin/sh -c "chmod +x '${POSIX_EXECUTABLE}' 2>/dev/null; exec '${POSIX_EXECUTABLE}'"`;
+// macOS and Linux go through a launcher script rather than starting the executable
+// directly, for two reasons confirmed against a real Touch Portal install:
+//   1. Touch Portal does not preserve the Unix mode bits stored in the .tpp, so the
+//      executable arrives without an execute bit and cannot be started directly.
+//   2. Touch Portal accepts only a single command here, so the chmod that fixes (1)
+//      cannot be inlined into this value - it has to live in a script.
+// Invoking the script through `sh` is what makes this work at all: the script needs no
+// execute bit of its own. See base/start_tpdiscord.sh.
+const POSIX_START_CMD = `sh %TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/start_tpdiscord.sh`;
 
 let states = {};
 let events = {};
