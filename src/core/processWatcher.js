@@ -23,6 +23,12 @@ class ProcessWatcher extends EventEmitter {
     }
   }
   watch(processName) {
+    // Touch Portal sends Settings on every settings change, and each one lands here. Without
+    // this guard every change stacked another polling interval on top of the last.
+    if (this.loop != null && this.processNames[processName]) {
+      return;
+    }
+    this.stopWatch();
     this.processNames[processName] = {};
     let that = this;
     this.loop = setInterval(() => {
@@ -43,8 +49,11 @@ class ProcessWatcher extends EventEmitter {
           emitEvent = null;
           return;
         }
+        if (!this.processNames[processName]) {
+          this.processNames[processName] = {};
+        }
         if (list.length > 0) {
-          if (this.processNames[processName] == null || !this.processNames[processName]["isRunning"]) {
+          if (!this.processNames[processName].isRunning) {
             this.processNames[processName].isRunning = true;
             emitEvent = true;
           }

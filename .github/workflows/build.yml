@@ -1,33 +1,83 @@
-name: Node.js CI
+name: Build & Release
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
+# Read-only by default; only the release job, which uploads assets, gets write access.
+# Actions are pinned to commit SHAs so a moved or compromised tag cannot change what runs
+# with that token.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  # Node's single-executable format injects the plugin into a copy of the running node
+  # binary, so each package has to be built on its own platform. Building macOS natively
+  # is also the only way to codesign it: an unsigned or broken signature is fatal on
+  # Apple Silicon, and that could never be produced from the old Windows-only runner.
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: Windows
+          - os: ubuntu-latest
+            target: Linux
+          # macos-15-intel is the only remaining x86_64 macOS image; macos-13 was retired
+          # in December 2025. GitHub retires Intel macOS entirely in Fall 2027, after which
+          # this leg has to go and Intel Macs fall back to the arm64 build under Rosetta 2.
+          - os: macos-15-intel
+            target: MacOS
+          - os: macos-latest
+            target: MacOS-Arm64
+
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           submodules: recursive
 
       - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '18'
+          node-version: '22'
           cache: npm
 
-      - run: npm ci --ignore-scripts --loglevel verbose
-      - run: .\node_modules\.bin\tsc -p node_modules\touchportal-api\tsconfig.json
-      - run: npm run pkg-all
+      - run: npm ci --ignore-scripts
+
+      - run: npm run build
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tpp-${{ matrix.target }}
+          path: Installers/*.tpp
+          if-no-files-found: error
+
+  release:
+    name: Attach packages to release
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # v8 only decompresses downloads whose Content-Type says zip. The packages themselves
+      # are zips, but upload-artifact archives them into an artifact container (archive
+      # defaults to true), so the container is what gets unzipped and the .tpp files land
+      # intact. Do not set archive:false on the upload side or this stops holding.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          path: Installers
+          pattern: tpp-*
+          merge-multiple: true
 
       - name: Upload artifacts to release
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: "Installers/*.tpp"

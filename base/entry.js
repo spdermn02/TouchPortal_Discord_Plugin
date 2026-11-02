@@ -5,6 +5,16 @@ const PLUGIN_NAME = "Touch Portal Discord Plugin";
 const PLUGIN_FOLDER = "tpdiscord";
 const PLUGIN_ICON = "tpdiscord.png";
 
+// macOS and Linux go through a launcher script rather than starting the executable
+// directly, for two reasons confirmed against a real Touch Portal install:
+//   1. Touch Portal does not preserve the Unix mode bits stored in the .tpp, so the
+//      executable arrives without an execute bit and cannot be started directly.
+//   2. Touch Portal accepts only a single command here, so the chmod that fixes (1)
+//      cannot be inlined into this value - it has to live in a script.
+// Invoking the script through `sh` is what makes this work at all: the script needs no
+// execute bit of its own. See base/start_tpdiscord.sh.
+const POSIX_START_CMD = `sh %TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/start_tpdiscord.sh`;
+
 let states = {};
 let events = {};
 let actions = {};
@@ -12,13 +22,13 @@ let connectors = {};
 
 let TP_PLUGIN_INFO = {
   sdk: 6,
-  version: 5100,
-  TPDiscord_Version: "5.1.0",
+  version: 5200,
+  TPDiscord_Version: "5.2.0",
   name: `${PLUGIN_NAME}`,
   id: `${PLUGIN_ID}`,
-  plugin_start_cmd_windows: '"%TP_PLUGIN_FOLDER%tpdiscord\\tpdiscord.exe"',
-  plugin_start_cmd_mac: `sh %TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/start_tpdiscord.sh`,
-  plugin_start_cmd_linux: `sh %TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}/start_tpdiscord.sh`,
+  plugin_start_cmd_windows: `"%TP_PLUGIN_FOLDER%${PLUGIN_FOLDER}\\${PLUGIN_FOLDER}.exe"`,
+  plugin_start_cmd_mac: POSIX_START_CMD,
+  plugin_start_cmd_linux: POSIX_START_CMD,
   configuration: {
     colorDark: "#23272A",
     colorLight: "#7289DA",

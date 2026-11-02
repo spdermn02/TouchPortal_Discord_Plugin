@@ -1,6 +1,6 @@
 {
   "name": "tpdiscord",
-  "version": "5.1.2",
+  "version": "5.2.0",
   "description": "Touch Portal Plugin for Discord using RPC",
   "main": "src/index.js",
   "bin": {
@@ -9,23 +9,11 @@
   "scripts": {
     "start": "node src/index.js",
     "build-entry": "node base/buildentry.js base/entry.js",
-    "pkg": "pkg --targets node18-linux-x64,node18-macos-x64,node18-win-x64 .",
-    "pkg-win": "pkg --targets node18-win-x64 .",
-    "pkg-mac": "pkg --targets node18-macos-x64 .",
-    "pkg-linux": "pkg --targets node18-linux-x64 .",
-    "pkg-all": "node scripts/build.js"
+    "build-deps": "tsc -p node_modules/touchportal-api/tsconfig.json",
+    "build": "node scripts/build.js"
   },
   "author": "Jameson Allen aka Spdermn02",
   "license": "ISC",
-  "pkg": {
-    "scripts": [
-      "src/**/*.js",
-      "src/*.js"
-    ],
-    "assets": [
-      "discord-rpc/**/*"
-    ]
-  },
   "dependencies": {
     "@types/markdown-it": "^14.1.2",
     "discord-rpc": "file:./discord-rpc",
@@ -35,11 +23,15 @@
   },
   "devDependencies": {
     "adm-zip": "^0.5.17",
+    "esbuild": "^0.28.1",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.32.0",
     "npm-check-updates": "^22.0.1",
-    "pkg": "^5.8.1",
+    "postject": "^1.0.0-alpha.6",
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

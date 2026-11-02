@@ -2,6 +2,21 @@
 
 const { logIt, diff, convertVolumeToPercentage, platform, discord_paths } = require("../../utils/helpers.js");
 
+// Event handlers run straight off the RPC socket. Anything they throw (or reject with) must
+// stop here: an uncaught error in one handler should cost one state update, not the plugin.
+const guard = (name, fn) => {
+  return (...args) => {
+    try {
+      const result = fn(...args);
+      if (result && typeof result.catch === "function") {
+        result.catch((err) => logIt("ERROR", `${name}: ${(err && err.stack) || err}`));
+      }
+    } catch (err) {
+      logIt("ERROR", `${name}: ${(err && err.stack) || err}`);
+    }
+  };
+};
+
 class VoiceStateHandler {
   constructor(DG, TPClient, userStateHandler, notificationHandler, voiceChannelHandler, procWatcher) {
     this.TPClient = TPClient;
@@ -26,68 +41,63 @@ class VoiceStateHandler {
   };
 
   registerEvents = () => {
-    this.DG.Client.on("ready", async () => {
-      if (
-        !this.DG.accessToken ||
-        (this.DG.Client.accessToken != undefined && this.DG.accessToken != this.DG.Client.accessToken)
-      ) {
-        this.DG.accessToken = this.DG.Client.accessToken;
-      }
+    this.DG.Client.on(
+      "ready",
+      guard("ready", async () => {
+        if (
+          !this.DG.accessToken ||
+          (this.DG.Client.accessToken != undefined && this.DG.accessToken != this.DG.Client.accessToken)
+        ) {
+          this.DG.accessToken = this.DG.Client.accessToken;
+        }
 
-      logIt("INFO", " < ---------------   Discord Connected   --------------- >");
+        logIt("INFO", " < ---------------   Discord Connected   --------------- >");
 
-      this.TPClient.stateUpdate("discord_connected", "Connected");
-      this.TPClient.settingUpdate("Plugin Connected", "Connected");
-      this.DG.connected = true;
+        this.TPClient.stateUpdate("discord_connected", "Connected");
+        this.TPClient.settingUpdate("Plugin Connected", "Connected");
+        this.DG.connected = true;
 
-      /// should these subscriptions be moved out of here?
+        const events = [
+          "VOICE_SETTINGS_UPDATE",
+          "VOICE_CHANNEL_SELECT",
+          "VOICE_CONNECTION_STATUS",
+          "CHANNEL_CREATE",
+          "VIDEO_STATE_UPDATE",
+          "SCREENSHARE_STATE_UPDATE",
+          "NOTIFICATION_CREATE",
+          "GUILD_CREATE",
+          "CURRENT_USER_UPDATE",
+        ];
+        for (const event of events) {
+          if (!this.DG.Client) {
+            return; // torn down mid-startup
+          }
+          await this.DG.Client.subscribe(event).catch((err) => {
+            logIt("ERROR", `subscribe ${event}: ${err}`);
+          });
+        }
 
-      await this.DG.Client.subscribe("VOICE_SETTINGS_UPDATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("VOICE_CHANNEL_SELECT").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("VOICE_CONNECTION_STATUS").catch((err) => {
-        logIt("ERROR", err);
-      });
+        // how to maybe get thread create events?
+        // https://github.com/Wumpus-Central/discrapper-canary/blob/75f0797775371f774081fa60b661b55afe880e76/chunks/218315.js#L36
 
-      await this.DG.Client.subscribe("CHANNEL_CREATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("VIDEO_STATE_UPDATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("SCREENSHARE_STATE_UPDATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("NOTIFICATION_CREATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("GUILD_CREATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-      await this.DG.Client.subscribe("CURRENT_USER_UPDATE").catch((err) => {
-        logIt("ERROR", err);
-      });
-
-      // how to maybe get thread create events?
-      // https://github.com/Wumpus-Central/discrapper-canary/blob/75f0797775371f774081fa60b661b55afe880e76/chunks/218315.js#L36
-
-      await this.getGuilds();
-      await this.getSoundboardSounds();
-    });
+        await this.getGuilds().catch((err) => logIt("ERROR", `getGuilds: ${err}`));
+        await this.getSoundboardSounds().catch((err) => logIt("ERROR", `getSoundboardSounds: ${err}`));
+      }),
+    );
 
     // If user changes their name,a vatar, premium_type...
     this.DG.Client.on("CURRENT_USER_UPDATE", (data) => {
-      logIt("DEBUG", "Current User Update", JSON.stringify(data));
+      if (!data) {
+        return;
+      }
+      logIt("DEBUG", "Current User Update", data.id);
       // let userId = data.id;
       // let userName = data.username; // or global_name ?
       // let userPremiumType = data.premium_type;
       // let userAvatar = data.avatar;
 
-      this.DG.userID = data.id;
-      this.DG.userPremiumType = data.premium_type;
+      this.DG.userId = data.id;
+      this.DG.userPremiumType = data.premium_type || 0;
       // we can decide if
       // this.TPClient.stateUpdate("discord_user_id", data.id);
       // this.TPClient.stateUpdate("discord_user_name", data.username);
@@ -96,70 +106,56 @@ class VoiceStateHandler {
       // this.TPClient.stateUpdate("discord_user_avatarID", data.avatarID);
     });
 
-    this.DG.Client.on("NOTIFICATION_CREATE", (data) => {
-      // When getting DMs, or Tagged in a message.. can give  you details as to where.. so could set up a button to take to channel where tagged technically..
-      // Select channel action would need a custom input for channel ID
-      this.notification.onNotification(data);
-    });
+    // When getting DMs, or Tagged in a message.. can give  you details as to where.. so could set up a button to take to channel where tagged technically..
+    // Select channel action would need a custom input for channel ID
+    this.DG.Client.on(
+      "NOTIFICATION_CREATE",
+      guard("NOTIFICATION_CREATE", (data) => this.notification.onNotification(data)),
+    );
 
     // should these events be pushed into their own file or remain here?
-    this.DG.Client.on("VOICE_STATE_CREATE", (data) => {
-      this.voiceState("create", data).catch((err) => {
-        logIt("ERROR", err);
-      });
-    });
+    this.DG.Client.on("VOICE_STATE_CREATE", guard("VOICE_STATE_CREATE", (data) => this.voiceState("create", data)));
 
-    this.DG.Client.on("VOICE_STATE_UPDATE", (data) => {
-      this.voiceState("update", data).catch((err) => {
-        logIt("ERROR", err);
-      });
-    });
+    this.DG.Client.on("VOICE_STATE_UPDATE", guard("VOICE_STATE_UPDATE", (data) => this.voiceState("update", data)));
 
-    this.DG.Client.on("VOICE_STATE_DELETE", (data) => {
-      this.voiceState("delete", data).catch((err) => {
-        logIt("ERROR", err);
-      });
-    });
+    this.DG.Client.on("VOICE_STATE_DELETE", guard("VOICE_STATE_DELETE", (data) => this.voiceState("delete", data)));
 
-    this.DG.Client.on("SPEAKING_START", (data) => {
-      this.voiceState("speaking", data).catch((err) => {
-        logIt("ERROR", err);
-      });
-    });
+    this.DG.Client.on("SPEAKING_START", guard("SPEAKING_START", (data) => this.voiceState("speaking", data)));
 
-    this.DG.Client.on("SPEAKING_STOP", (data) => {
-      this.voiceState("stop_speaking", data).catch((err) => {
-        logIt("ERROR", err);
-      });
-    });
+    this.DG.Client.on("SPEAKING_STOP", guard("SPEAKING_STOP", (data) => this.voiceState("stop_speaking", data)));
 
-    this.DG.Client.on("VOICE_SETTINGS_UPDATE", (data) => {
-      this.voiceSettings(data);
-    });
+    this.DG.Client.on("VOICE_SETTINGS_UPDATE", guard("VOICE_SETTINGS_UPDATE", (data) => this.voiceSettings(data)));
 
-    this.DG.Client.on("GUILD_CREATE", (data) => {
-      this.guildCreate(data);
-    });
+    this.DG.Client.on("GUILD_CREATE", guard("GUILD_CREATE", (data) => this.guildCreate(data)));
 
-    this.DG.Client.on("CHANNEL_CREATE", (data) => {
-      this.channelCreate(data);
-    });
+    this.DG.Client.on("CHANNEL_CREATE", guard("CHANNEL_CREATE", (data) => this.channelCreate(data)));
 
-    this.DG.Client.on("VOICE_CHANNEL_SELECT", (data) => {
-      this.voiceChannelHandler.voiceChannel(data, this.userStateHandler);
-    });
+    this.DG.Client.on(
+      "VOICE_CHANNEL_SELECT",
+      guard("VOICE_CHANNEL_SELECT", (data) => this.voiceChannelHandler.voiceChannel(data, this.userStateHandler)),
+    );
 
-    this.DG.Client.on("VOICE_CONNECTION_STATUS", (data) => {
-      this.voiceConnectionStatus(data);
-    });
+    this.DG.Client.on(
+      "VOICE_CONNECTION_STATUS",
+      guard("VOICE_CONNECTION_STATUS", (data) => this.voiceConnectionStatus(data)),
+    );
 
-    this.DG.Client.on("VIDEO_STATE_UPDATE", (data) => {
-      this.TPClient.stateUpdate("discord_camera_status", data.active ? "On" : "Off");
-    });
+    this.DG.Client.on(
+      "VIDEO_STATE_UPDATE",
+      guard("VIDEO_STATE_UPDATE", (data) => {
+        this.TPClient.stateUpdate("discord_camera_status", data && data.active ? "On" : "Off");
+      }),
+    );
 
-    this.DG.Client.on("SCREENSHARE_STATE_UPDATE", (data) => {
-      this.TPClient.stateUpdate("discord_screenshare_status", data.active ? "On" : "Off");
-    });
+    this.DG.Client.on(
+      "SCREENSHARE_STATE_UPDATE",
+      guard("SCREENSHARE_STATE_UPDATE", (data) => {
+        this.TPClient.stateUpdate("discord_screenshare_status", data && data.active ? "On" : "Off");
+      }),
+    );
+
+    // Without an error listener, an 'error' emit (e.g. from the transport) throws.
+    this.DG.Client.on("error", (err) => logIt("ERROR", `Discord client error: ${err}`));
 
     this.DG.Client.on("disconnected", () => {
       logIt("WARN", "discord connection closed, will attempt reconnect, once process detected");
@@ -168,27 +164,41 @@ class VoiceStateHandler {
 
       this.DG.connected = false;
 
-      // setting procWatcher processNames to false so we can force it to try to reconnect
-      this.processNames[discord_paths[platform]]["isRunning"] = false;
+      // setting procWatcher processNames to false so we can force it to try to reconnect.
+      // Only present when the watcher is actually running (Windows, not skipped): on Linux
+      // there is no discord_paths entry at all, and this used to throw and kill the plugin.
+      const watched = this.processNames[discord_paths[platform]];
+      if (watched) {
+        watched.isRunning = false;
+      }
 
-      if (platform != "win32" || this.DG.pluginSettings["Skip Process Watcher"].toLowerCase() == "yes") {
-        return this.doLogin();
+      const skipWatcher = String(this.DG.pluginSettings["Skip Process Watcher"] || "").toLowerCase() == "yes";
+      if ((platform != "win32" || skipWatcher) && this.doLogin) {
+        this.doLogin();
       }
     });
   };
 
   async voiceState(event, data) {
     logIt("DEBUG", "Voice State", event, JSON.stringify(data));
-    // let ids = [];
+    if (!data) {
+      return;
+    }
+    const selfId = this.DG.Client && this.DG.Client.user ? this.DG.Client.user.id : undefined;
+    // SPEAKING_* events carry user_id; everything else carries a user object.
+    if (event !== "speaking" && event !== "stop_speaking" && !(data.user && data.user.id)) {
+      logIt("DEBUG", `Voice State ${event}: no user in payload, ignoring`);
+      return;
+    }
 
     if (event === "create") {
-      if (data.user.id !== this.DG.Client.user.id) {
+      if (data.user.id !== selfId) {
         await this.userStateHandler.addUserData(data);
       }
     }
 
     if (event === "delete") {
-      this.userStateHandler.deleteUserStates(data);
+      await this.userStateHandler.deleteUserStates(data);
     }
 
     if (event === "speaking" || event === "stop_speaking") {
@@ -196,8 +206,8 @@ class VoiceStateHandler {
     }
 
     if (event === "update") {
-      if (data.user.id !== this.DG.Client.user.id) {
-        this.userStateHandler.updateUserStates(data);
+      if (data.user.id !== selfId) {
+        await this.userStateHandler.updateUserStates(data);
       }
     }
   }
@@ -241,9 +251,8 @@ class VoiceStateHandler {
     if (Object.prototype.hasOwnProperty.call(data, type)) {
       logIt("INFO", `Default ${type} device has changed.`);
 
-      const devicesArray = Array.isArray(data[type].available_devices)
-        ? data[type].available_devices
-        : Object.values(data[type].available_devices);
+      const available = data[type] && data[type].available_devices;
+      const devicesArray = Array.isArray(available) ? available : Object.values(available || {});
 
       if (devicesArray.length > 0 && devicesArray.some((device) => device.id && device.name)) {
         // This is when we startup and get a full array of devices
@@ -274,7 +283,8 @@ class VoiceStateHandler {
         this.DG.voiceSettings[`${type}DeviceId`] = data[type].device_id;
         this.DG.voiceSettings[`${type}DeviceVolume`] = data[type].volume;
 
-        const matchedDevice = this.DG.voiceSettings[`${type}Devices`].find(
+        const knownDevices = this.DG.voiceSettings[`${type}Devices`];
+        const matchedDevice = (Array.isArray(knownDevices) ? knownDevices : []).find(
           (device) => device.id === this.DG.voiceSettings[`${type}DeviceId`],
         );
         if (matchedDevice) {
@@ -295,7 +305,10 @@ class VoiceStateHandler {
 
   voiceSettings = (newData) => {
     logIt("DEBUG", "voiceSettings", JSON.stringify(newData));
-    const data = diff(this.DG.voiceSettings.prevVoiceActivityData, newData);
+    if (!newData || typeof newData !== "object") {
+      return;
+    }
+    const data = diff(this.DG.voiceSettings.prevVoiceActivityData, newData) || {};
     // // We always need these
     data.mute = newData.mute;
     data.deaf = newData.deaf;
@@ -304,13 +317,15 @@ class VoiceStateHandler {
     const connectors = [];
 
     if (
-      Object.prototype.hasOwnProperty.call(data, "input") &&
+      data.input != null &&
+      typeof data.input === "object" &&
       Object.prototype.hasOwnProperty.call(data.input, "device_id")
     ) {
       this.handleDeviceChange("input", data);
     }
     if (
-      Object.prototype.hasOwnProperty.call(data, "output") &&
+      data.output != null &&
+      typeof data.output === "object" &&
       Object.prototype.hasOwnProperty.call(data.output, "device_id")
     ) {
       this.handleDeviceChange("output", data);
@@ -345,7 +360,8 @@ class VoiceStateHandler {
     }
 
     if (
-      Object.prototype.hasOwnProperty.call(data, "input") &&
+      data.input != null &&
+      typeof data.input === "object" &&
       Object.prototype.hasOwnProperty.call(data.input, "volume") &&
       data.input.volume > -1
     ) {
@@ -354,7 +370,8 @@ class VoiceStateHandler {
       connectors.push({ id: "discord_voice_volume_connector", value: this.DG.voiceChannelInfo.voice_volume });
     }
     if (
-      Object.prototype.hasOwnProperty.call(data, "output") &&
+      data.output != null &&
+      typeof data.output === "object" &&
       Object.prototype.hasOwnProperty.call(data.output, "volume") &&
       data.output.volume > -1
     ) {
@@ -367,7 +384,8 @@ class VoiceStateHandler {
       });
     }
     if (
-      Object.prototype.hasOwnProperty.call(data, "mode") &&
+      data.mode != null &&
+      typeof data.mode === "object" &&
       Object.prototype.hasOwnProperty.call(data.mode, "type") &&
       data.mode.type != ""
     ) {
@@ -408,7 +426,7 @@ class VoiceStateHandler {
         value: this.DG.voiceSettings.silence_warning ? "On" : "Off",
       });
     }
-    if (Object.prototype.hasOwnProperty.call(data, "qos") || Object.prototype.hasOwnProperty.call(data, "qos")) {
+    if (Object.prototype.hasOwnProperty.call(data, "qos")) {
       this.DG.voiceSettings.qos_priority = data.qos ? 1 : 0;
       states.push({ id: "discord_qos_priority", value: this.DG.voiceSettings.qos_priority ? "On" : "Off" });
     }
@@ -425,11 +443,15 @@ class VoiceStateHandler {
 
   voiceConnectionStatus = async (data) => {
     logIt("DEBUG", "Voice Connection:", JSON.stringify(data));
+    if (!data) {
+      return;
+    }
     if (data.state != null && data.state == "VOICE_CONNECTED") {
       // Set Voice Channel Connect State
       this.DG.voiceChannelInfo.voice_channel_connected = "Yes";
-      this.DG.voiceChannelInfo.voice_average_ping = data.average_ping.toFixed(2);
-      this.DG.voiceChannelInfo.voice_hostname = data.hostname;
+      this.DG.voiceChannelInfo.voice_average_ping =
+        typeof data.average_ping === "number" ? data.average_ping.toFixed(2) : "0.00";
+      this.DG.voiceChannelInfo.voice_hostname = data.hostname || "<None>";
     } else if (data.state != null && data.state == "DISCONNECTED") {
       //Set Voice Channel Connect State Off
       this.DG.voiceChannelInfo.voice_channel_connected = "No";
@@ -451,8 +473,21 @@ class VoiceStateHandler {
     this.TPClient.stateUpdateMany(states);
   };
 
+  ensureGuildIndex = () => {
+    if (!this.DG.guilds || !Array.isArray(this.DG.guilds.array) || !this.DG.guilds.idx) {
+      this.DG.guilds = { array: [], idx: {} };
+    }
+  };
+
   getGuild = async (data) => {
+    if (!data || !data.id || !this.DG.Client) {
+      return;
+    }
     let guild = await this.DG.Client.getGuild(data.id);
+    if (!guild || !guild.id) {
+      return;
+    }
+    this.ensureGuildIndex();
     await this.assignGuildIndex(guild, 1);
 
     this.TPClient.choiceUpdate("discordServerList", this.DG.guilds.array);
@@ -469,18 +504,24 @@ class VoiceStateHandler {
   };
 
   getChannel = async (data) => {
+    if (!data || !data.id || !this.DG.Client) {
+      return;
+    }
     let channel = await this.DG.Client.getChannel(data.id);
+    if (!channel || !channel.guild_id) {
+      return; // DMs/group DMs have no guild to index under
+    }
     this.assignChannelIndex(channel.guild_id, channel);
   };
 
   guildCreate = async (data) => {
     logIt("DEBUG", "Guild Create:", JSON.stringify(data));
-    this.getGuild(data);
+    await this.getGuild(data);
   };
 
   channelCreate = async (data) => {
     logIt("DEBUG", "Channel Create:", JSON.stringify(data));
-    this.getChannel(data);
+    await this.getChannel(data);
   };
 
   getGuilds = async () => {
@@ -499,20 +540,32 @@ class VoiceStateHandler {
     // Switched this up because of the .forEach not honoring the await process,
     // but native if does
     for (let i = 0; i < data.guilds.length; i++) {
-      await this.assignGuildIndex(data.guilds[i], i);
+      if (!data.guilds[i] || !data.guilds[i].id) {
+        continue;
+      }
+      // One unreadable guild should not stop the rest from being indexed.
+      await this.assignGuildIndex(data.guilds[i], i).catch((err) => {
+        logIt("ERROR", `Indexing guild ${data.guilds[i].id} failed: ${err}`);
+      });
     }
 
     this.TPClient.choiceUpdate("discordServerList", this.DG.guilds.array);
 
+    if (!this.DG.Client) {
+      return;
+    }
     const voiceChannelData = await this.DG.Client.getSelectedVoiceChannel();
     if (voiceChannelData != null) {
       voiceChannelData.channel_id = voiceChannelData.id;
-      this.voiceChannelHandler.voiceChannel(voiceChannelData, this.userStateHandler);
+      await this.voiceChannelHandler.voiceChannel(voiceChannelData, this.userStateHandler);
     }
   };
 
   assignGuildIndex = async (guild, _counter) => {
-    this.DG.guilds.array.push(guild.name);
+    this.ensureGuildIndex();
+    if (!this.DG.guilds.array.includes(guild.name)) {
+      this.DG.guilds.array.push(guild.name);
+    }
     this.DG.guilds.idx[guild.name] = guild.id;
     this.DG.guilds.idx[guild.id] = guild.name;
 
@@ -522,7 +575,7 @@ class VoiceStateHandler {
   };
 
   buildGuildChannelIndex = async (guildId) => {
-    let chData = await this.getGuildChannels(guildId);
+    let chData = (await this.getGuildChannels(guildId)) || [];
 
     this.DG.channels[guildId] = {
       voice: {
@@ -547,16 +600,17 @@ class VoiceStateHandler {
       },
     };
 
-    await Promise.all(
-      chData.map(async (channel) => {
-        this.assignChannelIndex(guildId, channel);
-      }),
-    );
+    for (const channel of chData) {
+      this.assignChannelIndex(guildId, channel);
+    }
   };
 
   assignChannelIndex = (guildId, channel) => {
     if (!this.DG.channels[guildId]) {
-      console.error(`Guild ID ${guildId} does not exist in this.DG.channels`);
+      logIt("WARN", `Guild ID ${guildId} does not exist in this.DG.channels`);
+      return;
+    }
+    if (!channel || !channel.id) {
       return;
     }
 
@@ -582,9 +636,12 @@ class VoiceStateHandler {
   };
 
   getSoundboardSounds = async () => {
+    if (!this.DG.Client) {
+      return;
+    }
     const sounds = await this.DG.Client.getSoundboardSounds();
 
-    if (sounds != null) {
+    if (Array.isArray(sounds)) {
       this.DG.soundBoard = {
         array: [],
         idx: {},
@@ -599,14 +656,22 @@ class VoiceStateHandler {
       };
 
       for (const sound of sounds) {
-        if (sound.available) {
+        if (sound && sound.available) {
+          const isDefault = sound.guild_id === "0";
           let emojiName = sound.emoji_name ? sound.emoji_name + " - " : "";
-          let guildName = sound.guild_id === "0" ? "Discord Sounds" : this.DG.guilds.idx[sound.guild_id];
+          let guildName = isDefault
+            ? "Discord Sounds"
+            : (this.DG.guilds.idx && this.DG.guilds.idx[sound.guild_id]) || "Unknown Server";
           let soundName = guildName + " - " + emojiName + sound.name;
 
           this.DG.soundBoard.array.push(soundName);
           this.DG.soundBoard.idx[soundName] = sound;
           this.DG.soundBoard.idx[sound.sound_id] = sound;
+
+          // RANDOM SOUND for non-Nitro users picks from these; this list was never filled.
+          const bucket = isDefault ? this.DG.soundBoard.default : this.DG.soundBoard.nonDefault;
+          bucket.array.push(soundName);
+          bucket.idx[soundName] = sound;
         }
       }
 

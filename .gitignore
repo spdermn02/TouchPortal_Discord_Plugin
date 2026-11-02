@@ -303,3 +303,6 @@ $RECYCLE.BIN/
 
 Installers/
 discord-rpc/
+
+# Plugin build output (SEA bundle, blob and staged executable)
+/build/
