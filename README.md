@@ -30,7 +30,7 @@ The Discord plugin for Touch Portal provides seamless integration, allowing user
 This plugin simplifies your Discord interactions, bringing essential controls to your fingertips.
 
 
-## [ChangeLog](CHANGELOG.md)
+## [ChangeLog](docs/CHANGELOG.md)
 
 ## Plugin Capabilities
 ### Actions

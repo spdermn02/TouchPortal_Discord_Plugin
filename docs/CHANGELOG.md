@@ -7,10 +7,49 @@ and the `TPDiscord_Version` reported to Touch Portal.
 
 ## v5.2.0 — unreleased
 
-Build and packaging release. No new actions, events, or states — this fixes the Linux and
-macOS packages, which had never worked correctly.
+Build, packaging and stability release. No new actions, events, or states — this fixes the
+Linux and macOS packages, which had never worked correctly, and a long list of crashes that
+took the plugin down until Touch Portal was restarted.
 
-### Fixed
+### Fixed — stability
+- **Plugin crashed when several people joined or changed voice state at once**
+  (`TypeError: Cannot read properties of undefined (reading 'username')`). A half-built user
+  entry was visible while its avatar downloaded; the participant list now only ever sees
+  complete entries, and is published after the user is added rather than one person behind.
+- **Any unexpected error stopped the plugin.** Node 22 exits on an unhandled promise
+  rejection. Discord event handlers and actions are now guarded individually, with a
+  process-wide handler behind them, so a bad event costs a log line instead of the plugin.
+- Crash when Discord closed or the plugin reconnected before a connection had been made.
+- Crash on disconnect on Linux, on macOS, and on Windows with *Skip Process Watcher* set to
+  `Yes`, which also stopped automatic reconnection on those setups.
+- Crashes when actions were used before Discord data finished loading: Select Channel, Play
+  Sound, Set Default Audio Device, Select Channel by ID, and the channel dropdowns.
+- Crash when joining a voice channel on a server joined after the plugin started.
+- Crashes on incomplete data from Discord in notifications, voice settings and connection
+  status.
+- While waiting for login, a new Discord connection was opened every 5 seconds without
+  closing the last, which could stack authorization prompts. One attempt runs at a time.
+- Each settings save started another process-watcher poll on top of the existing ones.
+- Changing the Client Id or Client Secret now reconnects with the new credentials.
+- **VoiceActivity Tracker never worked**: its states were never created, and the IDs it
+  updated did not match. IDs are now trimmed, validated, and removing one takes effect.
+- **RANDOM SOUND did nothing for users without Nitro.**
+- Holding two volume buttons at once left one ramping forever; held buttons now also stop
+  if Discord disconnects.
+- Avatars went blank after someone left the channel, and users without an avatar got an
+  invalid image instead of the default one.
+- Discord RPC: messages split across, or combined within, a single socket read are now
+  reassembled correctly, and each connection keeps its own buffer.
+
+### Security
+- Avatar images are only downloaded from Discord's CDN over HTTPS, with a timeout and size cap.
+- Debug logging no longer writes DM or mention message content to the Touch Portal log.
+- Removed unused Discord RPC code that probed local HTTP ports for an API endpoint.
+- Updated `ws` for GHSA-96hv-2xvq-fx4p.
+- CI: workflow is read-only by default with write access scoped to the release job, and all
+  actions are pinned to commit SHAs.
+
+### Fixed — packaging
 - **Linux and macOS packages shipped a non-executable plugin.** Touch Portal does not
   preserve the Unix mode bits recorded in a `.tpp` when it unpacks a plugin, so the
   executable arrives without permission to run. It is now started through
