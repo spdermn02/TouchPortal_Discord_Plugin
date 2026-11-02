@@ -61,8 +61,8 @@ class DiscordConfig {
       voice_mode_type: "UNKNOWN",
       prevVoiceActivityData: {}, // keeping track of end user voice settings data
 
-      inputDevices: "",
-      outputDevices: "",
+      inputDevices: [],
+      outputDevices: [],
       inputDeviceId: "",
       outputDeviceId: "",
       outputDeviceVolume: 0,

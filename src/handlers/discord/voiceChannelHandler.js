@@ -1,4 +1,4 @@
-const { logIt, wait, imageToBase64, getGuilds } = require("../../utils/helpers.js");
+const { logIt, wait, imageToBase64 } = require("../../utils/helpers.js");
 const DEFAULT_BASE64_AVATAR = require("../../utils/DEFAULT_BASE64_AVATAR.js");
 
 class VoiceChannelHandler {
@@ -10,6 +10,9 @@ class VoiceChannelHandler {
 
   voiceChannel = async (data, userStateHandler) => {
     logIt("DEBUG", "Voice Channel join", JSON.stringify(data));
+    if (!data) {
+      return;
+    }
 
     //  await DiscordClient.subscribe("MESSAGE_CREATE", { channel_id: "1125087354969915464"}).catch((err) => {logIt("ERROR",err)});
     await userStateHandler.clearUserStates();
@@ -31,19 +34,16 @@ class VoiceChannelHandler {
       // Subscribe to voice channel events
       await this.subscribeToEvents(data.channel_id);
     } else {
-      this.DG.voiceChannelInfo.voice_channel_name = this.DG.channels[data.guild_id].voice.names[data.channel_id];
+      // The guild may not be indexed yet (fresh boot, or a server joined after startup).
+      // Fall back to what the payload says; the channel lookup below fills in the name.
+      const guildChannels = this.DG.channels[data.guild_id];
+      this.DG.voiceChannelInfo.voice_channel_name =
+        (guildChannels && guildChannels.voice.names[data.channel_id]) || data.name || "<Unknown>";
 
       this.DG.voiceChannelInfo.voice_channel_id = data.channel_id;
       this.DG.voiceChannelInfo.voice_channel_server_id = data.guild_id;
-
-      try {
-        // was getting times where the guilds.idx was not available on a fresh boot
-        this.DG.voiceChannelInfo.voice_channel_server_name = this.DG.guilds.idx[data.guild_id];
-      } catch (error) {
-        // Call getGuilds function to initialize guilds in case it's not available
-        this.DG.guilds = await getGuilds();
-        this.DG.voiceChannelInfo.voice_channel_server_name = this.DG.guilds.idx[data.guild_id];
-      }
+      this.DG.voiceChannelInfo.voice_channel_server_name =
+        (this.DG.guilds && this.DG.guilds.idx && this.DG.guilds.idx[data.guild_id]) || "<Unknown>";
 
       logIt(
         "DEBUG",
@@ -66,23 +66,30 @@ class VoiceChannelHandler {
 
     // when we first join a channel, or plugin launches we get the voice states of the users in the channel
     // console.time('for...of');
-    if (this.DG.voiceChannelInfo.voice_channel_id !== "<None>") {
+    if (this.DG.voiceChannelInfo.voice_channel_id !== "<None>" && this.DG.Client) {
       let avatarUrl;
+      const selfId = this.DG.Client.user ? this.DG.Client.user.id : undefined;
       const channel = await this.DG.Client.getChannel(this.DG.voiceChannelInfo.voice_channel_id);
+      if (channel && channel.name && this.DG.voiceChannelInfo.voice_channel_name === "<Unknown>") {
+        this.DG.voiceChannelInfo.voice_channel_name = channel.name;
+      }
+      const voiceStates = channel && Array.isArray(channel.voice_states) ? channel.voice_states : [];
 
       await Promise.all(
-        channel.voice_states.map(async (vs) => {
-          if (vs.user.id !== this.DG.Client.user.id) {
+        voiceStates.map(async (vs) => {
+          if (vs && vs.user && vs.user.id && vs.user.id !== selfId) {
             logIt("DEBUG", "User VS: ", vs, "User: ", vs.user.username);
 
             vs.speaking = false; // adding speaking to the object to track speaking status
-            if (vs.user.avatar === null) {
+            if (!vs.user.avatar) {
               vs.user.base64Avatar = DEFAULT_BASE64_AVATAR;
-            } else if (vs.user.avatar !== null) {
+            } else {
               avatarUrl = `https://cdn.discordapp.com/avatars/${vs.user.id}/${vs.user.avatar}.webp?size=128`;
 
-              vs.user.base64Avatar = await imageToBase64(avatarUrl);
+              vs.user.base64Avatar = (await imageToBase64(avatarUrl)) || DEFAULT_BASE64_AVATAR;
             }
+            // userStateHandler reads the avatar from the top level
+            vs.base64Avatar = vs.user.base64Avatar;
 
             this.DG.currentVoiceUsers[vs.user.id] = vs;
           }
@@ -92,16 +99,17 @@ class VoiceChannelHandler {
 
       Object.keys(this.DG.currentVoiceUsers).forEach((key, i) => {
         // Making sure not to add Client User to the list as it's not needed and would likely cause issues being in the flow of things for certain actions that cant be used on the client user
-        if (this.DG.currentVoiceUsers[key].user.id !== this.DG.Client.user.id) {
+        const entry = this.DG.currentVoiceUsers[key];
+        if (entry && entry.user && entry.user.id !== selfId) {
           // When we join a voice channel, update the states for all users in the channel
-          let states = this.userStateHandler.generateUserUpdates(i, this.DG.currentVoiceUsers[key], "user");
+          let states = this.userStateHandler.generateUserUpdates(`user_${i}`, entry);
           if (states.length > 0) {
             this.TPClient.stateUpdateMany(states);
           }
         }
       });
 
-      await this.userStateHandler.updateParticipantCount();
+      this.userStateHandler.updateParticipantCount();
     }
 
     let states = [
@@ -126,19 +134,21 @@ class VoiceChannelHandler {
     ];
 
     for (let event of events) {
+      if (!this.DG.Client) {
+        return;
+      }
       const subscription = await this.DG.Client.subscribe(event.name, {
         channel_id: channelId,
       }).catch((err) => {
-        logIt("ERROR", err);
+        logIt("ERROR", `subscribe ${event.name}: ${err}`);
       });
-      logIt("DEBUG", `Subscribed to ${event.description}`);
-      this.DG.voiceChannelInfo.last_voice_channel_subs.push({
-        subscription,
-        description: event.description,
-      });
-
-      let eventKeys = Object.keys(events);
-      logIt("DEBUG", "Subscribed to Voice Channel Events", eventKeys);
+      if (subscription) {
+        logIt("DEBUG", `Subscribed to ${event.description}`);
+        this.DG.voiceChannelInfo.last_voice_channel_subs.push({
+          subscription,
+          description: event.description,
+        });
+      }
       await wait(0.15);
     }
   };
@@ -150,16 +160,22 @@ class VoiceChannelHandler {
         logIt("DEBUG", `Unsubscribing from ${this.DG.voiceChannelInfo.last_voice_channel_subs[i].description}`);
         // await this.DG.voiceChannelInfo.last_voice_channel_subs[i].unsubscribe();
         // took off await and it fixed the unsubscribe issue/subscribe
-        this.DG.voiceChannelInfo.last_voice_channel_subs[i].subscription.unsubscribe();
+        const sub = this.DG.voiceChannelInfo.last_voice_channel_subs[i].subscription;
+        if (sub && typeof sub.unsubscribe === "function") {
+          Promise.resolve(sub.unsubscribe()).catch((err) => logIt("DEBUG", `unsubscribe: ${err}`));
+        }
 
         await wait(0.15);
       }
 
       logIt("INFO", "COMPLETE - Unsubscribing from Voice Channel voice states");
       this.DG.voiceChannelInfo.last_voice_channel_subs = [];
-      this.DG.currentVoiceUsers = {};
       await wait(0.15);
     }
+    // Always reset, even if subscribing failed last time, so users from the previous
+    // channel never leak into the next one.
+    this.DG.currentVoiceUsers = {};
+    this.userStateHandler.oldUserData = {};
   };
 }
 

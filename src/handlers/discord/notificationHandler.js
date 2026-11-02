@@ -7,6 +7,9 @@ class NotificationHandler {
   }
 
   extractForumOrAnnouncementName = (title) => {
+    if (typeof title !== "string") {
+      return null;
+    }
     const regex = /\(\s*"[^"]*"\s*,\s*([^)]*)\s*\)/;
     const match = title.match(regex);
 
@@ -23,13 +26,21 @@ class NotificationHandler {
   async onNotification(data) {
     // When getting DMs, or Tagged in a message.. can give  you details as to where.. so could set up a button to take to channel where tagged technically..
     // Select channel action would need a custom input for channel ID
-    logIt("DEBUG", "Notification Create", JSON.stringify(data));
+    // Deliberately not logging the payload: it carries message/DM content, and the Touch
+    // Portal log is a plain file users paste into bug reports.
+    const message = data && data.message;
+    const author = message && message.author;
+    if (!data || !author) {
+      logIt("DEBUG", "Notification without message author, ignoring");
+      return;
+    }
+    logIt("DEBUG", `Notification Create for channel ${data.channel_id}`);
 
     let channelId = data.channel_id;
-    let userId = data.message.author.id;
-    let userName = data.message.author.username; //username;
+    let userId = author.id;
+    let userName = author.username; //username;
     let avatarUrl = data.icon_url;
-    let timeStamp = data.message.timestamp;
+    let timeStamp = message.timestamp;
 
     let content = "";
     let userAvatarBase64 = "";
@@ -39,20 +50,24 @@ class NotificationHandler {
     let guildId;
     let guildName;
     let channelType;
-    for (const [key, value] of Object.entries(this.DG.channels)) {
+    const guildIdx = (this.DG.guilds && this.DG.guilds.idx) || {};
+    for (const [key, value] of Object.entries(this.DG.channels || {})) {
+      if (!value) {
+        continue;
+      }
       if (value.voice.names[channelId]) {
         guildId = key;
-        guildName = this.DG.guilds.idx[key];
+        guildName = guildIdx[key];
         channelType = "voice";
         break;
       } else if (value.text.names[channelId]) {
         guildId = key;
-        guildName = this.DG.guilds.idx[key];
+        guildName = guildIdx[key];
         channelType = "text";
         break;
       } else if (value.announcement.names[channelId]) {
         guildId = key;
-        guildName = this.DG.guilds.idx[key];
+        guildName = guildIdx[key];
         channelType = "announcement";
         break;
       } else {
@@ -60,7 +75,7 @@ class NotificationHandler {
         const forumOrAnnouncementName = this.extractForumOrAnnouncementName(data.title);
         if (forumOrAnnouncementName && value.forum.idx[forumOrAnnouncementName]) {
           guildId = key;
-          guildName = this.DG.guilds.idx[key];
+          guildName = guildIdx[key];
           channelType = "forum";
           break;
         }
@@ -84,7 +99,7 @@ class NotificationHandler {
       case "text":
       case "forum":
       case "announcement":
-        content = data.body;
+        content = data.body || "";
         userAvatarBase64 = await imageToBase64(avatarUrl);
 
         states.push(
@@ -100,12 +115,12 @@ class NotificationHandler {
 
         this.TPClient.stateUpdateMany(states);
         this.TPClient.stateUpdate("discord_newMention_eventState", "false");
-        logIt("DEBUG", `Notification for ${channelType} channel ${JSON.stringify(data)}`);
+        logIt("DEBUG", `Notification for ${channelType} channel ${channelId}`);
         break;
 
       case "dm":
-        logIt("DEBUG", `DM Info: ${JSON.stringify(data)}`);
-        content = data.body;
+        logIt("DEBUG", `DM notification in channel ${channelId}`);
+        content = data.body || "";
         userAvatarBase64 = await imageToBase64(avatarUrl);
         //// Save this for if we need to captrue the last X dms
         // this.TPClient.createState("discord_DM_user", "DM: UserName",  userName, "DirectMessage");
